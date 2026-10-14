@@ -17,6 +17,8 @@ public struct Snapshot: Decodable, Sendable, Equatable {
     public var utcOffsetSeconds: Int
     public var units: String
     public var quote: Quote?
+    /// Absent from a Pi older than the moon block.
+    public var moon: Moon?
     public var sources: Sources
 
     /// The zone the dashboard's days are counted in, which is the Pi's, not necessarily the TV's.
@@ -37,6 +39,40 @@ public struct Snapshot: Decodable, Sendable, Equatable {
 public struct Quote: Decodable, Sendable, Equatable {
     public var text: String
     public var author: String
+}
+
+/// The moonphase panel's data, as the Pi computes it (`moon` in `/api/dashboard`).
+public struct Moon: Decodable, Sendable, Equatable {
+    public var phaseName: String
+    public var supermoon: Bool
+    /// Present only when the Pi has coordinates.
+    public var rise: Date?
+    public var set: Date?
+    public var next: NextPhase
+    /// Today and the three days either side, in order.
+    public var days: [MoonDay]
+    public var quote: Quote?
+
+    public struct NextPhase: Decodable, Sendable, Equatable {
+        /// "full" or "new".
+        public var kind: String
+        public var date: CivilDate
+        public var days: Int
+
+        public var isFull: Bool { kind == "full" }
+    }
+
+    /// Today's entry: the middle of `days`.
+    public var today: MoonDay? { days.count == 7 ? days[3] : days.first }
+}
+
+public struct MoonDay: Decodable, Sendable, Equatable, Hashable {
+    public var date: CivilDate
+    public var ageDays: Double
+    /// Through the lunation at noon UTC: 0 new, 0.5 full; waxing below 0.5.
+    public var fraction: Double
+    /// Percent of the disc lit.
+    public var illumination: Double
 }
 
 public struct Sources: Decodable, Sendable, Equatable {

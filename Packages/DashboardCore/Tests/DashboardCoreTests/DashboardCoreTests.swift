@@ -3,7 +3,8 @@ import XCTest
 @testable import DashboardCore
 
 /// `Fixtures/snapshot.json` is real output of the Pi's `/api/dashboard`, rendered from
-/// HomeDashboard's dummy data in America/New_York on 2026-10-14 (generated_at 01:42 local).
+/// HomeDashboard's dummy data in America/New_York on 2026-10-14 (generated_at 03:27 local),
+/// with the Pi's coordinates set to New York so the moon block carries rise and set.
 final class DashboardCoreTests: XCTestCase {
     private func fixture() throws -> Data {
         let url = try XCTUnwrap(Bundle.module.url(forResource: "Fixtures/snapshot", withExtension: "json"))
@@ -212,6 +213,67 @@ final class DashboardCoreTests: XCTestCase {
                 .merging(["location": "  \nZoom"]) { $1 },
         ])
         XCTAssertEqual(s.sources.events?.data?.map(\.shortLocation), ["Casa de Fruta", "Zoom"])
+    }
+
+    // MARK: Moon
+
+    func testMoonBlockDecodes() throws {
+        let moon = try XCTUnwrap(DashboardClient.validated(fixture()).moon)
+        XCTAssertEqual(moon.phaseName, "Waxing Crescent")
+        XCTAssertEqual(moon.days.count, 7)
+        XCTAssertEqual(moon.today?.date, CivilDate(year: 2026, month: 10, day: 14))
+        XCTAssertNotNil(moon.rise)
+        XCTAssertEqual(moon.next.kind, "full")
+        XCTAssertEqual(moon.next.date, CivilDate(year: 2026, month: 10, day: 26))
+    }
+
+    func testOlderPiWithoutMoonStillDecodes() throws {
+        XCTAssertNil(try Snapshot.decode(json(minimal())).moon)
+    }
+
+    private func area(_ points: [CGPoint]) -> Double {
+        guard points.count > 2 else { return 0 }
+        var sum = 0.0
+        for i in points.indices {
+            let a = points[i], b = points[(i + 1) % points.count]
+            sum += Double(a.x * b.y - b.x * a.y)
+        }
+        return abs(sum) / 2
+    }
+
+    func testLitOutlineEnclosesTheLitShare() {
+        for fraction in [0.05, 0.124, 0.25, 0.4, 0.5, 0.6, 0.75, 0.9] {
+            let lit = area(MoonGeometry.litOutline(fraction: fraction, samples: 400)) / .pi
+            XCTAssertEqual(lit, MoonGeometry.litShare(fraction: fraction), accuracy: 0.002, "fraction \(fraction)")
+        }
+        XCTAssertTrue(MoonGeometry.litOutline(fraction: 0).isEmpty, "new moon")
+    }
+
+    func testWaxingLightsTheRightLimbAndWaningTheLeft() {
+        let waxing = MoonGeometry.litOutline(fraction: 0.15)
+        let waning = MoonGeometry.litOutline(fraction: 0.85)
+        XCTAssertGreaterThan(waxing.map(\.x).reduce(0, +), 0)
+        XCTAssertLessThan(waning.map(\.x).reduce(0, +), 0)
+    }
+
+    func testMoonPhaseShareMatchesThePiIllumination() throws {
+        // The Pi's illumination is the same cosine, so the drawn area agrees with the number.
+        for day in try XCTUnwrap(DashboardClient.validated(fixture()).moon).days {
+            XCTAssertEqual(MoonGeometry.litShare(fraction: day.fraction) * 100, day.illumination, accuracy: 0.6)
+        }
+    }
+
+    func testCompactTimeMatchesThePi() {
+        XCTAssertEqual(CompactTime.string(date("2026-10-14T11:26:20-04:00"), in: newYork), "11:26a")
+        XCTAssertEqual(CompactTime.string(date("2026-10-14T14:00:00-04:00"), in: newYork), "2p")
+        XCTAssertEqual(CompactTime.string(date("2026-10-14T00:05:00-04:00"), in: newYork), "12:05a")
+    }
+
+    func testDemoShiftMovesTheMoonDays() throws {
+        let s = try DashboardClient.validated(fixture())
+        let shifted = s.shiftedToToday(now: date("2026-10-20T10:00:00-04:00"))
+        XCTAssertEqual(shifted.moon?.today?.date, CivilDate(year: 2026, month: 10, day: 20))
+        XCTAssertEqual(shifted.moon?.next.date, CivilDate(year: 2026, month: 11, day: 1))
     }
 
     func testWeatherSymbols() {

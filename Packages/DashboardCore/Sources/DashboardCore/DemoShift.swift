@@ -28,6 +28,17 @@ extension Snapshot {
             b.date = b.date.adding(days: days)
             return b
         }
+        if var moon = moon {
+            moon.rise = moon.rise.map(move)
+            moon.set = moon.set.map(move)
+            moon.next.date = moon.next.date.adding(days: days)
+            moon.days = moon.days.map { d in
+                var d = d
+                d.date = d.date.adding(days: days)
+                return d
+            }
+            copy.moon = moon
+        }
         if var w = sources.weather?.data {
             w.sunrise = w.sunrise.map(move)
             w.sunset = w.sunset.map(move)

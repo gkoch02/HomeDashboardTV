@@ -1,6 +1,17 @@
 import DashboardCore
 import SwiftUI
 
+/// Moves the whole screen a few points every ten minutes, so an OLED set never holds one image.
+enum BurnIn {
+    /// Up to 10 points in each axis, a new spot every ten minutes.
+    static func drift(at now: Date) -> CGSize {
+        let slot = Int(now.timeIntervalSince1970 / 600)
+        let x = Double((slot * 7) % 21) - 10
+        let y = Double((slot * 13) % 21) - 10
+        return CGSize(width: x, height: y)
+    }
+}
+
 enum Palette {
     static let night = Color(red: 0.05, green: 0.06, blue: 0.09)
     static let dusk = Color(red: 0.09, green: 0.12, blue: 0.20)
@@ -42,7 +53,7 @@ struct DashboardView: View {
         }
         .padding(.horizontal, 96)
         .padding(.vertical, 64)
-        .offset(drift)
+        .offset(BurnIn.drift(at: now))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(sky)
         .overlay(alignment: .topTrailing) {
@@ -58,14 +69,6 @@ struct DashboardView: View {
             }
         }
         .environment(\.timeZone, zone)
-    }
-
-    /// Up to 10 points in each axis, a new spot every ten minutes.
-    private var drift: CGSize {
-        let slot = Int(now.timeIntervalSince1970 / 600)
-        let x = Double((slot * 7) % 21) - 10
-        let y = Double((slot * 13) % 21) - 10
-        return CGSize(width: x, height: y)
     }
 
     /// Day sky between sunrise and sunset, night sky otherwise, and dusk for the half hour
@@ -520,15 +523,7 @@ private struct DayCard: View {
 
     /// "9a", "11:30a", "2p": the cards are a third of the agenda wide, and a full "11:30 AM"
     /// column leaves a title a dozen characters.
-    private func compactTime(_ date: Date) -> String {
-        var cal = Calendar(identifier: .gregorian)
-        cal.timeZone = zone
-        let hour = cal.component(.hour, from: date)
-        let minute = cal.component(.minute, from: date)
-        let twelve = hour % 12 == 0 ? 12 : hour % 12
-        let suffix = hour < 12 ? "a" : "p"
-        return minute == 0 ? "\(twelve)\(suffix)" : String(format: "%d:%02d%@", twelve, minute, suffix)
-    }
+    private func compactTime(_ date: Date) -> String { CompactTime.string(date, in: zone) }
 }
 
 private struct BirthdayLine: View {

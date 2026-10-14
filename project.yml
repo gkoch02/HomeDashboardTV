@@ -6,10 +6,15 @@ options:
   createIntermediateGroups: true
   generateEmptyDirectories: false
   xcodeVersion: "27.0"
+# The team and bundle prefix come from Config/Signing.xcconfig, which a builder overrides
+# with their own in Config/Signing.local.xcconfig (ignored by git). Settings here would
+# take precedence over it, so neither is set below.
+configFiles:
+  Debug: Config/Signing.xcconfig
+  Release: Config/Signing.xcconfig
 settings:
   base:
-    # Signing matches the other PlumpBug apps: one team, automatic profiles.
-    DEVELOPMENT_TEAM: FGG98L437R
+    # Automatic profiles, for whichever team Signing.xcconfig names.
     CODE_SIGN_STYLE: Automatic
     # Xcode 27's recommended settings live here, not in the .pbxproj, because an edit
     # made in Xcode's UI is wiped by the next `xcodegen`.
@@ -60,7 +65,7 @@ targets:
           NSAllowsLocalNetworking: true
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: dev.plumpbug.homedashboard
+        PRODUCT_BUNDLE_IDENTIFIER: $(BUNDLE_ID_PREFIX).homedashboard
         PRODUCT_NAME: Home Dashboard
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: Home Dashboard
@@ -82,7 +87,7 @@ targets:
       - target: HomeDashboard
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: dev.plumpbug.homedashboard.uitests
+        PRODUCT_BUNDLE_IDENTIFIER: $(BUNDLE_ID_PREFIX).homedashboard.uitests
         GENERATE_INFOPLIST_FILE: YES
         SWIFT_VERSION: "5.0"
         TARGETED_DEVICE_FAMILY: "3"

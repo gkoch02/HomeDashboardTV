@@ -1,0 +1,7 @@
+// Signing and bundle identifiers. These are the author's. To build for your own Apple TV,
+// copy Signing.local.xcconfig.example to Signing.local.xcconfig beside this file (git
+// ignores it) and set your own; nothing tracked needs editing.
+DEVELOPMENT_TEAM = FGG98L437R
+BUNDLE_ID_PREFIX = dev.plumpbug
+
+#include? "Signing.local.xcconfig"

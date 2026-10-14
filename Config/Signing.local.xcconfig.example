@@ -1,0 +1,8 @@
+// Your signing, read after Signing.xcconfig. Copy to Signing.local.xcconfig and fill in.
+//
+// DEVELOPMENT_TEAM: your team ID, from Xcode → Settings → Accounts, or the Membership
+// page of developer.apple.com.
+// BUNDLE_ID_PREFIX: a reverse-DNS prefix of your own; the app becomes
+// <prefix>.homedashboard.
+DEVELOPMENT_TEAM = ABCDE12345
+BUNDLE_ID_PREFIX = com.example

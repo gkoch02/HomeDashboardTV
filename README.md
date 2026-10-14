@@ -1,9 +1,12 @@
 # Home Dashboard for Apple TV
 
-The tvOS companion to [HomeDashboard](../HomeDashboard), the Raspberry Pi e-ink dashboard.
+The tvOS companion to [HomeDashboard](https://github.com/gkoch02/HomeDashboard), the Raspberry Pi e-ink dashboard.
 The Pi keeps doing the fetching (Google Calendar / ICS / CalDAV, OpenWeatherMap, birthdays)
 on its own timer; this app reads the Pi's cached snapshot from `GET /api/dashboard` and
 draws it natively at TV resolution, with no e-ink pixels and no credentials on the TV.
+
+It is not on the App Store: it needs your own HomeDashboard Pi, and you build it onto your
+Apple TV yourself with Xcode ([Building it yourself](#building-it-yourself)).
 
 ![The dashboard on an Apple TV 4K, from HomeDashboard's dummy data](docs/dashboard.png)
 
@@ -53,6 +56,33 @@ panel's own fallback, an arc between the day's sunrise and sunset.
 On first launch the app opens its settings: pick the Pi under **On this network**, or type
 its address (`dashboard.local`, `192.168.1.20:8080`). **Demo data** shows a bundled week
 with no Pi at all. Click anywhere on the dashboard to come back to settings; Menu closes them.
+
+## Building it yourself
+
+You need a Mac with Xcode, an Apple TV on the same network as the Pi, and an Apple
+developer account. A paid Apple Developer Program membership is the dependable route: its
+development profiles last a year. A free Apple ID (a personal team) may also work, but what
+it installs stops launching after 7 days until you build it again.
+
+1. Pair the Apple TV with Xcode: on the TV, **Settings → Remotes and Devices → Remote App
+   and Devices**; on the Mac, **Window → Devices and Simulators** in Xcode, then pick the TV
+   and enter the code it shows.
+2. Give the build your own signing. The team and bundle prefix in the project are the
+   author's; yours go in a local file that git ignores:
+
+   ```bash
+   cp Config/Signing.local.xcconfig.example Config/Signing.local.xcconfig
+   ```
+
+   Set `DEVELOPMENT_TEAM` to your team ID (Xcode → Settings → Accounts) and
+   `BUNDLE_ID_PREFIX` to a reverse-DNS prefix of your own.
+3. Open `HomeDashboardTV.xcodeproj`, choose your Apple TV as the run destination and run
+   the **HomeDashboard** scheme. Xcode makes the profile (automatic signing) and installs
+   the app.
+
+On first launch, allow local network access so the app can find the Pi, then pick it in
+settings. The committed project is complete, so XcodeGen is only needed to change
+`project.yml` (see [Building](#building)).
 
 ## How it behaves
 
@@ -129,4 +159,14 @@ In the simulator, `-server <address>` or `-demo YES` sets the source for one run
 xcrun simctl launch booted dev.plumpbug.homedashboard -server 127.0.0.1:8080
 ```
 
-A device build needs a registered Apple TV for its development profile.
+(With your own `BUNDLE_ID_PREFIX`, the bundle identifier is `<prefix>.homedashboard`.)
+
+A device build needs a registered Apple TV for its development profile; signing is set up
+as in [Building it yourself](#building-it-yourself).
+
+## License
+
+MIT — see [LICENSE](LICENSE). The bundled typefaces are third-party works under the SIL
+Open Font License 1.1, each shipped with its upstream license text, and the demo data
+carries a few short quotations that are not ours to license; the **Third-party content**
+section of [LICENSE](LICENSE) sets out both.

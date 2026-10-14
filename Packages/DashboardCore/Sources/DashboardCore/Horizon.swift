@@ -14,11 +14,13 @@ public enum Horizon {
     static let nightWeight = 0.35
 
     /// The start of the 3-hour slot holding *now*: the window moves at most eight times a day.
+    ///
+    /// Set as a clock hour, not counted from midnight: on a DST day hours added to midnight
+    /// are elapsed time, which put 03:30 on spring-forward day in a window starting at 04:00.
     public static func windowStart(now: Date, in zone: TimeZone) -> Date {
         let cal = Calendar.gregorian(zone)
         let hour = cal.component(.hour, from: now)
-        let day = cal.startOfDay(for: now)
-        return cal.date(byAdding: .hour, value: (hour / slotHours) * slotHours, to: day) ?? now
+        return cal.date(bySettingHour: (hour / slotHours) * slotHours, minute: 0, second: 0, of: now) ?? now
     }
 
     static func hourWeight(_ hour: Int) -> Double {

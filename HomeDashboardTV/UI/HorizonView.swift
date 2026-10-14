@@ -700,17 +700,18 @@ private struct EventsBand: View {
         }
     }
 
-    private func hiddenChips() -> [Date] {
-        Horizon.stackChips(chipItems()).dropFirst(Self.maxChipRows).flatMap { $0.map(\.start) }
+    /// Chips past the rows shown; each counts toward "+N more" on every day it covers.
+    private func hiddenChips() -> [PlacedChip] {
+        Horizon.stackChips(chipItems()).dropFirst(Self.maxChipRows).flatMap { $0 }
     }
 
     /// A rough width for a chip label in its face, for choosing the short form.
     private static func width(_ text: String) -> Double { Double(text.count) * 12.5 }
 
     @ViewBuilder private func dayList(column: (x0: Double, x1: Double, day: CivilDate), events: [CalendarEvent],
-                                      chips: [PlacedChip], hidden: [Date], chipsY: CGFloat) -> some View {
+                                      chips: [PlacedChip], hidden: [PlacedChip], chipsY: CGFloat) -> some View {
         let dayEvents = events.filter { Horizon.columnDay($0, axis: axis) == column.day }
-        let hiddenHere = hidden.filter { CivilDate(max($0, axis.start), in: axis.zone) == column.day }.count
+        let hiddenHere = hidden.filter { $0.x0 < column.x1 && $0.x1 > column.x0 }.count
         let depth = (chips.filter { $0.x0 < column.x1 && $0.x1 > column.x0 }.map(\.row).max()).map { $0 + 1 } ?? 0
         let top = chipsY + CGFloat(depth) * Self.chipH + 4
         let available = max(0, Int((g.eventsY1 - top) / Self.rowH))

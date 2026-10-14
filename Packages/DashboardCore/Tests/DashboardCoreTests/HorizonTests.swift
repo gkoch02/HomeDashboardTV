@@ -25,6 +25,16 @@ final class HorizonTests: XCTestCase {
                        date("2026-10-14T21:00:00-04:00"))
     }
 
+    func testTheWindowStartsOnTheClockHourAcrossDST() {
+        // 2026-03-08 springs forward at 02:00, 2026-11-01 falls back at 02:00.
+        XCTAssertEqual(Horizon.windowStart(now: date("2026-03-08T03:30:00-04:00"), in: newYork),
+                       date("2026-03-08T03:00:00-04:00"))
+        XCTAssertEqual(Horizon.windowStart(now: date("2026-11-01T03:30:00-05:00"), in: newYork),
+                       date("2026-11-01T03:00:00-05:00"))
+        XCTAssertEqual(Horizon.windowStart(now: date("2026-11-01T01:30:00-05:00"), in: newYork),
+                       date("2026-11-01T00:00:00-04:00"))
+    }
+
     func testNightHoursAreNarrowerAndTheMapInverts() {
         let a = axis()
         let night = a.x(date("2026-10-14T04:00:00-04:00")) - a.x(date("2026-10-14T03:00:00-04:00"))

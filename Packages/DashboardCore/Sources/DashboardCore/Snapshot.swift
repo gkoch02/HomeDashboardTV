@@ -254,6 +254,19 @@ extension AirQuality {
         public static func < (a: Band, b: Band) -> Bool { a.rawValue < b.rawValue }
     }
 
+    /// The band's name, short enough for a badge: the EPA's own "Unhealthy for Sensitive
+    /// Groups" does not fit beside the temperature.
+    public var shortLabel: String {
+        switch band {
+        case .good: return "Good"
+        case .moderate: return "Moderate"
+        case .sensitive: return "Sensitive groups"
+        case .unhealthy: return "Unhealthy"
+        case .veryUnhealthy: return "Very unhealthy"
+        case .hazardous: return "Hazardous"
+        }
+    }
+
     public var band: Band {
         switch aqi {
         case ..<51: return .good

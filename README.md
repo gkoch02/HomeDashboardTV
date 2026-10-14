@@ -26,7 +26,8 @@ with no Pi at all. Click anywhere on the dashboard to come back to settings; Men
 - Keeps the last good snapshot on screen when the Pi is unreachable and says since when.
   A source the Pi reports as stale is named in the corner; an expired one is not drawn.
 - Days and times are in the Pi's configured zone, so the TV agrees with the panel.
-- Air quality (when the Pi has PurpleAir on) shows under the weather, in the EPA band's colour.
+- Air quality (when the Pi has PurpleAir on) sits beside the temperature as a badge in its EPA
+  band's colour, so a bad-air day reads from across the room.
 - A busy week never overflows: the day cards always keep their room, and Today and each card
   pick the richest layout that fits (wrapped titles, then single lines, then a count of the
   rest). A title too long even for two lines ends in "…".

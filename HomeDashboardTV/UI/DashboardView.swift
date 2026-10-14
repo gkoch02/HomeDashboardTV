@@ -199,6 +199,15 @@ private struct CurrentWeather: View {
                     Text(weather.currentDescription.capitalized)
                         .font(.system(size: 28, weight: .medium))
                         .foregroundStyle(Palette.muted)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                // Ahead of the badge and the spacer: a long description ("Thunderstorm With
+                // Heavy Rain") wraps beside the badge rather than pushing it off.
+                .layoutPriority(1)
+                Spacer(minLength: 0)
+                if let airQuality {
+                    AQIBadge(airQuality: airQuality)
                 }
             }
             HStack(spacing: 28) {
@@ -206,9 +215,6 @@ private struct CurrentWeather: View {
                 stat("arrow.down", degrees(weather.low))
                 if let feels = weather.feelsLike { stat("thermometer.medium", "feels \(degrees(feels))") }
                 stat("humidity", "\(weather.humidity)%")
-            }
-            if let airQuality {
-                AQILine(airQuality: airQuality)
             }
             ForEach(weather.alerts, id: \.self) { alert in
                 Label(alert.event, systemImage: "exclamationmark.triangle.fill")
@@ -258,22 +264,38 @@ private struct ForecastRow: View {
     }
 }
 
-private struct AQILine: View {
+/// Air quality beside the temperature, as prominent as it: the number in its EPA band's
+/// colour on a tile tinted the same, so a bad-air day reads from across the room.
+private struct AQIBadge: View {
     let airQuality: AirQuality
 
     var body: some View {
-        HStack(spacing: 12) {
-            Circle()
-                .fill(color)
-                .frame(width: 18, height: 18)
-            Text("AQI \(airQuality.aqi)")
-                .font(.system(size: 24, weight: .semibold, design: .rounded))
-                .foregroundStyle(Palette.ink)
-            Text(airQuality.category)
-                .font(.system(size: 24, weight: .medium))
-                .foregroundStyle(airQuality.band > .moderate ? color : Palette.muted)
+        VStack(spacing: 2) {
+            Text("AQI")
+                .font(.system(size: 18, weight: .bold))
+                .tracking(2)
+                .foregroundStyle(Palette.muted)
+            Text("\(airQuality.aqi)")
+                .font(.system(size: 64, weight: .semibold, design: .rounded))
+                .monospacedDigit()
+                .foregroundStyle(color)
                 .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            Text(airQuality.shortLabel)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(color)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 12)
         }
+        .padding(.vertical, 14)
+        .frame(width: 164)
+        .background(color.opacity(0.14), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .strokeBorder(color.opacity(0.45), lineWidth: 2)
+        )
     }
 
     /// The EPA's band colours, lifted a little so they read on the dark ground.

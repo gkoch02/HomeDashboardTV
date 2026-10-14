@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  core:
+    # The app itself is not built here: hosted runners trail new Xcode releases,
+    # and an archive brings in signing. This covers what can break without a TV.
+    # No paths filter: `core` is a required check, and a filtered-out run never
+    # reports, which would leave a docs-only PR unmergeable.
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      # Pinned to the version that generated the committed project; a different
+      # XcodeGen can write a different project and fail the sync check spuriously.
+      - name: Install XcodeGen 2.46.0
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/xcodegen.zip" \
+            https://github.com/yonaskolb/XcodeGen/releases/download/2.46.0/xcodegen.zip
+          unzip -q "$RUNNER_TEMP/xcodegen.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/xcodegen/bin" >> "$GITHUB_PATH"
+
+      - name: Xcode project matches project.yml
+        run: Tools/check_project_sync.sh
+
+      - uses: actions/cache@v4
+        with:
+          path: Packages/DashboardCore/.build
+          key: spm-${{ runner.os }}-${{ hashFiles('Packages/DashboardCore/Package.swift', 'Packages/DashboardCore/Sources/**', 'Packages/DashboardCore/Tests/**') }}
+          restore-keys: spm-${{ runner.os }}-
+
+      - name: DashboardCore tests
+        working-directory: Packages/DashboardCore
+        run: swift test

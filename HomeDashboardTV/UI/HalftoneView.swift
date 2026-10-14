@@ -1,15 +1,16 @@
 import DashboardCore
 import SwiftUI
 
-/// The spiritual successor to the Pi's `halftone_agenda`: a print plate on warm newsprint.
-/// The weather engraving and its reading on the left, the day's agenda on the right.
+/// The spiritual successor to the Pi's `halftone_agenda`, as a dark plate for a big screen:
+/// the weather and its reading on the left, the day's agenda on the right.
 ///
-/// What the TV adds: the engraving is a true AM halftone (round dots on a 45° screen, sized by
-/// tone, `HalftoneScene`) instead of an error-diffusion dither, and the plate prints in black
-/// plus two spot inks after the Pi's Inky palette: ochre rings the sun and moon and draws the
-/// lightning, red marks the event in progress and the next one up. Elapsed events print in a
-/// fine dot screen, the TV's take on the Pi's perforated type. Type is the Pi's own: Righteous
-/// for the weather and the agenda's chrome, DM Sans for the events.
+/// Cream type on a warm charcoal ground, with the Pi's two Inky spot inks: ochre for the sun,
+/// the moon's ring and the lightning, red for the event in progress and the next one up. The
+/// weather window is painted at full resolution (`WeatherArt`) from `WeatherScene`'s layout:
+/// gradient skies, a glowing sun, shaded clouds, and at night the real moon photograph at
+/// tonight's phase. Elapsed events print through a fine dot screen, the one halftone the plate
+/// keeps, after the Pi's perforated type. Type is the Pi's own: Righteous for the weather and
+/// the agenda's chrome, DM Sans for the events.
 struct HalftoneView: View {
     let snapshot: Snapshot
     let now: Date
@@ -25,18 +26,22 @@ struct HalftoneView: View {
             ZStack(alignment: .topLeading) {
                 Print.paper
 
-                // The engraving bleeds past the screen edge so the burn-in drift never shows one.
+                // The window bleeds past the screen edge so the burn-in drift never shows one.
                 Group {
                     if let weather = snapshot.sources.weather?.data {
-                        HalftoneArt(icon: weather.currentIcon, size: CGSize(width: artWidth + 24, height: artHeight + 24))
-                            .equatable()
+                        WeatherArt(
+                            icon: weather.currentIcon,
+                            moonFraction: snapshot.moon?.today?.fraction,
+                            size: CGSize(width: artWidth + 24, height: artHeight + 24)
+                        )
+                        .equatable()
                     } else {
-                        Print.ink.opacity(0.06)
+                        Print.ink.opacity(0.05)
                     }
                 }
                 .frame(width: artWidth + 24, height: artHeight + 24)
+                .clipped()  // before the offset, so the bleed past the top and left survives the drift
                 .offset(x: -24, y: -24)
-                .clipped()
                 .overlay(alignment: .topLeading) { alertChip.padding(.leading, 56).padding(.top, 44) }
 
                 WeatherBand(snapshot: snapshot, now: now)
@@ -59,7 +64,7 @@ struct HalftoneView: View {
             if let notice {
                 Text(notice.uppercased())
                     .font(.custom(Print.display, size: 20))
-                    .foregroundStyle(Print.paper)
+                    .foregroundStyle(Print.ink)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
                     .background(Print.red)
@@ -74,7 +79,7 @@ struct HalftoneView: View {
         if let alert = snapshot.sources.weather?.data?.alerts.first {
             Text(alert.event.uppercased())
                 .font(.custom(Print.display, size: 26))
-                .foregroundStyle(Print.paper)
+                .foregroundStyle(Print.ink)
                 .padding(.horizontal, 18)
                 .padding(.vertical, 8)
                 .background(Print.red)
@@ -82,119 +87,246 @@ struct HalftoneView: View {
     }
 }
 
-/// The plate's inks and faces.
+/// The plate's inks and faces. `paper` is the ground and `ink` the type, so the inverted
+/// treatments (the running event, the TOMORROW chip) read the same as on the Pi's light plate.
 enum Print {
-    static let paper = Color(red: 0.945, green: 0.925, blue: 0.882)
-    static let ink = Color(red: 0.11, green: 0.11, blue: 0.125)
-    static let red = Color(red: 0.84, green: 0.25, blue: 0.20)
-    static let ochre = Color(red: 0.90, green: 0.66, blue: 0.13)
-    static let faint = Color(red: 0.11, green: 0.11, blue: 0.125).opacity(0.55)
+    static let paper = Color(red: 0.080, green: 0.076, blue: 0.088)
+    static let ink = Color(red: 0.925, green: 0.895, blue: 0.835)
+    static let red = Color(red: 0.88, green: 0.33, blue: 0.25)
+    static let ochre = Color(red: 0.92, green: 0.69, blue: 0.22)
+    static let faint = Color(red: 0.925, green: 0.895, blue: 0.835).opacity(0.55)
 
     static let display = "Righteous-Regular"
     static let text = "DMSans-9ptRegular"
 }
 
-// MARK: - The engraving
+// MARK: - The weather window
 
-/// The weather scene screened as an AM halftone, with its crisp linework drawn over the dots.
-/// Equatable on what it draws, so the clock's minute ticks never re-screen it.
-private struct HalftoneArt: View, Equatable {
+/// The weather painted at full resolution from `WeatherScene`'s composition. Static (no
+/// motion, for the GPU and the panel), and Equatable on what it draws, so the minute ticks
+/// never repaint it.
+private struct WeatherArt: View, Equatable {
     let icon: String
+    let moonFraction: Double?
     let size: CGSize
 
-    /// Screen ruling: dot pitch in points. Fine enough to read as tone across a room, coarse
-    /// enough that the dots are the point up close.
-    private static let pitch: CGFloat = 6.5
-
     var body: some View {
-        let scene = HalftoneScene(icon: icon, size: size)
-        Canvas(rendersAsynchronously: false) { context, _ in
-            screen(scene, in: &context)
-            linework(scene, in: &context)
+        let scene = WeatherScene(icon: icon, size: size)
+        ZStack(alignment: .topLeading) {
+            Canvas(rendersAsynchronously: false) { context, _ in
+                sky(scene, in: &context)
+                if scene.night { stars(scene, in: &context) }
+                if !scene.night { sun(scene, in: &context) }
+                if scene.night, let (c, r) = scene.body { moonGlow(c, r, in: &context) }
+            }
+            if scene.night, let (c, r) = scene.body {
+                // Tonight's moon, from the photograph, at the phase the Pi reports.
+                ZStack {
+                    Circle().stroke(Print.ochre.opacity(0.45), lineWidth: max(2, r * 0.02)).padding(-r * 0.06)
+                    MoonDisc(fraction: moonFraction ?? 0.5, radius: r)
+                }
+                .frame(width: r * 2, height: r * 2)
+                .position(c)
+            }
+            Canvas(rendersAsynchronously: false) { context, _ in
+                weather(scene, in: &context)
+            }
         }
         .frame(width: size.width, height: size.height)
     }
 
-    /// Dots on a 45° grid, each covering its cell in proportion to the tone there.
-    private func screen(_ scene: HalftoneScene, in context: inout GraphicsContext) {
-        let p = Self.pitch
-        let diagonal = hypot(size.width, size.height)
-        let c = CGPoint(x: size.width / 2, y: size.height / 2)
-        let cosA = cos(Double.pi / 4), sinA = sin(Double.pi / 4)
-        var path = Path()
-        var v = -diagonal / 2
-        while v <= diagonal / 2 {
-            var u = -diagonal / 2
-            while u <= diagonal / 2 {
-                let x = c.x + CGFloat(cosA) * u - CGFloat(sinA) * v
-                let y = c.y + CGFloat(sinA) * u + CGFloat(cosA) * v
-                if x > -p, y > -p, x < size.width + p, y < size.height + p {
-                    let t = scene.tone(at: CGPoint(x: x, y: y))
-                    if t > 0.012 {
-                        // Dot area = tone x cell area; past ~80% the dots merge into solid.
-                        let r = min(p * 0.72, p * CGFloat((t / Double.pi).squareRoot()) * 1.06)
-                        path.addEllipse(in: CGRect(x: x - r, y: y - r, width: r * 2, height: r * 2))
-                    }
-                }
-                u += p
-            }
-            v += p
+    // MARK: Sky
+
+    private func palette(_ scene: WeatherScene) -> (top: Color, bottom: Color) {
+        if scene.night {
+            return (Color(red: 0.03, green: 0.04, blue: 0.09), Color(red: 0.09, green: 0.12, blue: 0.22))
         }
-        context.fill(path, with: .color(Print.ink))
+        switch scene.kind {
+        case .clear, .fewClouds:
+            return (Color(red: 0.07, green: 0.15, blue: 0.28), Color(red: 0.20, green: 0.32, blue: 0.45))
+        case .clouds:
+            return (Color(red: 0.10, green: 0.15, blue: 0.23), Color(red: 0.24, green: 0.31, blue: 0.39))
+        case .mist:
+            return (Color(red: 0.17, green: 0.19, blue: 0.22), Color(red: 0.32, green: 0.34, blue: 0.36))
+        case .overcast, .snow:
+            return (Color(red: 0.15, green: 0.18, blue: 0.22), Color(red: 0.30, green: 0.34, blue: 0.39))
+        case .rain:
+            return (Color(red: 0.10, green: 0.13, blue: 0.17), Color(red: 0.22, green: 0.27, blue: 0.32))
+        case .thunder:
+            return (Color(red: 0.07, green: 0.08, blue: 0.11), Color(red: 0.17, green: 0.19, blue: 0.25))
+        }
     }
 
-    /// What must stay sharp: the sun or moon's ring, stars, snow, the lightning.
-    private func linework(_ scene: HalftoneScene, in context: inout GraphicsContext) {
-        let unit = min(size.width, size.height)
-        // The sun or moon sits behind the cloud: its linework stops at the cloud's edge.
-        var cloud = Path()
-        for (c, r) in scene.puffs { cloud.addEllipse(in: CGRect(x: c.x - r, y: c.y - r, width: r * 2, height: r * 2)) }
-        var behind = context
-        if !scene.puffs.isEmpty { behind.clip(to: cloud, options: .inverse) }
-        var rays = Path()
+    private func sky(_ scene: WeatherScene, in context: inout GraphicsContext) {
+        let (top, bottom) = palette(scene)
+        context.fill(
+            Path(CGRect(origin: .zero, size: size)),
+            with: .linearGradient(Gradient(colors: [top, bottom]), startPoint: .zero, endPoint: CGPoint(x: 0, y: size.height))
+        )
+    }
+
+    private func stars(_ scene: WeatherScene, in context: inout GraphicsContext) {
+        guard scene.kind != .snow else { return }
+        var random = SplitMix(seed: 0x5354_4152)  // "STAR"
+        let clouds = cloudPath(scene)
+        for _ in 0..<140 {
+            let p = CGPoint(x: random.unit() * size.width, y: random.unit() * size.height * 0.9)
+            let r = 0.6 + pow(random.unit(), 3) * 2.4
+            let alpha = 0.25 + random.unit() * 0.6
+            guard !clouds.contains(p) else { continue }
+            let dot = Path(ellipseIn: CGRect(x: p.x - r, y: p.y - r, width: r * 2, height: r * 2))
+            if r > 2 {
+                var glow = context
+                glow.addFilter(.blur(radius: r * 2))
+                glow.fill(dot, with: .color(Print.ink.opacity(alpha * 0.6)))
+            }
+            context.fill(dot, with: .color(Print.ink.opacity(alpha)))
+        }
+    }
+
+    // MARK: Sun and moon
+
+    private func sun(_ scene: WeatherScene, in context: inout GraphicsContext) {
+        guard let (c, r) = scene.body else { return }
+        let dimmed = scene.kind == .mist ? 0.55 : 1.0
+        // The glow, then the rays as beams of light fading outward, then the disc.
+        context.fill(
+            Path(ellipseIn: CGRect(x: c.x - r * 3, y: c.y - r * 3, width: r * 6, height: r * 6)),
+            with: .radialGradient(
+                Gradient(colors: [Color(red: 0.98, green: 0.62, blue: 0.20).opacity(0.30 * dimmed), Print.ochre.opacity(0)]),
+                center: c, startRadius: r * 0.95, endRadius: r * 2.3
+            )
+        )
         for wedge in scene.rays {
-            rays.move(to: wedge[0])
-            for p in wedge.dropFirst() { rays.addLine(to: p) }
-            rays.closeSubpath()
+            var beam = Path()
+            beam.move(to: wedge[0])
+            for p in wedge.dropFirst() { beam.addLine(to: p) }
+            beam.closeSubpath()
+            context.fill(beam, with: .linearGradient(
+                Gradient(colors: [Color(red: 1, green: 0.86, blue: 0.55).opacity(0.7 * dimmed), Color(red: 0.98, green: 0.62, blue: 0.20).opacity(0)]),
+                startPoint: c, endPoint: wedge[1]
+            ))
         }
-        behind.fill(rays, with: .color(Print.paper))
-        behind.stroke(rays, with: .color(Print.ink), style: StrokeStyle(lineWidth: max(2.5, unit * 0.004), lineJoin: .round))
-        if let (c, r) = scene.body {
-            let ring = Path(ellipseIn: CGRect(x: c.x - r - 3, y: c.y - r - 3, width: (r + 3) * 2, height: (r + 3) * 2))
-            behind.stroke(ring, with: .color(Print.ochre), lineWidth: max(4, unit * 0.008))
+        let disc = Path(ellipseIn: CGRect(x: c.x - r, y: c.y - r, width: r * 2, height: r * 2))
+        context.fill(disc, with: .radialGradient(
+            Gradient(colors: [
+                Color(red: 1, green: 0.97, blue: 0.86).opacity(dimmed),
+                Color(red: 0.99, green: 0.84, blue: 0.47).opacity(dimmed),
+                Print.ochre.opacity(dimmed),
+            ]),
+            center: CGPoint(x: c.x - r * 0.25, y: c.y - r * 0.25), startRadius: 0, endRadius: r * 1.15
+        ))
+    }
+
+    private func moonGlow(_ c: CGPoint, _ r: CGFloat, in context: inout GraphicsContext) {
+        context.fill(
+            Path(ellipseIn: CGRect(x: c.x - r * 2.6, y: c.y - r * 2.6, width: r * 5.2, height: r * 5.2)),
+            with: .radialGradient(
+                Gradient(colors: [Print.ink.opacity(0.16), Print.ink.opacity(0)]),
+                center: c, startRadius: r, endRadius: r * 2.6
+            )
+        )
+    }
+
+    // MARK: Cloud, rain, snow, lightning, mist
+
+    private func cloudPath(_ scene: WeatherScene) -> Path {
+        var path = Path()
+        for (c, r) in scene.puffs { path.addEllipse(in: CGRect(x: c.x - r, y: c.y - r, width: r * 2, height: r * 2)) }
+        return path
+    }
+
+    private func cloudColors(_ scene: WeatherScene) -> (lit: Color, shade: Color) {
+        if scene.night { return (Color(red: 0.36, green: 0.39, blue: 0.47), Color(red: 0.16, green: 0.18, blue: 0.24)) }
+        switch scene.kind {
+        case .rain: return (Color(red: 0.62, green: 0.66, blue: 0.71), Color(red: 0.27, green: 0.30, blue: 0.36))
+        case .thunder: return (Color(red: 0.48, green: 0.51, blue: 0.57), Color(red: 0.17, green: 0.18, blue: 0.23))
+        case .overcast, .snow: return (Color(red: 0.80, green: 0.81, blue: 0.82), Color(red: 0.42, green: 0.45, blue: 0.50))
+        default: return (Color(red: 0.98, green: 0.97, blue: 0.95), Color(red: 0.62, green: 0.67, blue: 0.74))
         }
-        var random = SplitMix(seed: 0x4854_4F4E)  // "HTON"
-        if scene.night && scene.kind != .snow {
-            var stars = Path()
-            for _ in 0..<70 {
-                let x = random.unit() * size.width, y = random.unit() * size.height * 0.85
-                let p = CGPoint(x: x, y: y)
-                guard scene.tone(at: p) > 0.6 else { continue }  // open sky only
-                let r = 1.2 + random.unit() * 2.2
-                stars.addEllipse(in: CGRect(x: x - r, y: y - r, width: r * 2, height: r * 2))
+    }
+
+    private func weather(_ scene: WeatherScene, in context: inout GraphicsContext) {
+        let unit = min(size.width, size.height)
+        var random = SplitMix(seed: 0x5745_4154)  // "WEAT"
+
+        if scene.kind == .mist {
+            var bands = context
+            bands.addFilter(.blur(radius: unit * 0.03))
+            for i in 0..<7 {
+                let y = size.height * (0.18 + Double(i) * 0.12)
+                let inset = size.width * (0.05 + random.unit() * 0.25)
+                let band = Path(roundedRect: CGRect(x: inset, y: y, width: size.width - inset * 1.3, height: unit * 0.045), cornerRadius: unit * 0.02)
+                bands.fill(band, with: .color(Print.ink.opacity(0.10 + random.unit() * 0.12)))
             }
-            context.fill(stars, with: .color(Print.paper))
         }
-        if scene.kind == .snow {
-            var flakes = Path()
-            let base = scene.cloudBase
-            for _ in 0..<90 {
-                let x = random.unit() * size.width
+
+        if scene.kind == .rain || scene.kind == .thunder {
+            var rain = Path()
+            let base = scene.cloudBase - unit * 0.04
+            for _ in 0..<220 {
+                let x = random.unit() * (size.width + unit * 0.3) - unit * 0.15
                 let y = base + random.unit() * (size.height - base)
-                let r = unit * (0.006 + random.unit() * 0.009)
-                flakes.addEllipse(in: CGRect(x: x - r, y: y - r, width: r * 2, height: r * 2))
+                let length = unit * (0.04 + random.unit() * 0.05)
+                rain.move(to: CGPoint(x: x, y: y))
+                rain.addLine(to: CGPoint(x: x - length * 0.3, y: y + length))
             }
-            context.fill(flakes, with: .color(Print.paper))
-            context.stroke(flakes, with: .color(Print.ink), lineWidth: 1.5)
+            context.stroke(rain, with: .color(Color(red: 0.74, green: 0.83, blue: 0.92).opacity(0.5)),
+                           style: StrokeStyle(lineWidth: max(1.6, unit * 0.0035), lineCap: .round))
         }
+
+        if !scene.puffs.isEmpty {
+            let cloud = cloudPath(scene)
+            let bounds = cloud.boundingRect
+            let (lit, shade) = cloudColors(scene)
+            // A soft shadow under the bank, then the bank shaded top to bottom, then a
+            // brighter crown on each puff for volume.
+            var under = context
+            under.addFilter(.blur(radius: unit * 0.035))
+            under.fill(cloud.offsetBy(dx: 0, dy: unit * 0.03), with: .color(.black.opacity(0.28)))
+            context.fill(cloud, with: .linearGradient(
+                Gradient(colors: [lit, shade]),
+                startPoint: CGPoint(x: bounds.midX, y: bounds.minY),
+                endPoint: CGPoint(x: bounds.midX, y: bounds.maxY)
+            ))
+            var crowns = context
+            crowns.clip(to: cloud)
+            crowns.addFilter(.blur(radius: unit * 0.02))
+            for (c, r) in scene.puffs {
+                crowns.fill(
+                    Path(ellipseIn: CGRect(x: c.x - r * 0.7, y: c.y - r * 0.95, width: r * 1.4, height: r * 1.0)),
+                    with: .color(lit.opacity(0.55))
+                )
+            }
+        }
+
         let bolt = scene.bolt
         if let first = bolt.first {
             var path = Path()
             path.move(to: first)
             for p in bolt.dropFirst() { path.addLine(to: p) }
             path.closeSubpath()
-            context.fill(path, with: .color(Print.ochre))
-            context.stroke(path, with: .color(Print.ink), lineWidth: 3)
+            var glow = context
+            glow.addFilter(.blur(radius: unit * 0.03))
+            glow.fill(path, with: .color(Print.ochre.opacity(0.8)))
+            context.fill(path, with: .linearGradient(
+                Gradient(colors: [Color(red: 1, green: 0.95, blue: 0.75), Print.ochre]),
+                startPoint: path.boundingRect.origin,
+                endPoint: CGPoint(x: path.boundingRect.maxX, y: path.boundingRect.maxY)
+            ))
+        }
+
+        if scene.kind == .snow {
+            let base = scene.cloudBase - unit * 0.02
+            for _ in 0..<130 {
+                let p = CGPoint(x: random.unit() * size.width, y: base + random.unit() * (size.height - base))
+                let depth = random.unit()
+                let r = unit * (0.003 + depth * 0.009)
+                let flake = Path(ellipseIn: CGRect(x: p.x - r, y: p.y - r, width: r * 2, height: r * 2))
+                var soft = context
+                if depth < 0.4 { soft.addFilter(.blur(radius: r * 0.8)) }
+                soft.fill(flake, with: .color(Print.ink.opacity(0.55 + depth * 0.45)))
+            }
         }
     }
 }
@@ -216,7 +348,7 @@ private struct ScreenRule: View {
                 y += p / 2
                 row += 1
             }
-            context.fill(path, with: .color(Print.ink))
+            context.fill(path, with: .color(Print.ink.opacity(0.35)))
         }
     }
 }
@@ -408,7 +540,7 @@ private struct EventRow: View {
 
     var body: some View {
         let inverted = state == .running
-        let ink = inverted ? Print.paper : Print.ink
+        let ink = Print.ink
         HStack(alignment: .top, spacing: 18) {
             VStack(alignment: .trailing, spacing: 2) {
                 if event.isAllDay {
@@ -437,7 +569,7 @@ private struct EventRow: View {
                 if let location = event.shortLocation {
                     Text(location)
                         .font(.custom(Print.text, size: 28).weight(.medium))
-                        .foregroundStyle(inverted ? Print.paper.opacity(0.8) : Print.faint)
+                        .foregroundStyle(inverted ? Print.ink.opacity(0.75) : Print.faint)
                         .lineLimit(1)
                         .perforated(state == .elapsed)
                 }
@@ -446,7 +578,9 @@ private struct EventRow: View {
         }
         .padding(.vertical, inverted ? 14 : 0)
         .padding(.trailing, inverted ? 18 : 0)
-        .background(inverted ? Print.ink : .clear)
+        // On the dark plate "inverted" is a quiet lift, not a cream bar: the brightest block on
+        // a big screen should not be a meeting.
+        .background(inverted ? Print.ink.opacity(0.1) : .clear)
         .fixedSize(horizontal: false, vertical: true)
     }
 }
@@ -500,7 +634,7 @@ private struct DotScreen: View {
                 y += p * 0.87
                 row += 1
             }
-            context.fill(path, with: .color(Print.ink.opacity(0.75)))
+            context.fill(path, with: .color(Print.ink.opacity(0.6)))
         }
     }
 }

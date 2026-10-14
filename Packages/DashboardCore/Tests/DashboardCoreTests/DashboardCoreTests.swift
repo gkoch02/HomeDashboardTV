@@ -195,6 +195,15 @@ final class DashboardCoreTests: XCTestCase {
                         .unhealthy, .unhealthy, .veryUnhealthy, .veryUnhealthy, .hazardous, .hazardous])
     }
 
+    func testAQIShortLabelsFitTheBadge() throws {
+        let body = minimal(sources: [
+            "air_quality": ["fetched_at": "2026-10-14T09:00:00-04:00", "staleness": "fresh",
+                            "data": ["aqi": 128, "category": "Unhealthy for Sensitive Groups", "pm25": 47.0]],
+        ])
+        let airQuality = try XCTUnwrap(Snapshot.decode(json(body)).sources.airQuality?.data)
+        XCTAssertEqual(airQuality.shortLabel, "Sensitive groups", "the Pi's category is too long for the badge")
+    }
+
     func testShortLocationIsTheFirstLine() throws {
         let s = try snapshot(events: [
             event("Faire", "2026-10-14T00:00:00-04:00", "2026-10-15T00:00:00-04:00", allDay: true)

@@ -99,7 +99,8 @@ settings. The committed project is complete, so XcodeGen is only needed to chang
   pick the richest layout that fits (wrapped titles, then single lines, then a count of the
   rest). A title too long even for two lines ends in "…".
 - The layout drifts a few points every ten minutes, so an OLED TV never holds one image.
-- The screensaver is off while the app is open.
+- The screensaver and sleep are held off while the app is open, always or for 1–8 hours after
+  the last remote press (settings → Keep awake); after that the Apple TV's own timers apply.
 
 ## Layout
 

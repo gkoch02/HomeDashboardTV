@@ -19,9 +19,13 @@ struct DashboardScreen: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .focusable(!store.settingsVisible)
                 .focused($screenFocused)
-                .onTapGesture { if !store.settingsVisible { store.settingsVisible = true } }
+                .onTapGesture {
+                    store.noteInteraction()
+                    if !store.settingsVisible { store.settingsVisible = true }
+                }
                 .onMoveCommand { direction in
                     guard !store.settingsVisible else { return }
+                    store.noteInteraction()
                     switch direction {
                     case .left: store.layout = store.layout.advanced(by: -1)
                     case .right: store.layout = store.layout.advanced(by: 1)

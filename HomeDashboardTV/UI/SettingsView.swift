@@ -13,7 +13,7 @@ struct SettingsView: View {
 
     /// The controls focus can be sent to by name.
     enum Field: Hashable {
-        case layout(DashboardStore.Layout), pi(String), address, connect, demo, username, password, done
+        case layout(DashboardStore.Layout), awake(Int), pi(String), address, connect, demo, username, password, done
     }
 
     var body: some View {
@@ -38,6 +38,23 @@ struct SettingsView: View {
                             .focused($focus, equals: .layout(layout))
                         }
                     }
+                }
+
+                Section("Keep awake") {
+                    HStack(spacing: 24) {
+                        ForEach(DashboardStore.keepAwakeChoices, id: \.self) { hours in
+                            Button {
+                                store.keepAwakeHours = hours
+                            } label: {
+                                Label(awakeLabel(hours), systemImage: store.keepAwakeHours == hours ? "checkmark.circle.fill" : "circle")
+                            }
+                            .focused($focus, equals: .awake(hours))
+                        }
+                    }
+                    Text("For that long after a remote press; then the Apple TV's own screensaver and sleep timers apply. Set the screensaver's Start After to Never to go straight to sleep.")
+                        .font(.system(size: 22))
+                        .fixedSize(horizontal: false, vertical: true)
+                        .foregroundStyle(.tertiary)
                 }
 
                 Section("On this network") {
@@ -107,6 +124,8 @@ struct SettingsView: View {
                 focus = .pi(first.name)
             }
         }
+        // Moving through the panel is remote use too.
+        .onChange(of: focus) { _, _ in store.noteInteraction() }
         .onDisappear { browser.stop() }
         .onExitCommand {
             if store.connection != nil { store.settingsVisible = false }
@@ -119,6 +138,14 @@ struct SettingsView: View {
         if store.connection != nil { return .done }
         if let first = browser.found.first { return .pi(first.name) }
         return .address
+    }
+
+    private func awakeLabel(_ hours: Int) -> String {
+        switch hours {
+        case 0: return "Always"
+        case 1: return "1 hour"
+        default: return "\(hours) hours"
+        }
     }
 
     private var status: String {

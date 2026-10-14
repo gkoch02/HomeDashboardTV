@@ -25,16 +25,20 @@ struct DashboardView: View {
 
     private var zone: TimeZone { snapshot.timeZone }
 
+    private static let columnSpacing: CGFloat = 34
+    /// Two rows of day cards, each tall enough for a header and four one-line events.
+    private static let minimumGridHeight: CGFloat = 2 * 210 + 24
+
     var body: some View {
         let days = Agenda.days(from: snapshot, now: now, count: 7)
         HStack(alignment: .top, spacing: 70) {
             LeftColumn(snapshot: snapshot, now: now)
                 .frame(width: 560)
-            VStack(alignment: .leading, spacing: 34) {
+            AgendaColumn(spacing: Self.columnSpacing, minimumGridHeight: Self.minimumGridHeight) {
                 TodayPanel(day: days[0], zone: zone, now: now)
                 UpcomingGrid(days: Array(days.dropFirst()), zone: zone)
             }
-            .frame(maxWidth: .infinity, alignment: .topLeading)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
         .padding(.horizontal, 96)
         .padding(.vertical, 64)
@@ -95,6 +99,34 @@ struct DashboardView: View {
     }
 }
 
+/// Today above the day cards. Today is measured against everything the cards can spare, so it
+/// picks the richest of its layouts that fits, and is as tall as that layout; the cards take
+/// the rest, never less than `minimumGridHeight`.
+private struct AgendaColumn: Layout {
+    let spacing: CGFloat
+    let minimumGridHeight: CGFloat
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        proposal.replacingUnspecifiedDimensions()
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        guard subviews.count == 2 else { return }
+        let budget = max(bounds.height - spacing - minimumGridHeight, 0)
+        let today = subviews[0].sizeThatFits(ProposedViewSize(width: bounds.width, height: budget))
+        let todayHeight = min(today.height, budget)
+        subviews[0].place(
+            at: bounds.origin,
+            proposal: ProposedViewSize(width: bounds.width, height: todayHeight)
+        )
+        let gridTop = bounds.minY + todayHeight + spacing
+        subviews[1].place(
+            at: CGPoint(x: bounds.minX, y: gridTop),
+            proposal: ProposedViewSize(width: bounds.width, height: bounds.maxY - gridTop)
+        )
+    }
+}
+
 // MARK: - Left column
 
 private struct LeftColumn: View {
@@ -116,7 +148,11 @@ private struct LeftColumn: View {
                 .padding(.bottom, 48)
 
             if let weather = snapshot.sources.weather?.data {
-                CurrentWeather(weather: weather, metric: snapshot.isMetric)
+                CurrentWeather(
+                    weather: weather,
+                    metric: snapshot.isMetric,
+                    airQuality: snapshot.sources.airQuality?.data
+                )
                     .padding(.bottom, 36)
                 ForecastRow(days: Array(weather.forecast.prefix(5)), zone: zone)
             } else {
@@ -147,6 +183,7 @@ private struct LeftColumn: View {
 private struct CurrentWeather: View {
     let weather: Weather
     let metric: Bool
+    let airQuality: AirQuality?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
@@ -169,6 +206,9 @@ private struct CurrentWeather: View {
                 stat("arrow.down", degrees(weather.low))
                 if let feels = weather.feelsLike { stat("thermometer.medium", "feels \(degrees(feels))") }
                 stat("humidity", "\(weather.humidity)%")
+            }
+            if let airQuality {
+                AQILine(airQuality: airQuality)
             }
             ForEach(weather.alerts, id: \.self) { alert in
                 Label(alert.event, systemImage: "exclamationmark.triangle.fill")
@@ -218,20 +258,66 @@ private struct ForecastRow: View {
     }
 }
 
+private struct AQILine: View {
+    let airQuality: AirQuality
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Circle()
+                .fill(color)
+                .frame(width: 18, height: 18)
+            Text("AQI \(airQuality.aqi)")
+                .font(.system(size: 24, weight: .semibold, design: .rounded))
+                .foregroundStyle(Palette.ink)
+            Text(airQuality.category)
+                .font(.system(size: 24, weight: .medium))
+                .foregroundStyle(airQuality.band > .moderate ? color : Palette.muted)
+                .lineLimit(1)
+        }
+    }
+
+    /// The EPA's band colours, lifted a little so they read on the dark ground.
+    private var color: Color {
+        switch airQuality.band {
+        case .good: return Color(red: 0.36, green: 0.82, blue: 0.42)
+        case .moderate: return Color(red: 0.98, green: 0.86, blue: 0.30)
+        case .sensitive: return Color(red: 1.0, green: 0.60, blue: 0.22)
+        case .unhealthy: return Color(red: 1.0, green: 0.35, blue: 0.33)
+        case .veryUnhealthy: return Color(red: 0.72, green: 0.45, blue: 0.95)
+        case .hazardous: return Color(red: 0.80, green: 0.30, blue: 0.40)
+        }
+    }
+}
+
 // MARK: - Agenda
 
+/// Today's events at reading size. Its height is capped by `DashboardView` so the day cards
+/// keep their room; it shows the richest layout that fits: up to six events with locations,
+/// then without, then fewer events with a count of the rest.
 private struct TodayPanel: View {
     let day: AgendaDay
     let zone: TimeZone
     let now: Date
 
-    /// Rows that fit the panel at this size; the rest are counted.
-    private static let maxRows = 6
+    private static let layouts: [(rows: Int, locations: Bool)] =
+        [(6, true), (6, false)] + (0...5).reversed().map { ($0, false) }
 
     var body: some View {
+        ViewThatFits(in: .vertical) {
+            ForEach(Self.layouts.indices, id: \.self) { i in
+                content(rows: Self.layouts[i].rows, locations: Self.layouts[i].locations)
+            }
+        }
+        .padding(36)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .background(Palette.card, in: RoundedRectangle(cornerRadius: 32, style: .continuous))
+    }
+
+    private func content(rows: Int, locations: Bool) -> some View {
         let upcoming = day.events.filter { $0.isAllDay || $0.end > now }
         let finished = day.events.count - upcoming.count
-        VStack(alignment: .leading, spacing: 18) {
+        let hidden = upcoming.count - min(rows, upcoming.count)
+        return VStack(alignment: .leading, spacing: 18) {
             HStack(alignment: .firstTextBaseline) {
                 Text("Today")
                     .font(.system(size: 44, weight: .bold))
@@ -252,18 +338,16 @@ private struct TodayPanel: View {
                     .foregroundStyle(Palette.faint)
                     .padding(.vertical, 8)
             }
-            ForEach(upcoming.prefix(Self.maxRows), id: \.self) { event in
-                TodayRow(event: event, zone: zone, now: now)
+            ForEach(upcoming.prefix(rows), id: \.self) { event in
+                TodayRow(event: event, zone: zone, now: now, showsLocation: locations)
             }
-            if upcoming.count > Self.maxRows {
-                Text("+\(upcoming.count - Self.maxRows) more")
+            if hidden > 0 {
+                Text(rows == 0 ? "\(hidden) events" : "+\(hidden) more")
                     .font(.system(size: 24, weight: .medium))
                     .foregroundStyle(Palette.faint)
             }
         }
-        .padding(36)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Palette.card, in: RoundedRectangle(cornerRadius: 32, style: .continuous))
     }
 }
 
@@ -271,6 +355,7 @@ private struct TodayRow: View {
     let event: CalendarEvent
     let zone: TimeZone
     let now: Date
+    var showsLocation = true
 
     var body: some View {
         let happening = !event.isAllDay && event.start <= now && event.end > now
@@ -285,7 +370,7 @@ private struct TodayRow: View {
                     .font(.system(size: 34, weight: .semibold))
                     .foregroundStyle(Palette.ink)
                     .lineLimit(1)
-                if let location = event.location, !location.isEmpty {
+                if showsLocation, let location = event.shortLocation {
                     Text(location)
                         .font(.system(size: 24))
                         .foregroundStyle(Palette.faint)
@@ -305,16 +390,26 @@ private struct TodayRow: View {
     }
 }
 
+/// Two rows of three cards sharing the height left under Today, so a busy day cannot push
+/// its row (or the screen) taller.
 private struct UpcomingGrid: View {
     let days: [AgendaDay]
     let zone: TimeZone
 
+    private static let spacing: CGFloat = 24
+
     var body: some View {
-        Grid(horizontalSpacing: 24, verticalSpacing: 24) {
-            ForEach(Array(stride(from: 0, to: days.count, by: 3)), id: \.self) { row in
-                GridRow {
-                    ForEach(days[row..<min(row + 3, days.count)]) { day in
-                        DayCard(day: day, zone: zone)
+        GeometryReader { geometry in
+            let rows = stride(from: 0, to: days.count, by: 3).map { Array(days[$0..<min($0 + 3, days.count)]) }
+            let height = (geometry.size.height - Self.spacing * CGFloat(max(rows.count - 1, 0)))
+                / CGFloat(max(rows.count, 1))
+            VStack(spacing: Self.spacing) {
+                ForEach(rows, id: \.first?.id) { row in
+                    HStack(spacing: Self.spacing) {
+                        ForEach(row) { day in
+                            DayCard(day: day, zone: zone)
+                                .frame(height: height)
+                        }
                     }
                 }
             }
@@ -322,15 +417,39 @@ private struct UpcomingGrid: View {
     }
 }
 
+/// One upcoming day. The card's height is fixed by the grid; it shows the richest layout that
+/// fits: names and titles wrapping to two lines, then names only (a birthday is rarer than an
+/// event), then neither, then fewer events with a count of the rest.
 private struct DayCard: View {
     let day: AgendaDay
     let zone: TimeZone
 
-    private static let maxRows = 4
+    private static let layouts: [(rows: Int, titleLines: Int, nameLines: Int)] = [
+        (4, 2, 2), (4, 1, 2), (4, 1, 1), (3, 1, 1), (2, 1, 1), (1, 1, 1), (0, 1, 1),
+    ]
 
     var body: some View {
+        ViewThatFits(in: .vertical) {
+            ForEach(Self.layouts.indices, id: \.self) { i in
+                let layout = Self.layouts[i]
+                content(rows: layout.rows, titleLines: layout.titleLines, nameLines: layout.nameLines)
+            }
+        }
+        .padding(.horizontal, 24)
+        .padding(.vertical, 20)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(Palette.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+    }
+
+    private func content(rows: Int, titleLines: Int, nameLines: Int) -> some View {
         let date = day.day.start(in: zone)
-        VStack(alignment: .leading, spacing: 10) {
+        let shown = Array(day.events.prefix(rows))
+        let labels = shown.map { $0.isAllDay ? "•" : compactTime($0.start) }
+        // Every row reserves the width of this card's longest time, so the titles line up
+        // and get the rest of the card.
+        let widest = labels.max { $0.count < $1.count } ?? ""
+        let hidden = day.events.count - shown.count
+        return VStack(alignment: .leading, spacing: 7) {
             HStack(alignment: .firstTextBaseline, spacing: 10) {
                 Text(date.formatted(Date.FormatStyle(timeZone: zone).weekday(.wide)))
                     .font(.system(size: 28, weight: .bold))
@@ -339,20 +458,15 @@ private struct DayCard: View {
                     .font(.system(size: 22, weight: .medium))
                     .foregroundStyle(Palette.faint)
             }
-            .padding(.bottom, 4)
+            .padding(.bottom, 3)
             ForEach(day.birthdays, id: \.self) { birthday in
-                BirthdayLine(birthday: birthday, size: 22)
+                BirthdayLine(birthday: birthday, size: 22, compact: true, lines: nameLines)
             }
             if day.events.isEmpty && day.birthdays.isEmpty {
                 Text("Free")
                     .font(.system(size: 22))
                     .foregroundStyle(Palette.faint)
             }
-            let shown = Array(day.events.prefix(Self.maxRows))
-            let labels = shown.map { $0.isAllDay ? "•" : compactTime($0.start) }
-            // Every row reserves the width of this card's longest time, so the titles line up
-            // and get the rest of the card.
-            let widest = labels.max { $0.count < $1.count } ?? ""
             ForEach(Array(zip(shown, labels)), id: \.0) { event, label in
                 HStack(alignment: .firstTextBaseline, spacing: 12) {
                     ZStack(alignment: .trailing) {
@@ -364,24 +478,22 @@ private struct DayCard: View {
                     Text(event.summary)
                         .font(.system(size: 22, weight: .medium))
                         .foregroundStyle(Palette.muted)
-                        .lineLimit(1)
+                        .lineLimit(titleLines)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
-            if day.events.count > Self.maxRows {
+            if hidden > 0 {
                 HStack(spacing: 12) {
                     Text(widest).hidden()
                         .font(.system(size: 20, weight: .medium, design: .rounded))
                         .monospacedDigit()
-                    Text("+\(day.events.count - Self.maxRows) more")
+                    Text(shown.isEmpty ? "\(hidden) events" : "+\(hidden) more")
                         .font(.system(size: 20, weight: .medium))
                         .foregroundStyle(Palette.faint)
                 }
             }
-            Spacer(minLength: 0)
         }
-        .padding(24)
-        .frame(maxWidth: .infinity, minHeight: 220, maxHeight: .infinity, alignment: .topLeading)
-        .background(Palette.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     /// "9a", "11:30a", "2p": the cards are a third of the agenda wide, and a full "11:30 AM"
@@ -400,15 +512,27 @@ private struct DayCard: View {
 private struct BirthdayLine: View {
     let birthday: Birthday
     let size: CGFloat
+    /// The day cards are a third of the agenda wide: the name with the age beside it, wrapping
+    /// to a second line rather than cutting a long name short.
+    var compact = false
+    var lines = 2
 
     var body: some View {
         Label {
-            Text(birthday.age.map { "\(birthday.name) turns \($0)" } ?? "\(birthday.name)'s birthday")
+            if compact {
+                (Text(birthday.name)
+                    + Text(birthday.age.map { "  \($0)" } ?? "")
+                    .foregroundColor(Palette.today))
+                    .lineLimit(lines)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else {
+                Text(birthday.age.map { "\(birthday.name) turns \($0)" } ?? "\(birthday.name)'s birthday")
+                    .lineLimit(1)
+            }
         } icon: {
             Image(systemName: "gift.fill").foregroundStyle(Palette.today)
         }
         .font(.system(size: size, weight: .semibold))
         .foregroundStyle(Palette.ink)
-        .lineLimit(1)
     }
 }

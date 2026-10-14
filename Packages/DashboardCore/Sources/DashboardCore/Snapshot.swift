@@ -243,3 +243,37 @@ enum PythonISODate {
         return formatter.date(from: text).map { $0.addingTimeInterval(fraction) }
     }
 }
+
+extension AirQuality {
+    /// The EPA band the Pi's AQI falls in, which sets the colour it is drawn in. The Pi sends
+    /// the band's name as `category`; the band is recomputed here so the colour cannot drift
+    /// from the number if a newer Pi words a category differently.
+    public enum Band: Int, Sendable, Comparable {
+        case good, moderate, sensitive, unhealthy, veryUnhealthy, hazardous
+
+        public static func < (a: Band, b: Band) -> Bool { a.rawValue < b.rawValue }
+    }
+
+    public var band: Band {
+        switch aqi {
+        case ..<51: return .good
+        case ..<101: return .moderate
+        case ..<151: return .sensitive
+        case ..<201: return .unhealthy
+        case ..<301: return .veryUnhealthy
+        default: return .hazardous
+        }
+    }
+}
+
+extension CalendarEvent {
+    /// The location's first non-blank line. Google writes a venue's name and full address on
+    /// separate lines, and the name is what reads at TV distance.
+    public var shortLocation: String? {
+        location?
+            .split(whereSeparator: \.isNewline)
+            .lazy
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .first { !$0.isEmpty }
+    }
+}

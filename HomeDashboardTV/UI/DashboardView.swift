@@ -29,6 +29,7 @@ enum Palette {
 ///
 /// Every time and day is the Pi's zone (`Snapshot.timeZone`), so the TV agrees with the panel.
 /// The content drifts a few points every ten minutes so an OLED set never holds one image.
+/// It fills the screen to a 56 x 44 pt margin, past tvOS's overscan safe area.
 struct DashboardView: View {
     let snapshot: Snapshot
     let now: Date
@@ -42,19 +43,23 @@ struct DashboardView: View {
 
     var body: some View {
         let days = Agenda.days(from: snapshot, now: now, count: 7)
-        HStack(alignment: .top, spacing: 70) {
+        HStack(alignment: .top, spacing: 52) {
             LeftColumn(snapshot: snapshot, now: now)
-                .frame(width: 560)
+                .frame(width: 540)
             AgendaColumn(spacing: Self.columnSpacing, minimumGridHeight: Self.minimumGridHeight) {
                 TodayPanel(day: days[0], zone: zone, now: now)
                 UpcomingGrid(days: Array(days.dropFirst()), zone: zone)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
-        .padding(.horizontal, 96)
-        .padding(.vertical, 64)
+        // One margin, ours, instead of tvOS's overscan safe area plus ours (176 pt a side in
+        // all): a TV that shows the whole picture wasted it, and the day cards need it. The
+        // margin still holds the burn-in drift (10 pt) clear of the edge.
+        .padding(.horizontal, 56)
+        .padding(.vertical, 44)
         .offset(BurnIn.drift(at: now))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .ignoresSafeArea()
         .background(sky)
         .overlay(alignment: .topTrailing) {
             if let notice {

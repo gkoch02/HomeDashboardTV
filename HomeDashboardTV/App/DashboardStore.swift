@@ -25,6 +25,15 @@ final class DashboardStore {
             }
         }
 
+        /// The layout `steps` places along `allCases`, wrapping at either end: the remote's
+        /// left and right step through them.
+        func advanced(by steps: Int) -> Layout {
+            let all = Self.allCases
+            let index = all.firstIndex(of: self)!
+            let count = all.count
+            return all[((index + steps) % count + count) % count]
+        }
+
         /// A saved layout, including the agenda's earlier name.
         init?(saved: String) {
             self.init(rawValue: saved == "halftone" ? "agenda" : saved)

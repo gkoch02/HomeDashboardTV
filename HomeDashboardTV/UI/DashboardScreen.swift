@@ -2,7 +2,7 @@ import DashboardCore
 import SwiftUI
 
 /// The root: the dashboard, or a placeholder until the first snapshot, with settings over it.
-/// A click opens settings; Menu closes them.
+/// A click opens settings; Menu closes them. Left and right step through the layouts.
 ///
 /// Focus and the click handler belong to the dashboard layer alone, never to a container that
 /// also holds the settings panel: on tvOS a non-focusable ancestor took the panel's buttons
@@ -20,6 +20,14 @@ struct DashboardScreen: View {
                 .focusable(!store.settingsVisible)
                 .focused($screenFocused)
                 .onTapGesture { if !store.settingsVisible { store.settingsVisible = true } }
+                .onMoveCommand { direction in
+                    guard !store.settingsVisible else { return }
+                    switch direction {
+                    case .left: store.layout = store.layout.advanced(by: -1)
+                    case .right: store.layout = store.layout.advanced(by: 1)
+                    default: break
+                    }
+                }
                 .accessibilityIdentifier("dashboard")
             if store.settingsVisible {
                 SettingsView()

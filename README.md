@@ -56,6 +56,8 @@ panel's own fallback, an arc between the day's sunrise and sunset.
 On first launch the app opens its settings: pick the Pi under **On this network**, or type
 its address (`dashboard.local`, `192.168.1.20:8080`). **Demo data** shows a bundled week
 with no Pi at all. Click anywhere on the dashboard to come back to settings; Menu closes them.
+Left and right on the remote step through the layouts (Dashboard, Agenda, Moon, Horizon), and
+the one you land on is remembered.
 
 ## Building it yourself
 

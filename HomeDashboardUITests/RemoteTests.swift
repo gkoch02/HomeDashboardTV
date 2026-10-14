@@ -52,4 +52,22 @@ final class RemoteTests: XCTestCase {
         remote.press(.select)
         XCTAssertTrue(done.waitForExistence(timeout: 5), "the dashboard has focus again, so a click reopens settings")
     }
+
+    /// Left and right step through the layouts, wrapping at either end.
+    func testLeftAndRightCycleLayouts() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-demo", "YES", "-layout", "dashboard"]
+        app.launch()
+        let today = app.staticTexts["Today"]
+        XCTAssertTrue(today.waitForExistence(timeout: 10))
+
+        remote.press(.left)
+        XCTAssertTrue(today.waitForNonExistence(timeout: 5), "left wraps from Dashboard to Horizon")
+
+        remote.press(.right)
+        XCTAssertTrue(today.waitForExistence(timeout: 5), "right wraps from Horizon back to Dashboard")
+
+        remote.press(.right)
+        XCTAssertTrue(today.waitForNonExistence(timeout: 5), "right moves on to Agenda")
+    }
 }

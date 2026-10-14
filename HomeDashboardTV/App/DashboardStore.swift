@@ -10,16 +10,21 @@ import Observation
 @MainActor
 @Observable
 final class DashboardStore {
-    /// What the screen shows: the week, the Pi's moonphase theme, or its halftone agenda.
+    /// What the screen shows: the week, the day's agenda plate, or the Pi's moonphase theme.
     enum Layout: String, CaseIterable {
-        case dashboard, halftone, moon
+        case dashboard, agenda, moon
 
         var title: String {
             switch self {
             case .dashboard: return "Dashboard"
-            case .halftone: return "Halftone"
+            case .agenda: return "Agenda"
             case .moon: return "Moon"
             }
+        }
+
+        /// A saved layout, including the agenda's earlier name.
+        init?(saved: String) {
+            self.init(rawValue: saved == "halftone" ? "agenda" : saved)
         }
     }
 
@@ -62,7 +67,7 @@ final class DashboardStore {
     init() {
         username = defaults.string(forKey: Keys.username) ?? "admin"
         // `-layout moon` sets it for a run too, since launch arguments land in UserDefaults.
-        layout = defaults.string(forKey: Keys.layout).flatMap(Layout.init(rawValue:)) ?? .dashboard
+        layout = defaults.string(forKey: Keys.layout).flatMap(Layout.init(saved:)) ?? .dashboard
         password = Keychain.password ?? ""
         // `-demo YES` and `-server <url>` set the source for a run (screenshots, the simulator).
         if defaults.bool(forKey: "demo") {

@@ -1,7 +1,8 @@
 import DashboardCore
 import SwiftUI
 
-/// The spiritual successor to the Pi's `halftone_agenda`, as a dark plate for a big screen:
+/// The Agenda layout: the spiritual successor to the Pi's `halftone_agenda`, as a dark plate
+/// for a big screen:
 /// the weather and its reading on the left, the day's agenda on the right.
 ///
 /// Cream type on a warm charcoal ground, with the Pi's two Inky spot inks: ochre for the sun,
@@ -11,7 +12,7 @@ import SwiftUI
 /// tonight's phase. Elapsed events print through a fine dot screen, the one halftone the plate
 /// keeps, after the Pi's perforated type. Type is the Pi's own: Righteous for the weather and
 /// the agenda's chrome, DM Sans for the events.
-struct HalftoneView: View {
+struct AgendaPlateView: View {
     let snapshot: Snapshot
     let now: Date
     let notice: String?
@@ -438,7 +439,7 @@ private struct AgendaPane: View {
     @Environment(\.timeZone) private var zone
 
     var body: some View {
-        let (day, tomorrow) = Agenda.halftoneDay(from: snapshot, now: now)
+        let (day, tomorrow) = Agenda.rolloverDay(from: snapshot, now: now)
         let rows = day.birthdays.map(Row.birthday) + day.events.map(Row.event)
         let next = day.events.first { !$0.isAllDay && $0.start > now }
         VStack(alignment: .leading, spacing: 0) {

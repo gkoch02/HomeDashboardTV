@@ -15,7 +15,7 @@ moon value (the `moon` block of `/api/dashboard`); the app only draws it.
 
 ![The Moon layout on an Apple TV, from HomeDashboard's dummy data](docs/moon.png)
 
-**Halftone** (settings → Show → Halftone) is the spiritual successor to the Pi's
+**Agenda** (settings → Show → Agenda) is the spiritual successor to the Pi's
 `halftone_agenda`, as a dark plate for a big screen: the weather and its reading on the left,
 the day's agenda on the right, in cream type on warm charcoal with the Pi's Inky spot inks,
 ochre and red. The weather window is painted at full resolution: a sky for each kind of
@@ -25,7 +25,7 @@ elapsed events print through a fine dot screen (its perforated type), the one in
 lifted, the next one carries a red tick, and after sunset, once the day's events are over, it
 rolls over to tomorrow.
 
-![The Halftone layout, from HomeDashboard's dummy data](docs/halftone.png)
+![The Agenda layout, from HomeDashboard's dummy data](docs/agenda.png)
 
 ## What the TV needs
 
@@ -60,9 +60,9 @@ with no Pi at all. Click anywhere on the dashboard to come back to settings; Men
   agenda (events per day in the Pi's zone), the HTTP client and the demo-data shift. No UI;
   `swift test` runs it on the Mac.
 - `HomeDashboardTV/App`: the polling store, Bonjour discovery and the Keychain.
-- `HomeDashboardTV/UI`: the dashboard, the halftone plate, the moon, and the settings panel.
+- `HomeDashboardTV/UI`: the dashboard, the agenda plate, the moon, and the settings panel.
   The weather scenes' composition is `WeatherScene` in `DashboardCore`;
-  `docs/halftone-scenes.png` shows six of them.
+  `docs/agenda-scenes.png` shows six of them.
 - `HomeDashboardTV/Resources/Fonts`: Cinzel, Cormorant Garamond, Manufacturing Consent,
   Righteous and DM Sans from HomeDashboard's `fonts/` (SIL OFL; each licence beside its font). The moon
   photograph (`MoonPhoto`) is the author's own full moon: the full-resolution original of
@@ -97,7 +97,7 @@ cd Packages/DashboardCore && swift test
 ```
 
 In the simulator, `-server <address>` or `-demo YES` sets the source for one run, and
-`-layout dashboard|halftone|moon` the layout:
+`-layout dashboard|agenda|moon` the layout:
 
 ```bash
 xcrun simctl launch booted dev.plumpbug.homedashboard -server 127.0.0.1:8080

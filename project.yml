@@ -40,8 +40,8 @@ targets:
         UIUserInterfaceStyle: Dark
         UILaunchScreen:
           UIColorName: LaunchBackground
-        # The moonphase and halftone themes' faces, from HomeDashboard's fonts/ (all OFL;
-        # licences beside them).
+        # The moonphase, halftone and wide_horizon themes' faces, from HomeDashboard's fonts/
+        # (all OFL; licences beside them).
         UIAppFonts:
           - Cinzel.ttf
           - CormorantGaramond.ttf
@@ -49,6 +49,9 @@ targets:
           - ManufacturingConsent-Regular.ttf
           - Righteous-Regular.ttf
           - DMSans.ttf
+          - BigShouldersDisplay-Black.ttf
+          - BigShouldersDisplay-ExtraBold.ttf
+          - Figtree-ExtraBold.ttf
         # The Pi is found over Bonjour and read over plain HTTP on the LAN.
         NSLocalNetworkUsageDescription: Home Dashboard finds your dashboard's Raspberry Pi on your network and reads its calendar and weather from it.
         NSBonjourServices:

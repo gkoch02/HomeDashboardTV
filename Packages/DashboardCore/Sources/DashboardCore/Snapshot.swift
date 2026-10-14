@@ -19,6 +19,9 @@ public struct Snapshot: Decodable, Sendable, Equatable {
     public var quote: Quote?
     /// Absent from a Pi older than the moon block.
     public var moon: Moon?
+    /// The sun's altitude through the next days; absent from an older Pi, null without
+    /// coordinates.
+    public var sun: Sun?
     public var sources: Sources
 
     /// The zone the dashboard's days are counted in, which is the Pi's, not necessarily the TV's.
@@ -39,6 +42,21 @@ public struct Snapshot: Decodable, Sendable, Equatable {
 public struct Quote: Decodable, Sendable, Equatable {
     public var text: String
     public var author: String
+}
+
+/// The sun's altitude every `stepMinutes` from `start` (local midnight today) for four days,
+/// and each day's solar noon: what the Pi's `wide_horizon` shades its sky by (`sun` in
+/// `/api/dashboard`). Samples step in real time.
+public struct Sun: Decodable, Sendable, Equatable {
+    public var start: Date
+    public var stepMinutes: Int
+    public var altitudes: [Double]
+    public var noons: [Noon]
+
+    public struct Noon: Decodable, Sendable, Equatable {
+        public var time: Date
+        public var altitude: Double
+    }
 }
 
 /// The moonphase panel's data, as the Pi computes it (`moon` in `/api/dashboard`).
@@ -170,6 +188,8 @@ public struct HourlyForecast: Decodable, Sendable, Equatable, Hashable {
     public var temp: Double
     public var icon: String
     public var precipChance: Double?
+    /// Expected rain or snow over the slot, when the forecast gives one.
+    public var precipMm: Double?
 }
 
 public struct WeatherAlert: Decodable, Sendable, Equatable, Hashable {

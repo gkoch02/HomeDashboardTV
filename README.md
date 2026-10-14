@@ -30,6 +30,21 @@ rolls over to tomorrow.
 
 ![The Agenda layout, from HomeDashboard's dummy data](docs/agenda.png)
 
+**Horizon** (settings → Show → Horizon) is the Pi's `wide_horizon` theme: the next 72 hours
+on one time axis, night hours narrower than waking ones. The sky across the screen is
+coloured by the sun's altitude at every moment, so day, twilight and night follow each other
+left to right, with stars by night, the sun at each noon and the moon photograph at each
+night's transit. The forecast temperature runs over it as one line with each day's high and
+low, clouds, rain, snow, storms and mist sit on their 3-hour slots, the chance of rain hangs
+beneath, and the calendar sits below on the same hours: a strip of every timed event's span,
+all-day chips and birthdays, then each day's events in its own column. The conditions now and
+an outlook (the warmest and coldest hours, the next rain) fill the left column. The sun is
+the Pi's: the `sun` block of `/api/dashboard` carries its altitude every 15 minutes, computed
+from the Pi's coordinates. A Pi without coordinates, or one older than the block, gets the
+panel's own fallback, an arc between the day's sunrise and sunset.
+
+![The Horizon layout, from HomeDashboard's dummy data](docs/horizon.png)
+
 ## What the TV needs
 
 - The Pi's web UI running, with HomeDashboard 6.2 or later (the `/api/dashboard` route):
@@ -95,7 +110,7 @@ settings. The committed project is complete, so XcodeGen is only needed to chang
   composition `WeatherScene` in `DashboardCore`; `docs/agenda-scenes.png` shows six of them),
   the moon disc, a starfield.
 - `HomeDashboardTV/Resources/Fonts`: Cinzel, Cormorant Garamond, Manufacturing Consent,
-  Righteous and DM Sans from HomeDashboard's `fonts/` (SIL OFL; each licence beside its font). The moon
+  Righteous, DM Sans, Big Shoulders Display and Figtree from HomeDashboard's `fonts/` (SIL OFL; each licence beside its font). The moon
   photograph (`MoonPhoto`) is the author's own full moon: the full-resolution original of
   the Pi's `assets/moon_full.png`, cropped to the disc at its native 1288 px with the
   disc's levels stretched, enough for the hero moon at 4K without upscaling.
@@ -138,7 +153,7 @@ cd Packages/DashboardCore && swift test
 ```
 
 In the simulator, `-server <address>` or `-demo YES` sets the source for one run, and
-`-layout dashboard|agenda|moon` the layout:
+`-layout dashboard|agenda|moon|horizon` the layout:
 
 ```bash
 xcrun simctl launch booted dev.plumpbug.homedashboard -server 127.0.0.1:8080

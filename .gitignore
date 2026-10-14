@@ -5,6 +5,9 @@
 # project alongside your change; `Tools/check_project_sync.sh` verifies the two
 # agree. HomeDashboardTV/Info.plist is generated and committed for the same reason.
 
+# A builder's own signing (see Config/Signing.local.xcconfig.example)
+Config/Signing.local.xcconfig
+
 # User state
 xcuserdata/
 .DS_Store

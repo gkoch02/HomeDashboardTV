@@ -35,9 +35,10 @@ night's transit. The forecast temperature runs over it as one line with each day
 low, clouds, rain, snow, storms and mist sit on their 3-hour slots, the chance of rain hangs
 beneath, and the calendar sits below on the same hours: a strip of every timed event's span,
 all-day chips and birthdays, then each day's events in its own column. The conditions now and
-an outlook (the warmest and coldest hours, the next rain) fill the left column. The payload
-carries no coordinates, so the sun follows the Pi's own fallback: an arc between the day's
-sunrise and sunset.
+an outlook (the warmest and coldest hours, the next rain) fill the left column. The sun is
+the Pi's: the `sun` block of `/api/dashboard` carries its altitude every 15 minutes, computed
+from the Pi's coordinates. A Pi without coordinates, or one older than the block, gets the
+panel's own fallback, an arc between the day's sunrise and sunset.
 
 ![The Horizon layout, from HomeDashboard's dummy data](docs/horizon.png)
 

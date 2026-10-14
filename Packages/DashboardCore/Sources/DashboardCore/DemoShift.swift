@@ -39,6 +39,15 @@ extension Snapshot {
             }
             copy.moon = moon
         }
+        if var sun = sun {
+            sun.start = move(sun.start)
+            sun.noons = sun.noons.map { n in
+                var n = n
+                n.time = move(n.time)
+                return n
+            }
+            copy.sun = sun
+        }
         if var w = sources.weather?.data {
             w.sunrise = w.sunrise.map(move)
             w.sunset = w.sunset.map(move)

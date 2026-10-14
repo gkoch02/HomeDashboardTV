@@ -15,6 +15,7 @@
 		60B9ABEACDE09E876B36F3F1 /* PiBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B3C54094507B36DC31C7C76 /* PiBrowser.swift */; };
 		7E6CE2079A42A622309DEC52 /* DashboardScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4CAFF9985B9F380C5555D3D /* DashboardScreen.swift */; };
 		7E84F655354C4B325DAE7DF9 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 660A98750F7DEDD3E9B93FCE /* DashboardView.swift */; };
+		A56CCAD2FA51F96FCACA8EED /* RemoteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5C83EE56FEAB64DF4BCEF1 /* RemoteTests.swift */; };
 		A702BE2F6D6D411D256D80BE /* MoonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10DA38EC1D96409C50598DB5 /* MoonView.swift */; };
 		B4314A66BEB07B6ADB8167FC /* demo-snapshot.json in Resources */ = {isa = PBXBuildFile; fileRef = F31AD003A5C8873570D9A9F2 /* demo-snapshot.json */; };
 		BB501FDE97EAB93BA7415424 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBCC482A09982EB05EE52C5 /* SettingsView.swift */; };
@@ -25,10 +26,22 @@
 		F307849DC1335E469A4963A0 /* HomeDashboardApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63DD5EE230242228C007145D /* HomeDashboardApp.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		F862B51EA4B3FD955E08C011 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 80C8068411EEFD62C88B5E8B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 59B6F95BBAEF30F318F97A34;
+			remoteInfo = HomeDashboard;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		0A63BFA37FD3C74D01808FA4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0B3C54094507B36DC31C7C76 /* PiBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiBrowser.swift; sourceTree = "<group>"; };
 		10DA38EC1D96409C50598DB5 /* MoonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoonView.swift; sourceTree = "<group>"; };
+		1D5C83EE56FEAB64DF4BCEF1 /* RemoteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteTests.swift; sourceTree = "<group>"; };
+		53F9A78BB2607C29E062F3B0 /* HomeDashboardUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HomeDashboardUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5BCEA6F65BFB1AF66825E854 /* ManufacturingConsent-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "ManufacturingConsent-Regular.ttf"; sourceTree = "<group>"; };
 		61DD62983158D3984EC63FFB /* Cinzel.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Cinzel.ttf; sourceTree = "<group>"; };
 		63DD5EE230242228C007145D /* HomeDashboardApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeDashboardApp.swift; sourceTree = "<group>"; };
@@ -69,6 +82,7 @@
 			isa = PBXGroup;
 			children = (
 				B11D136C433B5D7FD6C407D9 /* Home Dashboard.app */,
+				53F9A78BB2607C29E062F3B0 /* HomeDashboardUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -82,6 +96,14 @@
 				5BCEA6F65BFB1AF66825E854 /* ManufacturingConsent-Regular.ttf */,
 			);
 			path = Fonts;
+			sourceTree = "<group>";
+		};
+		771AFCC3F41AF7DA6A5D716B /* HomeDashboardUITests */ = {
+			isa = PBXGroup;
+			children = (
+				1D5C83EE56FEAB64DF4BCEF1 /* RemoteTests.swift */,
+			);
+			path = HomeDashboardUITests;
 			sourceTree = "<group>";
 		};
 		8435F5BBC9087767063A50A3 /* Resources */ = {
@@ -120,6 +142,7 @@
 			isa = PBXGroup;
 			children = (
 				E60E330D634A2C6AA113C70F /* HomeDashboardTV */,
+				771AFCC3F41AF7DA6A5D716B /* HomeDashboardUITests */,
 				053C1BD7847BD27195E0E9B4 /* Packages */,
 				177C3E4F5ABEFD3B526E3F56 /* Products */,
 			);
@@ -159,6 +182,24 @@
 			productReference = B11D136C433B5D7FD6C407D9 /* Home Dashboard.app */;
 			productType = "com.apple.product-type.application";
 		};
+		B04779F0352A3EBCAB0BBB12 /* HomeDashboardUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A5A944D916CC8EF48E37002D /* Build configuration list for PBXNativeTarget "HomeDashboardUITests" */;
+			buildPhases = (
+				1AF8D348CDC215C37A7632C2 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3D9B63AED2391074D8EC1A70 /* PBXTargetDependency */,
+			);
+			name = HomeDashboardUITests;
+			packageProductDependencies = (
+			);
+			productName = HomeDashboardUITests;
+			productReference = 53F9A78BB2607C29E062F3B0 /* HomeDashboardUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -171,6 +212,11 @@
 					59B6F95BBAEF30F318F97A34 = {
 						DevelopmentTeam = FGG98L437R;
 						ProvisioningStyle = Automatic;
+					};
+					B04779F0352A3EBCAB0BBB12 = {
+						DevelopmentTeam = FGG98L437R;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 59B6F95BBAEF30F318F97A34;
 					};
 				};
 			};
@@ -192,6 +238,7 @@
 			projectRoot = "";
 			targets = (
 				59B6F95BBAEF30F318F97A34 /* HomeDashboard */,
+				B04779F0352A3EBCAB0BBB12 /* HomeDashboardUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -214,6 +261,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		1AF8D348CDC215C37A7632C2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A56CCAD2FA51F96FCACA8EED /* RemoteTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		332729B340729CC4D391C2DE /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -230,6 +285,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		3D9B63AED2391074D8EC1A70 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 59B6F95BBAEF30F318F97A34 /* HomeDashboard */;
+			targetProxy = F862B51EA4B3FD955E08C011 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		4EE1466125F8A7F5411FDF7B /* Release */ = {
@@ -252,6 +315,24 @@
 				SDKROOT = appletvos;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 3;
+			};
+			name = Release;
+		};
+		5111E163BDDEA3BB125B83D3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.plumpbug.homedashboard.uitests;
+				SDKROOT = appletvos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
+				TEST_TARGET_NAME = HomeDashboard;
 			};
 			name = Release;
 		};
@@ -320,6 +401,24 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TVOS_DEPLOYMENT_TARGET = 17.0;
+			};
+			name = Debug;
+		};
+		D3C0104FF410BD447415A5E6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.plumpbug.homedashboard.uitests;
+				SDKROOT = appletvos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
+				TEST_TARGET_NAME = HomeDashboard;
 			};
 			name = Debug;
 		};
@@ -424,6 +523,15 @@
 			buildConfigurations = (
 				B95AE3C0A6FEAC18257C4CF9 /* Debug */,
 				E3C84E43217A6758E1DF0218 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A5A944D916CC8EF48E37002D /* Build configuration list for PBXNativeTarget "HomeDashboardUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D3C0104FF410BD447415A5E6 /* Debug */,
+				5111E163BDDEA3BB125B83D3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

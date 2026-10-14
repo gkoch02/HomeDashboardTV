@@ -9,6 +9,12 @@ struct SettingsView: View {
     @State private var typedAddress = ""
     @State private var resolving: String?
     @State private var addressError: String?
+    @FocusState private var focus: Field?
+
+    /// The controls focus can be sent to by name.
+    enum Field: Hashable {
+        case layout(DashboardStore.Layout), pi(String), address, connect, demo, username, password, done
+    }
 
     var body: some View {
         @Bindable var store = store
@@ -29,6 +35,7 @@ struct SettingsView: View {
                             } label: {
                                 Label(layout.title, systemImage: store.layout == layout ? "checkmark.circle.fill" : "circle")
                             }
+                            .focused($focus, equals: .layout(layout))
                         }
                     }
                 }
@@ -46,6 +53,7 @@ struct SettingsView: View {
                             Label(resolving == found.name ? "\(found.name) — connecting…" : found.name,
                                   systemImage: "dot.radiowaves.left.and.right")
                         }
+                        .focused($focus, equals: .pi(found.name))
                     }
                 }
 
@@ -54,11 +62,14 @@ struct SettingsView: View {
                         TextField("dashboard.local:8080", text: $typedAddress)
                             .textContentType(.URL)
                             .frame(width: 640)
+                            .focused($focus, equals: .address)
                         Button("Connect") { connectTyped() }
+                            .focused($focus, equals: .connect)
                         Button("Demo data") {
                             store.connect(.demo)
                             store.settingsVisible = false
                         }
+                        .focused($focus, equals: .demo)
                     }
                     if let addressError {
                         Text(addressError).font(.system(size: 22)).foregroundStyle(.red)
@@ -69,25 +80,45 @@ struct SettingsView: View {
                     HStack(spacing: 24) {
                         TextField("Username", text: $store.username)
                             .frame(width: 360)
+                            .focused($focus, equals: .username)
                         SecureField("Password", text: $store.password)
                             .frame(width: 360)
+                            .focused($focus, equals: .password)
                     }
                 }
 
                 Button("Done") { store.settingsVisible = false }
                     .disabled(store.connection == nil)
+                    .focused($focus, equals: .done)
             }
             .padding(80)
             .frame(maxWidth: 1400, alignment: .leading)
+            .focusSection()
         }
         .onAppear {
             browser.start()
+            // The panel takes focus as it appears; nothing else will hand it over.
+            DispatchQueue.main.async { focus = initialFocus }
             if case let .server(url) = store.connection { typedAddress = url.host().map { "\($0):\(url.port ?? 8080)" } ?? "" }
+        }
+        .onChange(of: browser.found) { _, found in
+            // The first Pi to turn up is the likeliest choice on a first launch.
+            if store.connection == nil, focus == nil || focus == .address, let first = found.first {
+                focus = .pi(first.name)
+            }
         }
         .onDisappear { browser.stop() }
         .onExitCommand {
             if store.connection != nil { store.settingsVisible = false }
         }
+    }
+
+    /// Where focus lands when the panel opens: Done once a source is set, else the first Pi
+    /// found, else the address field.
+    private var initialFocus: Field {
+        if store.connection != nil { return .done }
+        if let first = browser.found.first { return .pi(first.name) }
+        return .address
     }
 
     private var status: String {

@@ -65,6 +65,22 @@ targets:
         TARGETED_DEVICE_FAMILY: "3"
         # Rendered by scripts/generate_brand_assets.py.
         ASSETCATALOG_COMPILER_APPICON_NAME: "App Icon & Top Shelf Image"
+  # Drives the app with the Siri Remote (XCUIRemote): focus is the one thing the simulator
+  # tools cannot exercise, and a panel the remote cannot reach is a dead app on a TV.
+  HomeDashboardUITests:
+    type: bundle.ui-testing
+    platform: tvOS
+    sources:
+      - path: HomeDashboardUITests
+    dependencies:
+      - target: HomeDashboard
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.plumpbug.homedashboard.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "3"
+        TEST_TARGET_NAME: HomeDashboard
 schemes:
   HomeDashboard:
     build:
@@ -74,3 +90,5 @@ schemes:
       config: Debug
     test:
       config: Debug
+      targets:
+        - HomeDashboardUITests

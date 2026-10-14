@@ -298,32 +298,25 @@ final class DashboardCoreTests: XCTestCase {
         XCTAssertFalse(Agenda.halftoneDay(from: s, now: date("2026-10-14T10:30:00-04:00")).isTomorrow)
     }
 
-    func testHalftoneSceneMapsIconsAndTones() {
+    func testWeatherSceneMapsIconsAndComposes() {
         let size = CGSize(width: 900, height: 640)
-        let clear = HalftoneScene(icon: "01d", size: size)
+        let clear = WeatherScene(icon: "01d", size: size)
         XCTAssertEqual(clear.kind, .clear)
         XCTAssertFalse(clear.night)
         let (c, r) = try! XCTUnwrap(clear.body)
-        XCTAssertLessThan(clear.tone(at: c), 0.1, "the sun's face is near paper")
         XCTAssertEqual(clear.rays.count, 12)
         let tips = clear.rays.map { hypot($0[1].x - c.x, $0[1].y - c.y) / r }
         XCTAssertEqual(tips.max() ?? 0, 1.9, accuracy: 0.001, "long rays")
         XCTAssertEqual(tips.min() ?? 0, 1.5, accuracy: 0.001, "short rays")
         let reach = clear.rays.flatMap { $0 }
         XCTAssertTrue(reach.allSatisfy { $0.x >= 0 && $0.y >= 0 && $0.x <= 900 && $0.y <= 640 }, "no ray leaves the pane")
-        XCTAssertTrue(HalftoneScene(icon: "01n", size: size).rays.isEmpty, "the moon has no rays")
-        XCTAssertEqual(HalftoneScene(icon: "10n", size: size).kind, .rain)
-        XCTAssertGreaterThan(HalftoneScene(icon: "01n", size: size).tone(at: CGPoint(x: 20, y: 20)), 0.7, "the night sky is dark")
-        XCTAssertNil(HalftoneScene(icon: "04d", size: size).body, "overcast hides the sun")
-        XCTAssertEqual(HalftoneScene(icon: "11d", size: size).bolt.count, 7)
-        for kind in HalftoneScene.Kind.allCases {
-            let scene = HalftoneScene(kind: kind, night: false, size: size)
-            for x in stride(from: 0.0, through: 900, by: 37) {
-                for y in stride(from: 0.0, through: 640, by: 41) {
-                    let t = scene.tone(at: CGPoint(x: x, y: y))
-                    XCTAssert((0...1).contains(t), "\(kind) tone \(t) out of range")
-                }
-            }
+        XCTAssertTrue(WeatherScene(icon: "01n", size: size).rays.isEmpty, "the moon has no rays")
+        XCTAssertEqual(WeatherScene(icon: "10n", size: size).kind, .rain)
+        XCTAssertNil(WeatherScene(icon: "04d", size: size).body, "overcast hides the sun")
+        XCTAssertEqual(WeatherScene(icon: "11d", size: size).bolt.count, 7)
+        for kind in WeatherScene.Kind.allCases {
+            let scene = WeatherScene(kind: kind, night: false, size: size)
+            XCTAssertTrue(scene.puffs.allSatisfy { $0.0.y - $0.1 > -size.height * 0.05 }, "\(kind): clouds stay in the pane")
         }
     }
 

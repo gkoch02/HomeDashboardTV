@@ -16,13 +16,14 @@ moon value (the `moon` block of `/api/dashboard`); the app only draws it.
 ![The Moon layout on an Apple TV, from HomeDashboard's dummy data](docs/moon.png)
 
 **Halftone** (settings → Show → Halftone) is the spiritual successor to the Pi's
-`halftone_agenda`: a print plate on warm newsprint, the weather engraving and its reading on
-the left, the day's agenda on the right. The engraving is a true halftone (round dots on a
-45° screen, sized by tone) of a scene for each kind of weather, printed in black plus two spot
-inks after the Pi's Inky palette: ochre for the sun, moon and lightning, red for the event in
-progress and the next one up. Elapsed events print through a fine dot screen, the Pi's
-perforated type; after sunset, once the day's events are over, the agenda rolls over to
-tomorrow, as on the Pi.
+`halftone_agenda`, as a dark plate for a big screen: the weather and its reading on the left,
+the day's agenda on the right, in cream type on warm charcoal with the Pi's Inky spot inks,
+ochre and red. The weather window is painted at full resolution: a sky for each kind of
+weather by day and night, a glowing sun, shaded cloud banks, rain, snow, lightning and mist,
+and at night the moon photograph at tonight's phase. The agenda keeps the Pi's treatments:
+elapsed events print through a fine dot screen (its perforated type), the one in progress is
+lifted, the next one carries a red tick, and after sunset, once the day's events are over, it
+rolls over to tomorrow.
 
 ![The Halftone layout, from HomeDashboard's dummy data](docs/halftone.png)
 
@@ -60,8 +61,8 @@ with no Pi at all. Click anywhere on the dashboard to come back to settings; Men
   `swift test` runs it on the Mac.
 - `HomeDashboardTV/App`: the polling store, Bonjour discovery and the Keychain.
 - `HomeDashboardTV/UI`: the dashboard, the halftone plate, the moon, and the settings panel.
-  The halftone scenes are tone fields in `DashboardCore` (`HalftoneScene`), so the view only
-  screens them; `docs/halftone-scenes.png` shows six of them.
+  The weather scenes' composition is `WeatherScene` in `DashboardCore`;
+  `docs/halftone-scenes.png` shows six of them.
 - `HomeDashboardTV/Resources/Fonts`: Cinzel, Cormorant Garamond, Manufacturing Consent,
   Righteous and DM Sans from HomeDashboard's `fonts/` (SIL OFL; each licence beside its font). The moon
   photograph (`MoonPhoto`) is the author's own full moon: the full-resolution original of

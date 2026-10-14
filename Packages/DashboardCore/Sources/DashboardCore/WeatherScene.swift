@@ -1,15 +1,12 @@
 import CoreGraphics
 import Foundation
 
-/// The weather illustration of the Halftone layout, as a tone field: ink coverage from 0
-/// (bare paper) to 1 (solid ink) at any point of the art pane.
-///
-/// The Pi's halftone themes draw a procedural scene per OWM icon and dither it. Here the
-/// scene is analytic, so the TV can screen it at any resolution: the view samples `tone(at:)`
-/// on a rotated grid and prints a dot whose area is the tone, an AM halftone. Linework that
-/// must stay crisp (the sun's rays and ring, the lightning, stars, flakes) is drawn as vectors
-/// on top; `body`, `rays` and `bolt` give their geometry.
-public struct HalftoneScene: Sendable, Equatable {
+/// The weather illustration of the Halftone layout, as geometry: where the sun or moon sits,
+/// its rays, the cloud banks, the lightning, and where rain and snow start. The view paints
+/// it (gradients, glows, the moon photograph); this decides the composition, so it can be
+/// tested and is the same at any screen size. Scenes follow the Pi's halftone themes: one per
+/// OWM icon kind, by day and by night.
+public struct WeatherScene: Sendable, Equatable {
     public enum Kind: String, Sendable, CaseIterable {
         case clear, fewClouds, clouds, overcast, rain, thunder, snow, mist
     }
@@ -116,85 +113,5 @@ public struct HalftoneScene: Sendable, Equatable {
             CGPoint(x: x + 0.10 * u, y: y + 0.14 * u), CGPoint(x: x + 0.03 * u, y: y + 0.14 * u),
             CGPoint(x: x + 0.09 * u, y: y),
         ]
-    }
-
-    // MARK: Tone
-
-    /// Ink coverage at *p* (pane coordinates, y down).
-    public func tone(at p: CGPoint) -> Double {
-        var t = sky(at: p)
-        if let (c, r) = body {
-            let d = hypot(p.x - c.x, p.y - c.y)
-            if d < r {
-                t = night ? moonDisc(p, c, r) : sunDisc(d, r)
-            }
-        }
-        if let cloud = cloudTone(at: p) { t = cloud }
-        if kind == .rain || kind == .thunder, p.y > cloudBase, rainStreak(p) {
-            t = max(t, 0.82)
-        }
-        return min(max(t, 0), 1)
-    }
-
-    /// The sky: a graded mid-tone by day, near-black by night, heavier under weather.
-    private func sky(at p: CGPoint) -> Double {
-        let y = Double(p.y / max(size.height, 1))
-        if night { return 0.86 - 0.16 * y }
-        switch kind {
-        case .clear, .fewClouds: return 0.40 - 0.28 * y
-        case .clouds: return 0.36 - 0.14 * y
-        case .mist:
-            let band = 0.5 + 0.5 * sin(Double(p.y) / Double(unit) * 26)
-            return 0.14 + 0.26 * band * (0.4 + 0.6 * y)
-        case .overcast, .snow: return 0.48 - 0.12 * y
-        case .rain: return 0.56 - 0.12 * y
-        case .thunder: return 0.68 - 0.10 * y
-        }
-    }
-
-    /// A lit disc: near paper at the centre, a little limb darkening.
-    private func sunDisc(_ d: CGFloat, _ r: CGFloat) -> Double {
-        let f = Double(d / r)
-        return 0.03 + 0.17 * f * f
-    }
-
-    /// The moon: lit, with maria as soft darker patches.
-    private func moonDisc(_ p: CGPoint, _ c: CGPoint, _ r: CGFloat) -> Double {
-        let maria: [(CGFloat, CGFloat, CGFloat)] = [(-0.30, -0.25, 0.32), (0.18, -0.18, 0.26), (-0.05, 0.22, 0.30), (0.35, 0.30, 0.18)]
-        var t = 0.06 + 0.14 * pow(Double(hypot(p.x - c.x, p.y - c.y) / r), 2)
-        for (mx, my, mr) in maria {
-            let d = hypot(p.x - (c.x + mx * r), p.y - (c.y + my * r)) / (mr * r)
-            if d < 1 { t += 0.26 * Double(1 - d * d) }
-        }
-        return t
-    }
-
-    /// Inside a cloud: lit from above, darker underneath, and heavier for rain and storms.
-    private func cloudTone(at p: CGPoint) -> Double? {
-        var inside: (CGPoint, CGFloat)?
-        for puff in puffs where hypot(p.x - puff.0.x, p.y - puff.0.y) < puff.1 {
-            inside = puff
-            break
-        }
-        guard let (c, r) = inside else { return nil }
-        let base: Double
-        switch kind {
-        case .rain: base = 0.24
-        case .thunder: base = 0.36
-        case .overcast, .snow: base = 0.14
-        default: base = night ? 0.30 : 0.04
-        }
-        let shade = Double(max(0, (p.y - (c.y - r)) / (2 * r)))
-        return base + 0.40 * pow(shade, 1.6)
-    }
-
-    /// Slanting rain, in broken streaks.
-    private func rainStreak(_ p: CGPoint) -> Bool {
-        let u = Double(unit)
-        let s = Double(p.x) + Double(p.y) * 0.32
-        let lane = s.truncatingRemainder(dividingBy: u * 0.055)
-        guard lane < u * 0.008 else { return false }
-        let seg = (Double(p.y) + floor(s / (u * 0.055)) * u * 0.031).truncatingRemainder(dividingBy: u * 0.11)
-        return seg < u * 0.07
     }
 }

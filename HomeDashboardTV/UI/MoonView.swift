@@ -9,10 +9,9 @@ import SwiftUI
 /// moonphase_panel.py`) and scaled to the screen, so the layout matches the panel and the
 /// type, set in the panel's own faces, stays sharp at 4K. All moon values come from the Pi's
 /// `moon` block; nothing astronomical is computed here.
-struct MoonView: View {
+struct MoonView: Theme {
     let snapshot: Snapshot
     let now: Date
-    let notice: String?
 
     private var zone: TimeZone { snapshot.timeZone }
 
@@ -24,7 +23,6 @@ struct MoonView: View {
                 if let moon = snapshot.moon {
                     plate(moon: moon, s: s)
                         .frame(width: 800 * s, height: 480 * s)
-                        .offset(BurnIn.drift(at: now))
                 } else {
                     Text("This dashboard's Pi does not send moon data yet.\nUpdate HomeDashboard on the Pi to show the moon.")
                         .font(.custom(MoonFace.body, size: 30).weight(.semibold))
@@ -34,21 +32,9 @@ struct MoonView: View {
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
         }
-        .background { Starfield().background(Color.black).ignoresSafeArea() }
-        .overlay(alignment: .topTrailing) {
-            if let notice {
-                Text(notice)
-                    .font(.system(size: 22, weight: .medium))
-                    .foregroundStyle(Palette.alert)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 10)
-                    .background(.black.opacity(0.6), in: Capsule())
-                    .padding(.top, 36)
-                    .padding(.trailing, 60)
-            }
-        }
-        .environment(\.timeZone, zone)
     }
+
+    var backdrop: some View { Starfield().background(Color.black) }
 
     private func plate(moon: Moon, s: CGFloat) -> some View {
         ZStack(alignment: .topLeading) {
@@ -201,81 +187,15 @@ struct MoonView: View {
 }
 
 /// The panel's faces, bundled from HomeDashboard's fonts/ (OFL).
-enum MoonFace {
+private enum MoonFace {
     static let caps = "Cinzel"
     static let body = "Cormorant Garamond"
     static let fraktur = "Manufacturing Consent"
 }
 
-enum MoonInk {
+private enum MoonInk {
     static let text = Color(white: 0.94)
     static let muted = Color(white: 0.74)
-}
-
-/// One disc: the photograph where the sun lights it, a faint (earthshine) copy elsewhere.
-struct MoonDisc: View {
-    let fraction: Double
-    let radius: CGFloat
-    var halo = false
-
-    /// How bright the unlit side's texture stays, as on the panel (`_EARTHSHINE_FACTOR`).
-    private static let earthshine = 0.12
-
-    var body: some View {
-        ZStack {
-            Color.black  // the disc is opaque: no star shows through the dark limb
-            photo.opacity(Self.earthshine)
-            photo.mask(LitShape(fraction: fraction))
-        }
-        .frame(width: radius * 2, height: radius * 2)
-        .clipShape(Circle())
-        .shadow(color: .white.opacity(halo ? 0.22 * MoonGeometry.litShare(fraction: fraction) : 0), radius: radius * 0.22)
-    }
-
-    private var photo: some View {
-        Image("MoonPhoto")
-            .resizable()
-            .interpolation(.high)
-            .antialiased(true)
-    }
-}
-
-/// The sunlit region of a disc filling the rect (`MoonGeometry.litOutline`).
-struct LitShape: Shape {
-    let fraction: Double
-
-    func path(in rect: CGRect) -> Path {
-        let points = MoonGeometry.litOutline(fraction: fraction)
-        guard let first = points.first else { return Path() }
-        let r = min(rect.width, rect.height) / 2
-        let centre = CGPoint(x: rect.midX, y: rect.midY)
-        func place(_ p: CGPoint) -> CGPoint { CGPoint(x: centre.x + p.x * r, y: centre.y + p.y * r) }
-        var path = Path()
-        path.move(to: place(first))
-        for point in points.dropFirst() { path.addLine(to: place(point)) }
-        path.closeSubpath()
-        return path
-    }
-}
-
-/// A fixed field of stars, the same every launch, kept faint so it never competes with the moon.
-private struct Starfield: View {
-    var body: some View {
-        Canvas { context, size in
-            var random = SplitMix(seed: 0x4D6F_6F6E)
-            for _ in 0..<220 {
-                let x = random.unit() * size.width
-                let y = random.unit() * size.height
-                let r = 0.6 + random.unit() * random.unit() * 2.2
-                let alpha = 0.15 + random.unit() * 0.55
-                context.fill(
-                    Path(ellipseIn: CGRect(x: x - r, y: y - r, width: r * 2, height: r * 2)),
-                    with: .color(.white.opacity(alpha))
-                )
-            }
-        }
-        .ignoresSafeArea()
-    }
 }
 
 /// Dots with a small four-point star every so often.
@@ -311,22 +231,4 @@ private struct DottedRule: View {
             }
         }
     }
-}
-
-/// A small deterministic generator, so the starfield never shifts between launches.
-private struct SplitMix {
-    var state: UInt64
-    init(seed: UInt64) { state = seed }
-    mutating func next() -> UInt64 {
-        state &+= 0x9E37_79B9_7F4A_7C15
-        var z = state
-        z = (z ^ (z >> 30)) &* 0xBF58_476D_1CE4_E5B9
-        z = (z ^ (z >> 27)) &* 0x94D0_49BB_1331_11EB
-        return z ^ (z >> 31)
-    }
-    mutating func unit() -> Double { Double(next() >> 11) / Double(1 << 53) }
-}
-
-extension Array {
-    subscript(safe index: Int) -> Element? { indices.contains(index) ? self[index] : nil }
 }

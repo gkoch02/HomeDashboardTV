@@ -79,6 +79,37 @@ final class HorizonTests: XCTestCase {
         XCTAssertEqual(sun.altitude(at: rise.addingTimeInterval(-1800)), -6, accuracy: 0.5)
     }
 
+    func testThePiSunBlockDrivesTheAltitude() throws {
+        let s = try snapshot()
+        let block = try XCTUnwrap(s.sun)
+        XCTAssertEqual(block.start, date("2026-10-14T00:00:00-04:00"))
+        XCTAssertEqual(block.stepMinutes, 15)
+        XCTAssertEqual(block.altitudes.count, 385)
+
+        let sun = SunModel(snapshot: s)
+        XCTAssertTrue(sun.isExact)
+        let tenAM = date("2026-10-14T10:00:00-04:00")
+        XCTAssertEqual(sun.altitude(at: tenAM), block.altitudes[40], accuracy: 1e-9)
+        let between = tenAM.addingTimeInterval(450)
+        XCTAssertEqual(sun.altitude(at: between), (block.altitudes[40] + block.altitudes[41]) / 2, accuracy: 1e-9)
+        // Past the samples, the arc.
+        let later = block.start.addingTimeInterval(5 * 86_400)
+        XCTAssertEqual(sun.altitude(at: later), sun.arcAltitude(at: later))
+
+        let noons = sun.noons(in: axis())
+        XCTAssertEqual(noons.map(\.time), block.noons.prefix(3).map(\.time))
+        XCTAssertEqual(noons[0].altitude, block.noons[0].altitude)
+        XCTAssertLessThan(noons[0].altitude, 50)  // October in New York, not the arc's 50°
+    }
+
+    func testTheDemoShiftCarriesTheSunBlock() throws {
+        let s = try snapshot()
+        let shifted = s.shiftedToToday(now: date("2026-10-20T09:00:00-04:00"))
+        XCTAssertEqual(shifted.sun?.start, date("2026-10-20T00:00:00-04:00"))
+        XCTAssertEqual(shifted.sun?.altitudes, s.sun?.altitudes)
+        XCTAssertEqual(shifted.sun?.noons.first?.time, s.sun?.noons.first?.time.addingTimeInterval(6 * 86_400))
+    }
+
     func testWithoutWeatherTheSunKeepsFixedHours() {
         let sun = SunModel(weather: nil, zone: newYork)
         XCTAssertEqual(sun.rise, 6.5)

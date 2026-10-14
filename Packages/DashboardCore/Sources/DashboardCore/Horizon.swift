@@ -125,20 +125,23 @@ public struct TimeAxis: Sendable, Equatable {
 
 // MARK: - The sun
 
-/// Solar altitude across the window, from the day's sunrise and sunset: the Pi's fallback when
-/// it has no coordinates (`altitude_fn`), a sine arc by day and a linear fall at night. The
-/// payload carries no coordinates, and this puts the twilights where they are, which is all
-/// the sky needs. Without sun times, 06:30 and 19:30.
+/// Solar altitude across the window. From the Pi's `sun` block when it sends one (it has
+/// coordinates): its samples, interpolated, and its solar noons. Otherwise the Pi's own
+/// fallback (`altitude_fn`): an arc between the day's sunrise and sunset, a sine by day and
+/// a linear fall at night, which puts the twilights where they are; without sun times,
+/// 06:30 and 19:30.
 public struct SunModel: Sendable, Equatable {
-    /// Local clock hours.
+    /// Local clock hours, for the fallback arc.
     public let rise: Double
     public let set: Double
     public let zone: TimeZone
-    /// The arc's height at noon, in degrees.
+    public let sun: Sun?
+    /// The fallback arc's height at noon, in degrees.
     static let peak = 50.0
 
-    public init(weather: Weather?, zone: TimeZone) {
+    public init(weather: Weather?, sun: Sun? = nil, zone: TimeZone) {
         self.zone = zone
+        self.sun = sun.flatMap { $0.altitudes.count >= 2 && $0.stepMinutes > 0 ? $0 : nil }
         let cal = Calendar.gregorian(zone)
         func clock(_ d: Date?) -> Double? {
             guard let d else { return nil }
@@ -154,8 +157,27 @@ public struct SunModel: Sendable, Equatable {
         }
     }
 
-    /// Degrees above the horizon at *t*.
+    public init(snapshot: Snapshot) {
+        self.init(weather: snapshot.sources.weather?.data, sun: snapshot.sun, zone: snapshot.timeZone)
+    }
+
+    /// Whether the altitudes are the Pi's, not the fallback arc.
+    public var isExact: Bool { sun != nil }
+
+    /// Degrees above the horizon at *t*: the Pi's samples where they reach, else the arc.
     public func altitude(at t: Date) -> Double {
+        if let sun {
+            let k = t.timeIntervalSince(sun.start) / Double(sun.stepMinutes * 60)
+            if k >= 0 && k <= Double(sun.altitudes.count - 1) {
+                let i = min(Int(k), sun.altitudes.count - 2)
+                let f = k - Double(i)
+                return sun.altitudes[i] + (sun.altitudes[i + 1] - sun.altitudes[i]) * f
+            }
+        }
+        return arcAltitude(at: t)
+    }
+
+    func arcAltitude(at t: Date) -> Double {
         let cal = Calendar.gregorian(zone)
         let c = cal.dateComponents([.hour, .minute, .second], from: t)
         let h = Double(c.hour ?? 0) + Double(c.minute ?? 0) / 60 + Double(c.second ?? 0) / 3600
@@ -166,8 +188,13 @@ public struct SunModel: Sendable, Equatable {
         return max(-40, -12 * dist)
     }
 
-    /// Each solar noon inside the window, with its altitude.
+    /// Each solar noon inside the window with the sun up, with its altitude.
     public func noons(in axis: TimeAxis) -> [(time: Date, altitude: Double)] {
+        if let sun {
+            return sun.noons
+                .filter { $0.time >= axis.start && $0.time <= axis.end && $0.altitude > 0 }
+                .map { ($0.time, $0.altitude) }
+        }
         var out: [(Date, Double)] = []
         var day = CivilDate(axis.start, in: zone)
         let last = CivilDate(axis.end, in: zone)

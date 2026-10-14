@@ -8,8 +8,9 @@ import SwiftUI
 /// sit below on the same hours. The conditions now and an outlook fill the left column.
 ///
 /// Laid out as the Pi's 1360x480 plate, with the TV's extra height given to the sky and the
-/// event lists. The model is `Horizon` in `DashboardCore`; the sun is its fallback arc from
-/// the day's sunrise and sunset, as the payload carries no coordinates. Type is the Pi's own:
+/// event lists. The model is `Horizon` in `DashboardCore`; the sun is the Pi's `sun` block,
+/// or without one (no coordinates, an older Pi) the arc between sunrise and sunset, as the
+/// panel falls back to. Type is the Pi's own:
 /// Big Shoulders Display for names and numbers, Figtree ExtraBold for events, DM Sans for
 /// labels.
 struct HorizonView: Theme {
@@ -111,7 +112,7 @@ private struct SkyModel: Equatable {
 
     init(snapshot: Snapshot, axis: TimeAxis, slots: [HorizonSlot]) {
         self.axis = axis
-        let sun = SunModel(weather: snapshot.sources.weather?.data, zone: axis.zone)
+        let sun = SunModel(snapshot: snapshot)
         self.sun = sun
         self.slots = slots
         extremes = Horizon.extremes(slots, axis: axis)

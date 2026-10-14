@@ -276,6 +276,57 @@ final class DashboardCoreTests: XCTestCase {
         XCTAssertEqual(shifted.moon?.next.date, CivilDate(year: 2026, month: 11, day: 1))
     }
 
+    // MARK: Halftone
+
+    func testHalftoneRollsOverOnlyAfterDuskWithNothingLeft() throws {
+        let s = try snapshot(events: [
+            event("Dinner", "2026-10-14T19:30:00-04:00", "2026-10-14T21:00:00-04:00"),
+            event("Breakfast", "2026-10-15T08:00:00-04:00", "2026-10-15T09:00:00-04:00"),
+        ])
+        // No weather, so dusk is 18:00. Before it: today.
+        XCTAssertFalse(Agenda.halftoneDay(from: s, now: date("2026-10-14T17:00:00-04:00")).isTomorrow)
+        // After dusk but dinner still on: today.
+        XCTAssertFalse(Agenda.halftoneDay(from: s, now: date("2026-10-14T20:00:00-04:00")).isTomorrow)
+        // After dusk and dinner done: tomorrow, with tomorrow's events.
+        let late = Agenda.halftoneDay(from: s, now: date("2026-10-14T21:30:00-04:00"))
+        XCTAssertTrue(late.isTomorrow)
+        XCTAssertEqual(late.day.events.map(\.summary), ["Breakfast"])
+    }
+
+    func testHalftoneDoesNotRollOverAtMiddayWhenTheDayIsDone() throws {
+        let s = try snapshot(events: [event("Standup", "2026-10-14T09:00:00-04:00", "2026-10-14T09:15:00-04:00")])
+        XCTAssertFalse(Agenda.halftoneDay(from: s, now: date("2026-10-14T10:30:00-04:00")).isTomorrow)
+    }
+
+    func testHalftoneSceneMapsIconsAndTones() {
+        let size = CGSize(width: 900, height: 640)
+        let clear = HalftoneScene(icon: "01d", size: size)
+        XCTAssertEqual(clear.kind, .clear)
+        XCTAssertFalse(clear.night)
+        let (c, r) = try! XCTUnwrap(clear.body)
+        XCTAssertLessThan(clear.tone(at: c), 0.1, "the sun's face is near paper")
+        XCTAssertEqual(clear.rays.count, 12)
+        let tips = clear.rays.map { hypot($0[1].x - c.x, $0[1].y - c.y) / r }
+        XCTAssertEqual(tips.max() ?? 0, 1.9, accuracy: 0.001, "long rays")
+        XCTAssertEqual(tips.min() ?? 0, 1.5, accuracy: 0.001, "short rays")
+        let reach = clear.rays.flatMap { $0 }
+        XCTAssertTrue(reach.allSatisfy { $0.x >= 0 && $0.y >= 0 && $0.x <= 900 && $0.y <= 640 }, "no ray leaves the pane")
+        XCTAssertTrue(HalftoneScene(icon: "01n", size: size).rays.isEmpty, "the moon has no rays")
+        XCTAssertEqual(HalftoneScene(icon: "10n", size: size).kind, .rain)
+        XCTAssertGreaterThan(HalftoneScene(icon: "01n", size: size).tone(at: CGPoint(x: 20, y: 20)), 0.7, "the night sky is dark")
+        XCTAssertNil(HalftoneScene(icon: "04d", size: size).body, "overcast hides the sun")
+        XCTAssertEqual(HalftoneScene(icon: "11d", size: size).bolt.count, 7)
+        for kind in HalftoneScene.Kind.allCases {
+            let scene = HalftoneScene(kind: kind, night: false, size: size)
+            for x in stride(from: 0.0, through: 900, by: 37) {
+                for y in stride(from: 0.0, through: 640, by: 41) {
+                    let t = scene.tone(at: CGPoint(x: x, y: y))
+                    XCTAssert((0...1).contains(t), "\(kind) tone \(t) out of range")
+                }
+            }
+        }
+    }
+
     func testWeatherSymbols() {
         XCTAssertEqual(WeatherSymbol.name(for: "01d"), "sun.max.fill")
         XCTAssertEqual(WeatherSymbol.name(for: "01n"), "moon.stars.fill")

@@ -10,11 +10,17 @@ import Observation
 @MainActor
 @Observable
 final class DashboardStore {
-    /// What the screen shows: the week, or the Pi's moonphase theme.
+    /// What the screen shows: the week, the Pi's moonphase theme, or its halftone agenda.
     enum Layout: String, CaseIterable {
-        case dashboard, moon
+        case dashboard, halftone, moon
 
-        var title: String { self == .dashboard ? "Dashboard" : "Moon" }
+        var title: String {
+            switch self {
+            case .dashboard: return "Dashboard"
+            case .halftone: return "Halftone"
+            case .moon: return "Moon"
+            }
+        }
     }
 
     enum Connection: Equatable {

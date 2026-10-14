@@ -43,6 +43,8 @@ struct DashboardScreen: View {
                     switch store.layout {
                     case .dashboard:
                         DashboardView(snapshot: snapshot, now: context.date, notice: notice(now: context.date))
+                    case .halftone:
+                        HalftoneView(snapshot: snapshot, now: context.date, notice: notice(now: context.date))
                     case .moon:
                         MoonView(snapshot: snapshot, now: context.date, notice: notice(now: context.date))
                     }

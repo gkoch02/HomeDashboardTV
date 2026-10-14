@@ -10,12 +10,16 @@
 		00B3C70A424BF2CD94123F64 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 708E7FA2EC39FD82617171C5 /* Keychain.swift */; };
 		18033621437C98349750E47C /* ManufacturingConsent-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5BCEA6F65BFB1AF66825E854 /* ManufacturingConsent-Regular.ttf */; };
 		1848039F6E75D7821BB4AFEB /* DMSans.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F7B2857FB7AFDA686A83D0B /* DMSans.ttf */; };
+		1D535A92E7CDDFD49C58C839 /* BigShouldersDisplay-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 76149526166AFF15A3A36459 /* BigShouldersDisplay-Black.ttf */; };
 		234A879AF993DBACD53A1C57 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2103C0B8C55F989AF037F3 /* Theme.swift */; };
+		323A78D9DFE43D04189A8C2C /* HorizonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB6C810B9D81A542EB0FA9F /* HorizonView.swift */; };
 		460AFA6DC7DC369E67096935 /* Cinzel.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 61DD62983158D3984EC63FFB /* Cinzel.ttf */; };
 		4743623BB70CE9459A0B24DD /* CormorantGaramond.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A68DDBCA1329C420B50A6188 /* CormorantGaramond.ttf */; };
 		48BB3B40E6E914FDBE11153A /* DashboardStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8986DA2F23A6044A8D92D3B4 /* DashboardStore.swift */; };
+		54F0157FE87CCD17BBC04712 /* Figtree-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8D623B4B66C03F6E41617CBC /* Figtree-ExtraBold.ttf */; };
 		60B9ABEACDE09E876B36F3F1 /* PiBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B3C54094507B36DC31C7C76 /* PiBrowser.swift */; };
 		7701A0FDED19BDD2E1A71CC9 /* WeatherArt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72F2A46DC8514A7232F59DA3 /* WeatherArt.swift */; };
+		77285EF0F0FD9A8ED107921F /* BigShouldersDisplay-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CED58FBF03979E34EA7C79D3 /* BigShouldersDisplay-ExtraBold.ttf */; };
 		7ABAC51A5C68DEC61FE7DBA5 /* SplitMix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6041939B5D7B3127401CA708 /* SplitMix.swift */; };
 		7E6CE2079A42A622309DEC52 /* DashboardScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4CAFF9985B9F380C5555D3D /* DashboardScreen.swift */; };
 		7E84F655354C4B325DAE7DF9 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 660A98750F7DEDD3E9B93FCE /* DashboardView.swift */; };
@@ -61,8 +65,11 @@
 		660A98750F7DEDD3E9B93FCE /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		708E7FA2EC39FD82617171C5 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
 		72F2A46DC8514A7232F59DA3 /* WeatherArt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherArt.swift; sourceTree = "<group>"; };
+		76149526166AFF15A3A36459 /* BigShouldersDisplay-Black.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "BigShouldersDisplay-Black.ttf"; sourceTree = "<group>"; };
 		7F7B2857FB7AFDA686A83D0B /* DMSans.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = DMSans.ttf; sourceTree = "<group>"; };
+		7FB6C810B9D81A542EB0FA9F /* HorizonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorizonView.swift; sourceTree = "<group>"; };
 		8986DA2F23A6044A8D92D3B4 /* DashboardStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardStore.swift; sourceTree = "<group>"; };
+		8D623B4B66C03F6E41617CBC /* Figtree-ExtraBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Figtree-ExtraBold.ttf"; sourceTree = "<group>"; };
 		9740313FCCA386C7F996F6FA /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		A4CAFF9985B9F380C5555D3D /* DashboardScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardScreen.swift; sourceTree = "<group>"; };
 		A68DDBCA1329C420B50A6188 /* CormorantGaramond.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = CormorantGaramond.ttf; sourceTree = "<group>"; };
@@ -70,6 +77,7 @@
 		BDBCC482A09982EB05EE52C5 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		C1E1BFF6FCCC998B7C7EC292 /* Starfield.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Starfield.swift; sourceTree = "<group>"; };
 		C73B1F8A158D7CE5DE173E01 /* DashboardCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = DashboardCore; path = Packages/DashboardCore; sourceTree = SOURCE_ROOT; };
+		CED58FBF03979E34EA7C79D3 /* BigShouldersDisplay-ExtraBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "BigShouldersDisplay-ExtraBold.ttf"; sourceTree = "<group>"; };
 		F2343E09D5ADE1C0F4096554 /* CormorantGaramond-Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "CormorantGaramond-Italic.ttf"; sourceTree = "<group>"; };
 		F31AD003A5C8873570D9A9F2 /* demo-snapshot.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "demo-snapshot.json"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -106,10 +114,13 @@
 		51176171595685C45C216FB2 /* Fonts */ = {
 			isa = PBXGroup;
 			children = (
+				76149526166AFF15A3A36459 /* BigShouldersDisplay-Black.ttf */,
+				CED58FBF03979E34EA7C79D3 /* BigShouldersDisplay-ExtraBold.ttf */,
 				61DD62983158D3984EC63FFB /* Cinzel.ttf */,
 				F2343E09D5ADE1C0F4096554 /* CormorantGaramond-Italic.ttf */,
 				A68DDBCA1329C420B50A6188 /* CormorantGaramond.ttf */,
 				7F7B2857FB7AFDA686A83D0B /* DMSans.ttf */,
+				8D623B4B66C03F6E41617CBC /* Figtree-ExtraBold.ttf */,
 				5BCEA6F65BFB1AF66825E854 /* ManufacturingConsent-Regular.ttf */,
 				24D3FE4C261142D9F0D912CA /* Righteous-Regular.ttf */,
 			);
@@ -151,6 +162,7 @@
 				1A7D3CB3930F0208F3F6CD8B /* AgendaPlateView.swift */,
 				A4CAFF9985B9F380C5555D3D /* DashboardScreen.swift */,
 				660A98750F7DEDD3E9B93FCE /* DashboardView.swift */,
+				7FB6C810B9D81A542EB0FA9F /* HorizonView.swift */,
 				10DA38EC1D96409C50598DB5 /* MoonView.swift */,
 				BDBCC482A09982EB05EE52C5 /* SettingsView.swift */,
 				4C2103C0B8C55F989AF037F3 /* Theme.swift */,
@@ -281,10 +293,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				E683ABB11290452C9675BF4E /* Assets.xcassets in Resources */,
+				1D535A92E7CDDFD49C58C839 /* BigShouldersDisplay-Black.ttf in Resources */,
+				77285EF0F0FD9A8ED107921F /* BigShouldersDisplay-ExtraBold.ttf in Resources */,
 				460AFA6DC7DC369E67096935 /* Cinzel.ttf in Resources */,
 				EB6312D619DA25549CF17252 /* CormorantGaramond-Italic.ttf in Resources */,
 				4743623BB70CE9459A0B24DD /* CormorantGaramond.ttf in Resources */,
 				1848039F6E75D7821BB4AFEB /* DMSans.ttf in Resources */,
+				54F0157FE87CCD17BBC04712 /* Figtree-ExtraBold.ttf in Resources */,
 				18033621437C98349750E47C /* ManufacturingConsent-Regular.ttf in Resources */,
 				D022FE87E73DB8C7AF8A49A8 /* PrivacyInfo.xcprivacy in Resources */,
 				F758B12F3C7CA752CF16F9D0 /* Righteous-Regular.ttf in Resources */,
@@ -312,6 +327,7 @@
 				48BB3B40E6E914FDBE11153A /* DashboardStore.swift in Sources */,
 				7E84F655354C4B325DAE7DF9 /* DashboardView.swift in Sources */,
 				F307849DC1335E469A4963A0 /* HomeDashboardApp.swift in Sources */,
+				323A78D9DFE43D04189A8C2C /* HorizonView.swift in Sources */,
 				00B3C70A424BF2CD94123F64 /* Keychain.swift in Sources */,
 				C5E2D782A5D8AF6532B9A6FA /* MoonDisc.swift in Sources */,
 				A702BE2F6D6D411D256D80BE /* MoonView.swift in Sources */,

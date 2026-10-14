@@ -10,16 +10,18 @@ import Observation
 @MainActor
 @Observable
 final class DashboardStore {
-    /// What the screen shows: the week, the day's agenda plate, or the Pi's moonphase theme.
+    /// What the screen shows: the week, the day's agenda plate, the Pi's moonphase theme, or
+    /// the next 72 hours on one axis.
     /// Each case is a `Theme`, drawn in `DashboardScreen.content`.
     enum Layout: String, CaseIterable {
-        case dashboard, agenda, moon
+        case dashboard, agenda, moon, horizon
 
         var title: String {
             switch self {
             case .dashboard: return "Dashboard"
             case .agenda: return "Agenda"
             case .moon: return "Moon"
+            case .horizon: return "Horizon"
             }
         }
 

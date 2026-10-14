@@ -50,8 +50,10 @@ with no Pi at all. Click anywhere on the dashboard to come back to settings; Men
 - `HomeDashboardTV/App`: the polling store, Bonjour discovery and the Keychain.
 - `HomeDashboardTV/UI`: the dashboard, the moon, and the settings panel.
 - `HomeDashboardTV/Resources/Fonts`: Cinzel, Cormorant Garamond and Manufacturing Consent
-  from HomeDashboard's `fonts/` (SIL OFL; each licence beside its font), and the moon
-  photograph (`MoonPhoto`) is HomeDashboard's `assets/moon_full.png`.
+  from HomeDashboard's `fonts/` (SIL OFL; each licence beside its font). The moon
+  photograph (`MoonPhoto`) is the author's own full moon: the full-resolution original of
+  the Pi's `assets/moon_full.png`, cropped to the disc at its native 1288 px with the
+  disc's levels stretched, enough for the hero moon at 4K without upscaling.
 - `HomeDashboardTV/Resources/demo-snapshot.json` and the test fixture are real output of the
   Pi's route over HomeDashboard's dummy data.
 

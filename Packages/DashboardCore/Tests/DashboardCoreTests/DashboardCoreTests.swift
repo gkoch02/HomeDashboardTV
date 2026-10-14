@@ -182,6 +182,29 @@ final class DashboardCoreTests: XCTestCase {
         XCTAssertEqual(authed.url?.absoluteString, "http://pi.local:8080/api/dashboard")
     }
 
+    func testAQIBandsFollowTheEPABreakpoints() throws {
+        func band(_ aqi: Int) throws -> AirQuality.Band {
+            let body = minimal(sources: [
+                "air_quality": ["fetched_at": "2026-10-14T09:00:00-04:00", "staleness": "fresh",
+                                "data": ["aqi": aqi, "category": "x", "pm25": 1.0]],
+            ])
+            return try XCTUnwrap(Snapshot.decode(json(body)).sources.airQuality?.data).band
+        }
+        XCTAssertEqual(try [0, 50, 51, 100, 101, 150, 151, 200, 201, 300, 301, 500].map(band),
+                       [.good, .good, .moderate, .moderate, .sensitive, .sensitive,
+                        .unhealthy, .unhealthy, .veryUnhealthy, .veryUnhealthy, .hazardous, .hazardous])
+    }
+
+    func testShortLocationIsTheFirstLine() throws {
+        let s = try snapshot(events: [
+            event("Faire", "2026-10-14T00:00:00-04:00", "2026-10-15T00:00:00-04:00", allDay: true)
+                .merging(["location": "Casa de Fruta\n10021 Pacheco Pass Hwy, Hollister"]) { $1 },
+            event("Call", "2026-10-14T09:00:00-04:00", "2026-10-14T10:00:00-04:00")
+                .merging(["location": "  \nZoom"]) { $1 },
+        ])
+        XCTAssertEqual(s.sources.events?.data?.map(\.shortLocation), ["Casa de Fruta", "Zoom"])
+    }
+
     func testWeatherSymbols() {
         XCTAssertEqual(WeatherSymbol.name(for: "01d"), "sun.max.fill")
         XCTAssertEqual(WeatherSymbol.name(for: "01n"), "moon.stars.fill")

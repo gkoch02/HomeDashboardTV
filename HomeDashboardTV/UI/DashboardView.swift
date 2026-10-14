@@ -1,18 +1,7 @@
 import DashboardCore
 import SwiftUI
 
-/// Moves the whole screen a few points every ten minutes, so an OLED set never holds one image.
-enum BurnIn {
-    /// Up to 10 points in each axis, a new spot every ten minutes.
-    static func drift(at now: Date) -> CGSize {
-        let slot = Int(now.timeIntervalSince1970 / 600)
-        let x = Double((slot * 7) % 21) - 10
-        let y = Double((slot * 13) % 21) - 10
-        return CGSize(width: x, height: y)
-    }
-}
-
-enum Palette {
+private enum Palette {
     static let night = Color(red: 0.05, green: 0.06, blue: 0.09)
     static let dusk = Color(red: 0.09, green: 0.12, blue: 0.20)
     static let day = Color(red: 0.13, green: 0.19, blue: 0.30)
@@ -28,12 +17,12 @@ enum Palette {
 /// large on the right with the next six days beneath it.
 ///
 /// Every time and day is the Pi's zone (`Snapshot.timeZone`), so the TV agrees with the panel.
-/// The content drifts a few points every ten minutes so an OLED set never holds one image.
 /// It fills the screen to a 56 x 44 pt margin, past tvOS's overscan safe area.
-struct DashboardView: View {
+struct DashboardView: Theme {
     let snapshot: Snapshot
     let now: Date
-    let notice: String?
+
+    static let fullBleed = true
 
     private var zone: TimeZone { snapshot.timeZone }
 
@@ -57,28 +46,12 @@ struct DashboardView: View {
         // margin still holds the burn-in drift (10 pt) clear of the edge.
         .padding(.horizontal, 56)
         .padding(.vertical, 44)
-        .offset(BurnIn.drift(at: now))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .ignoresSafeArea()
-        .background(sky)
-        .overlay(alignment: .topTrailing) {
-            if let notice {
-                Label(notice, systemImage: "exclamationmark.arrow.circlepath")
-                    .font(.system(size: 22, weight: .medium))
-                    .foregroundStyle(Palette.alert)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 10)
-                    .background(.black.opacity(0.45), in: Capsule())
-                    .padding(.top, 36)
-                    .padding(.trailing, 60)
-            }
-        }
-        .environment(\.timeZone, zone)
     }
 
     /// Day sky between sunrise and sunset, night sky otherwise, and dusk for the half hour
     /// either side. Without sun times (no weather) the night sky.
-    private var sky: some View {
+    var backdrop: some View {
         let top: Color
         if let rise = snapshot.sources.weather?.data?.sunrise,
            let set = snapshot.sources.weather?.data?.sunset {
@@ -96,7 +69,6 @@ struct DashboardView: View {
             top = Palette.night
         }
         return LinearGradient(colors: [top, Palette.night], startPoint: .top, endPoint: .bottom)
-            .ignoresSafeArea()
     }
 
     /// The Pi's sun times are for the day it fetched; carry them to *today* so a cache from

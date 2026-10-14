@@ -16,11 +16,11 @@
 		60B9ABEACDE09E876B36F3F1 /* PiBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B3C54094507B36DC31C7C76 /* PiBrowser.swift */; };
 		7E6CE2079A42A622309DEC52 /* DashboardScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4CAFF9985B9F380C5555D3D /* DashboardScreen.swift */; };
 		7E84F655354C4B325DAE7DF9 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 660A98750F7DEDD3E9B93FCE /* DashboardView.swift */; };
+		9645C744C0BB544F09B9A0CE /* AgendaPlateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A7D3CB3930F0208F3F6CD8B /* AgendaPlateView.swift */; };
 		A56CCAD2FA51F96FCACA8EED /* RemoteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5C83EE56FEAB64DF4BCEF1 /* RemoteTests.swift */; };
 		A702BE2F6D6D411D256D80BE /* MoonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10DA38EC1D96409C50598DB5 /* MoonView.swift */; };
 		B4314A66BEB07B6ADB8167FC /* demo-snapshot.json in Resources */ = {isa = PBXBuildFile; fileRef = F31AD003A5C8873570D9A9F2 /* demo-snapshot.json */; };
 		BB501FDE97EAB93BA7415424 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBCC482A09982EB05EE52C5 /* SettingsView.swift */; };
-		C4FFE54491385853A06B77A8 /* HalftoneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6CBA90C924CF230DC6D886D /* HalftoneView.swift */; };
 		D022FE87E73DB8C7AF8A49A8 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 9740313FCCA386C7F996F6FA /* PrivacyInfo.xcprivacy */; };
 		E683ABB11290452C9675BF4E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0A63BFA37FD3C74D01808FA4 /* Assets.xcassets */; };
 		EB6312D619DA25549CF17252 /* CormorantGaramond-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F2343E09D5ADE1C0F4096554 /* CormorantGaramond-Italic.ttf */; };
@@ -43,6 +43,7 @@
 		0A63BFA37FD3C74D01808FA4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0B3C54094507B36DC31C7C76 /* PiBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiBrowser.swift; sourceTree = "<group>"; };
 		10DA38EC1D96409C50598DB5 /* MoonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoonView.swift; sourceTree = "<group>"; };
+		1A7D3CB3930F0208F3F6CD8B /* AgendaPlateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgendaPlateView.swift; sourceTree = "<group>"; };
 		1D5C83EE56FEAB64DF4BCEF1 /* RemoteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteTests.swift; sourceTree = "<group>"; };
 		24D3FE4C261142D9F0D912CA /* Righteous-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Righteous-Regular.ttf"; sourceTree = "<group>"; };
 		53F9A78BB2607C29E062F3B0 /* HomeDashboardUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HomeDashboardUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -59,7 +60,6 @@
 		B11D136C433B5D7FD6C407D9 /* Home Dashboard.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "Home Dashboard.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		BDBCC482A09982EB05EE52C5 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		C73B1F8A158D7CE5DE173E01 /* DashboardCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = DashboardCore; path = Packages/DashboardCore; sourceTree = SOURCE_ROOT; };
-		D6CBA90C924CF230DC6D886D /* HalftoneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HalftoneView.swift; sourceTree = "<group>"; };
 		F2343E09D5ADE1C0F4096554 /* CormorantGaramond-Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "CormorantGaramond-Italic.ttf"; sourceTree = "<group>"; };
 		F31AD003A5C8873570D9A9F2 /* demo-snapshot.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "demo-snapshot.json"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -127,9 +127,9 @@
 		A2506F3F72054145456E54E1 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				1A7D3CB3930F0208F3F6CD8B /* AgendaPlateView.swift */,
 				A4CAFF9985B9F380C5555D3D /* DashboardScreen.swift */,
 				660A98750F7DEDD3E9B93FCE /* DashboardView.swift */,
-				D6CBA90C924CF230DC6D886D /* HalftoneView.swift */,
 				10DA38EC1D96409C50598DB5 /* MoonView.swift */,
 				BDBCC482A09982EB05EE52C5 /* SettingsView.swift */,
 			);
@@ -284,10 +284,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9645C744C0BB544F09B9A0CE /* AgendaPlateView.swift in Sources */,
 				7E6CE2079A42A622309DEC52 /* DashboardScreen.swift in Sources */,
 				48BB3B40E6E914FDBE11153A /* DashboardStore.swift in Sources */,
 				7E84F655354C4B325DAE7DF9 /* DashboardView.swift in Sources */,
-				C4FFE54491385853A06B77A8 /* HalftoneView.swift in Sources */,
 				F307849DC1335E469A4963A0 /* HomeDashboardApp.swift in Sources */,
 				00B3C70A424BF2CD94123F64 /* Keychain.swift in Sources */,
 				A702BE2F6D6D411D256D80BE /* MoonView.swift in Sources */,

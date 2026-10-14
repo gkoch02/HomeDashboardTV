@@ -1,7 +1,7 @@
 import CoreGraphics
 import Foundation
 
-/// The weather illustration of the Halftone layout, as geometry: where the sun or moon sits,
+/// The weather illustration of the Agenda layout, as geometry: where the sun or moon sits,
 /// its rays, the cloud banks, the lightning, and where rain and snow start. The view paints
 /// it (gradients, glows, the moon photograph); this decides the composition, so it can be
 /// tested and is the same at any screen size. Scenes follow the Pi's halftone themes: one per
@@ -83,7 +83,7 @@ public struct WeatherScene: Sendable, Equatable {
     }
 
     /// The sun's twelve rays, long and short in turn, as tapering wedges (none at night or
-    /// with the sun hidden). Drawn as vectors: a halftone screen cannot hold a thin taper.
+    /// with the sun hidden).
     public var rays: [[CGPoint]] {
         guard !night, let (c, r) = body else { return [] }
         return (0..<12).map { k in

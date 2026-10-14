@@ -276,26 +276,26 @@ final class DashboardCoreTests: XCTestCase {
         XCTAssertEqual(shifted.moon?.next.date, CivilDate(year: 2026, month: 11, day: 1))
     }
 
-    // MARK: Halftone
+    // MARK: Agenda layout
 
-    func testHalftoneRollsOverOnlyAfterDuskWithNothingLeft() throws {
+    func testAgendaRollsOverOnlyAfterDuskWithNothingLeft() throws {
         let s = try snapshot(events: [
             event("Dinner", "2026-10-14T19:30:00-04:00", "2026-10-14T21:00:00-04:00"),
             event("Breakfast", "2026-10-15T08:00:00-04:00", "2026-10-15T09:00:00-04:00"),
         ])
         // No weather, so dusk is 18:00. Before it: today.
-        XCTAssertFalse(Agenda.halftoneDay(from: s, now: date("2026-10-14T17:00:00-04:00")).isTomorrow)
+        XCTAssertFalse(Agenda.rolloverDay(from: s, now: date("2026-10-14T17:00:00-04:00")).isTomorrow)
         // After dusk but dinner still on: today.
-        XCTAssertFalse(Agenda.halftoneDay(from: s, now: date("2026-10-14T20:00:00-04:00")).isTomorrow)
+        XCTAssertFalse(Agenda.rolloverDay(from: s, now: date("2026-10-14T20:00:00-04:00")).isTomorrow)
         // After dusk and dinner done: tomorrow, with tomorrow's events.
-        let late = Agenda.halftoneDay(from: s, now: date("2026-10-14T21:30:00-04:00"))
+        let late = Agenda.rolloverDay(from: s, now: date("2026-10-14T21:30:00-04:00"))
         XCTAssertTrue(late.isTomorrow)
         XCTAssertEqual(late.day.events.map(\.summary), ["Breakfast"])
     }
 
-    func testHalftoneDoesNotRollOverAtMiddayWhenTheDayIsDone() throws {
+    func testAgendaDoesNotRollOverAtMiddayWhenTheDayIsDone() throws {
         let s = try snapshot(events: [event("Standup", "2026-10-14T09:00:00-04:00", "2026-10-14T09:15:00-04:00")])
-        XCTAssertFalse(Agenda.halftoneDay(from: s, now: date("2026-10-14T10:30:00-04:00")).isTomorrow)
+        XCTAssertFalse(Agenda.rolloverDay(from: s, now: date("2026-10-14T10:30:00-04:00")).isTomorrow)
     }
 
     func testWeatherSceneMapsIconsAndComposes() {

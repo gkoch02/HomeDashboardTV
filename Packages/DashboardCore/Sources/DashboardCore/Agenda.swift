@@ -51,13 +51,13 @@ public enum Agenda {
 }
 
 extension Agenda {
-    /// The day the Halftone agenda shows: today, or tomorrow once today is done.
+    /// The day the Agenda layout shows: today, or tomorrow once today is done.
     ///
     /// The Pi's `day_arc_panel.agenda_day`: it rolls over only when every timed event today
     /// has ended (a day with none counts) *and* it is past sunset, or 18:00 without a sunset.
     /// Either alone is wrong: the last meeting ending at 10:30 is not the day's end, and
     /// sunset alone would pull a 19:30 dinner off the screen while it was happening.
-    public static func halftoneDay(from snapshot: Snapshot, now: Date) -> (day: AgendaDay, isTomorrow: Bool) {
+    public static func rolloverDay(from snapshot: Snapshot, now: Date) -> (day: AgendaDay, isTomorrow: Bool) {
         let zone = snapshot.timeZone
         let days = Self.days(from: snapshot, now: now, count: 2)
         let today = days[0]

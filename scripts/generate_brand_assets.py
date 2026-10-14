@@ -4,7 +4,7 @@
     python3 scripts/generate_brand_assets.py
 
 The icon is the dashboard in one picture, in the app's own colours: a wall-calendar page
-(front layer) with today's square in amber, over an amber sun (middle layer), on the app's
+(front layer) showing one week as the app does, today's column in amber, over an amber sun (middle layer), on the app's
 night-to-day sky (back layer). The parallax tilt slides the page across the sun. No text,
 so it stays sharp at every size and in every language.
 
@@ -128,21 +128,29 @@ def icon_layers(width: int, height: int) -> dict[str, Image.Image]:
             11 * s,
             fill=RING + (255,),
         )
-    # The week grid: 7 columns by 3 rows, today's square in amber.
-    cols, rows = 7, 3
-    gx0, gy0, gx1, gy1 = 212, 228, 536, 386
-    gap = 12
+    # The week, as the app shows it: seven day columns with a few events in each, today's
+    # in amber.
+    cols = 7
+    gx0, gy0, gx1, gy1 = 212, 222, 536, 388
+    gap = 10
     cw = (gx1 - gx0 - gap * (cols - 1)) / cols
-    ch = (gy1 - gy0 - gap * (rows - 1)) / rows
-    for r in range(rows):
-        for c in range(cols):
-            x = gx0 + c * (cw + gap)
-            y = gy0 + r * (ch + gap)
-            today = (r, c) == (1, 3)
+    events = (2, 3, 1, 3, 2, 1, 2)
+    today = 3
+    for c in range(cols):
+        x = gx0 + c * (cw + gap)
+        lit = c == today
+        d.rounded_rectangle(
+            [x * s, gy0 * s, (x + cw) * s, gy1 * s],
+            9 * s,
+            fill=(AMBER_DEEP if lit else GRID) + (255,),
+        )
+        bar = ((255, 236, 200) if lit else (164, 172, 188)) + (255,)
+        for e in range(events[c]):
+            y = gy0 + 16 + e * 26
             d.rounded_rectangle(
-                [x * s, y * s, (x + cw) * s, (y + ch) * s],
-                9 * s,
-                fill=(AMBER_DEEP if today else GRID) + (255,),
+                [(x + 7) * s, y * s, (x + cw - 7) * s, (y + 14) * s],
+                5 * s,
+                fill=bar,
             )
 
     return {name: finish(layer, width, height) for name, layer in

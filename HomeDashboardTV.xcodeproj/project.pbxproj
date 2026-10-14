@@ -1,0 +1,420 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		00B3C70A424BF2CD94123F64 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 708E7FA2EC39FD82617171C5 /* Keychain.swift */; };
+		48BB3B40E6E914FDBE11153A /* DashboardStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8986DA2F23A6044A8D92D3B4 /* DashboardStore.swift */; };
+		60B9ABEACDE09E876B36F3F1 /* PiBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B3C54094507B36DC31C7C76 /* PiBrowser.swift */; };
+		7E6CE2079A42A622309DEC52 /* DashboardScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4CAFF9985B9F380C5555D3D /* DashboardScreen.swift */; };
+		7E84F655354C4B325DAE7DF9 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 660A98750F7DEDD3E9B93FCE /* DashboardView.swift */; };
+		B4314A66BEB07B6ADB8167FC /* demo-snapshot.json in Resources */ = {isa = PBXBuildFile; fileRef = F31AD003A5C8873570D9A9F2 /* demo-snapshot.json */; };
+		BB501FDE97EAB93BA7415424 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBCC482A09982EB05EE52C5 /* SettingsView.swift */; };
+		D022FE87E73DB8C7AF8A49A8 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 9740313FCCA386C7F996F6FA /* PrivacyInfo.xcprivacy */; };
+		E683ABB11290452C9675BF4E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0A63BFA37FD3C74D01808FA4 /* Assets.xcassets */; };
+		EEC06FB2796AB38DD2F6D063 /* DashboardCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3298B6D11AB4D038081715DC /* DashboardCore */; };
+		F307849DC1335E469A4963A0 /* HomeDashboardApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63DD5EE230242228C007145D /* HomeDashboardApp.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0A63BFA37FD3C74D01808FA4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		0B3C54094507B36DC31C7C76 /* PiBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiBrowser.swift; sourceTree = "<group>"; };
+		63DD5EE230242228C007145D /* HomeDashboardApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeDashboardApp.swift; sourceTree = "<group>"; };
+		660A98750F7DEDD3E9B93FCE /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		708E7FA2EC39FD82617171C5 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
+		8986DA2F23A6044A8D92D3B4 /* DashboardStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardStore.swift; sourceTree = "<group>"; };
+		9740313FCCA386C7F996F6FA /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		A4CAFF9985B9F380C5555D3D /* DashboardScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardScreen.swift; sourceTree = "<group>"; };
+		B11D136C433B5D7FD6C407D9 /* Home Dashboard.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "Home Dashboard.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		BDBCC482A09982EB05EE52C5 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		C73B1F8A158D7CE5DE173E01 /* DashboardCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = DashboardCore; path = Packages/DashboardCore; sourceTree = SOURCE_ROOT; };
+		F31AD003A5C8873570D9A9F2 /* demo-snapshot.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "demo-snapshot.json"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		CF55BBDFE7D9EEF06CDA4ECE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EEC06FB2796AB38DD2F6D063 /* DashboardCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		053C1BD7847BD27195E0E9B4 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				C73B1F8A158D7CE5DE173E01 /* DashboardCore */,
+			);
+			path = Packages;
+			sourceTree = "<group>";
+		};
+		177C3E4F5ABEFD3B526E3F56 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B11D136C433B5D7FD6C407D9 /* Home Dashboard.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		8435F5BBC9087767063A50A3 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				0A63BFA37FD3C74D01808FA4 /* Assets.xcassets */,
+				F31AD003A5C8873570D9A9F2 /* demo-snapshot.json */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		A2506F3F72054145456E54E1 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				A4CAFF9985B9F380C5555D3D /* DashboardScreen.swift */,
+				660A98750F7DEDD3E9B93FCE /* DashboardView.swift */,
+				BDBCC482A09982EB05EE52C5 /* SettingsView.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		B518798CA5BBD4BDF9F84D27 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				8986DA2F23A6044A8D92D3B4 /* DashboardStore.swift */,
+				63DD5EE230242228C007145D /* HomeDashboardApp.swift */,
+				708E7FA2EC39FD82617171C5 /* Keychain.swift */,
+				0B3C54094507B36DC31C7C76 /* PiBrowser.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		E41374EF0FAE5A64D98DE0B1 = {
+			isa = PBXGroup;
+			children = (
+				E60E330D634A2C6AA113C70F /* HomeDashboardTV */,
+				053C1BD7847BD27195E0E9B4 /* Packages */,
+				177C3E4F5ABEFD3B526E3F56 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E60E330D634A2C6AA113C70F /* HomeDashboardTV */ = {
+			isa = PBXGroup;
+			children = (
+				9740313FCCA386C7F996F6FA /* PrivacyInfo.xcprivacy */,
+				B518798CA5BBD4BDF9F84D27 /* App */,
+				8435F5BBC9087767063A50A3 /* Resources */,
+				A2506F3F72054145456E54E1 /* UI */,
+			);
+			path = HomeDashboardTV;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		59B6F95BBAEF30F318F97A34 /* HomeDashboard */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3E80956CFDE3DBDD080A0A17 /* Build configuration list for PBXNativeTarget "HomeDashboard" */;
+			buildPhases = (
+				332729B340729CC4D391C2DE /* Sources */,
+				3028E9752B7034B37E25C8AD /* Resources */,
+				CF55BBDFE7D9EEF06CDA4ECE /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HomeDashboard;
+			packageProductDependencies = (
+				3298B6D11AB4D038081715DC /* DashboardCore */,
+			);
+			productName = HomeDashboard;
+			productReference = B11D136C433B5D7FD6C407D9 /* Home Dashboard.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		80C8068411EEFD62C88B5E8B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2700;
+				TargetAttributes = {
+					59B6F95BBAEF30F318F97A34 = {
+						DevelopmentTeam = FGG98L437R;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 7F89048E6C593A207A3CA2DF /* Build configuration list for PBXProject "HomeDashboardTV" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = E41374EF0FAE5A64D98DE0B1;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				F8C8FB2521571A186EE3C1AA /* XCLocalSwiftPackageReference "Packages/DashboardCore" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 177C3E4F5ABEFD3B526E3F56 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				59B6F95BBAEF30F318F97A34 /* HomeDashboard */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		3028E9752B7034B37E25C8AD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E683ABB11290452C9675BF4E /* Assets.xcassets in Resources */,
+				D022FE87E73DB8C7AF8A49A8 /* PrivacyInfo.xcprivacy in Resources */,
+				B4314A66BEB07B6ADB8167FC /* demo-snapshot.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		332729B340729CC4D391C2DE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7E6CE2079A42A622309DEC52 /* DashboardScreen.swift in Sources */,
+				48BB3B40E6E914FDBE11153A /* DashboardStore.swift in Sources */,
+				7E84F655354C4B325DAE7DF9 /* DashboardView.swift in Sources */,
+				F307849DC1335E469A4963A0 /* HomeDashboardApp.swift in Sources */,
+				00B3C70A424BF2CD94123F64 /* Keychain.swift in Sources */,
+				60B9ABEACDE09E876B36F3F1 /* PiBrowser.swift in Sources */,
+				BB501FDE97EAB93BA7415424 /* SettingsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		4EE1466125F8A7F5411FDF7B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HomeDashboardTV/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Home Dashboard";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.plumpbug.homedashboard;
+				PRODUCT_NAME = "Home Dashboard";
+				SDKROOT = appletvos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
+			};
+			name = Release;
+		};
+		B95AE3C0A6FEAC18257C4CF9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = FGG98L437R;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TVOS_DEPLOYMENT_TARGET = 17.0;
+			};
+			name = Debug;
+		};
+		E3C84E43217A6758E1DF0218 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = FGG98L437R;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TVOS_DEPLOYMENT_TARGET = 17.0;
+			};
+			name = Release;
+		};
+		E95DA14E05C479350AC78B26 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HomeDashboardTV/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Home Dashboard";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.plumpbug.homedashboard;
+				PRODUCT_NAME = "Home Dashboard";
+				SDKROOT = appletvos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3E80956CFDE3DBDD080A0A17 /* Build configuration list for PBXNativeTarget "HomeDashboard" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E95DA14E05C479350AC78B26 /* Debug */,
+				4EE1466125F8A7F5411FDF7B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		7F89048E6C593A207A3CA2DF /* Build configuration list for PBXProject "HomeDashboardTV" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B95AE3C0A6FEAC18257C4CF9 /* Debug */,
+				E3C84E43217A6758E1DF0218 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		F8C8FB2521571A186EE3C1AA /* XCLocalSwiftPackageReference "Packages/DashboardCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/DashboardCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3298B6D11AB4D038081715DC /* DashboardCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DashboardCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 80C8068411EEFD62C88B5E8B /* Project object */;
+}

@@ -7,6 +7,14 @@ draws it natively at TV resolution, with no e-ink pixels and no credentials on t
 
 ![The dashboard on an Apple TV 4K, from HomeDashboard's dummy data](docs/dashboard.png)
 
+**Moon** (settings → Show → Moon) is the Pi's `moonphase_photo` theme, drawn natively: today's
+moon from the photograph, cut by the true terminator with a faint earthshine copy on the dark
+side, three days either side, then moonrise and moonset, sunrise, sunset and the weather, the
+next full or new moon, and the panel's quote, in the panel's own faces. The Pi computes every
+moon value (the `moon` block of `/api/dashboard`); the app only draws it.
+
+![The Moon layout on an Apple TV, from HomeDashboard's dummy data](docs/moon.png)
+
 ## What the TV needs
 
 - The Pi's web UI running, with HomeDashboard 6.2 or later (the `/api/dashboard` route):
@@ -40,7 +48,10 @@ with no Pi at all. Click anywhere on the dashboard to come back to settings; Men
   agenda (events per day in the Pi's zone), the HTTP client and the demo-data shift. No UI;
   `swift test` runs it on the Mac.
 - `HomeDashboardTV/App`: the polling store, Bonjour discovery and the Keychain.
-- `HomeDashboardTV/UI`: the dashboard and the settings panel.
+- `HomeDashboardTV/UI`: the dashboard, the moon, and the settings panel.
+- `HomeDashboardTV/Resources/Fonts`: Cinzel, Cormorant Garamond and Manufacturing Consent
+  from HomeDashboard's `fonts/` (SIL OFL; each licence beside its font), and the moon
+  photograph (`MoonPhoto`) is HomeDashboard's `assets/moon_full.png`.
 - `HomeDashboardTV/Resources/demo-snapshot.json` and the test fixture are real output of the
   Pi's route over HomeDashboard's dummy data.
 
@@ -69,7 +80,8 @@ xcodegen
 cd Packages/DashboardCore && swift test
 ```
 
-In the simulator, `-server <address>` or `-demo YES` sets the source for one run:
+In the simulator, `-server <address>` or `-demo YES` sets the source for one run, and
+`-layout moon` the layout:
 
 ```bash
 xcrun simctl launch booted dev.plumpbug.homedashboard -server 127.0.0.1:8080

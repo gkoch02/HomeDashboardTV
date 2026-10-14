@@ -21,6 +21,18 @@ struct SettingsView: View {
                     .font(.system(size: 26))
                     .foregroundStyle(.secondary)
 
+                Section("Show") {
+                    HStack(spacing: 24) {
+                        ForEach(DashboardStore.Layout.allCases, id: \.self) { layout in
+                            Button {
+                                store.layout = layout
+                            } label: {
+                                Label(layout.title, systemImage: store.layout == layout ? "checkmark.circle.fill" : "circle")
+                            }
+                        }
+                    }
+                }
+
                 Section("On this network") {
                     if browser.found.isEmpty {
                         Text("Looking for dashboards… (the Pi advertises itself after `make web-enable`)")

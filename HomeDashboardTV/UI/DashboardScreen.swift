@@ -10,7 +10,12 @@ struct DashboardScreen: View {
         ZStack {
             TimelineView(.everyMinute) { context in
                 if let snapshot = store.snapshot {
-                    DashboardView(snapshot: snapshot, now: context.date, notice: notice(now: context.date))
+                    switch store.layout {
+                    case .dashboard:
+                        DashboardView(snapshot: snapshot, now: context.date, notice: notice(now: context.date))
+                    case .moon:
+                        MoonView(snapshot: snapshot, now: context.date, notice: notice(now: context.date))
+                    }
                 } else if store.connection != nil {
                     Waiting(problem: store.problem)
                 }

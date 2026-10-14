@@ -10,6 +10,13 @@ import Observation
 @MainActor
 @Observable
 final class DashboardStore {
+    /// What the screen shows: the week, or the Pi's moonphase theme.
+    enum Layout: String, CaseIterable {
+        case dashboard, moon
+
+        var title: String { self == .dashboard ? "Dashboard" : "Moon" }
+    }
+
     enum Connection: Equatable {
         case demo
         case server(URL)
@@ -21,6 +28,10 @@ final class DashboardStore {
     private(set) var problem: String?
     private(set) var failingSince: Date?
     var settingsVisible = false
+
+    var layout: Layout {
+        didSet { defaults.set(layout.rawValue, forKey: Keys.layout) }
+    }
 
     var username: String {
         didSet { defaults.set(username, forKey: Keys.username) }
@@ -39,10 +50,13 @@ final class DashboardStore {
     private enum Keys {
         static let connection = "connection"
         static let username = "username"
+        static let layout = "layout"
     }
 
     init() {
         username = defaults.string(forKey: Keys.username) ?? "admin"
+        // `-layout moon` sets it for a run too, since launch arguments land in UserDefaults.
+        layout = defaults.string(forKey: Keys.layout).flatMap(Layout.init(rawValue:)) ?? .dashboard
         password = Keychain.password ?? ""
         // `-demo YES` and `-server <url>` set the source for a run (screenshots, the simulator).
         if defaults.bool(forKey: "demo") {

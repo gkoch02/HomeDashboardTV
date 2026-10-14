@@ -8,14 +8,19 @@
 
 /* Begin PBXBuildFile section */
 		00B3C70A424BF2CD94123F64 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 708E7FA2EC39FD82617171C5 /* Keychain.swift */; };
+		18033621437C98349750E47C /* ManufacturingConsent-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5BCEA6F65BFB1AF66825E854 /* ManufacturingConsent-Regular.ttf */; };
+		460AFA6DC7DC369E67096935 /* Cinzel.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 61DD62983158D3984EC63FFB /* Cinzel.ttf */; };
+		4743623BB70CE9459A0B24DD /* CormorantGaramond.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A68DDBCA1329C420B50A6188 /* CormorantGaramond.ttf */; };
 		48BB3B40E6E914FDBE11153A /* DashboardStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8986DA2F23A6044A8D92D3B4 /* DashboardStore.swift */; };
 		60B9ABEACDE09E876B36F3F1 /* PiBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B3C54094507B36DC31C7C76 /* PiBrowser.swift */; };
 		7E6CE2079A42A622309DEC52 /* DashboardScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4CAFF9985B9F380C5555D3D /* DashboardScreen.swift */; };
 		7E84F655354C4B325DAE7DF9 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 660A98750F7DEDD3E9B93FCE /* DashboardView.swift */; };
+		A702BE2F6D6D411D256D80BE /* MoonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10DA38EC1D96409C50598DB5 /* MoonView.swift */; };
 		B4314A66BEB07B6ADB8167FC /* demo-snapshot.json in Resources */ = {isa = PBXBuildFile; fileRef = F31AD003A5C8873570D9A9F2 /* demo-snapshot.json */; };
 		BB501FDE97EAB93BA7415424 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBCC482A09982EB05EE52C5 /* SettingsView.swift */; };
 		D022FE87E73DB8C7AF8A49A8 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 9740313FCCA386C7F996F6FA /* PrivacyInfo.xcprivacy */; };
 		E683ABB11290452C9675BF4E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0A63BFA37FD3C74D01808FA4 /* Assets.xcassets */; };
+		EB6312D619DA25549CF17252 /* CormorantGaramond-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F2343E09D5ADE1C0F4096554 /* CormorantGaramond-Italic.ttf */; };
 		EEC06FB2796AB38DD2F6D063 /* DashboardCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3298B6D11AB4D038081715DC /* DashboardCore */; };
 		F307849DC1335E469A4963A0 /* HomeDashboardApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63DD5EE230242228C007145D /* HomeDashboardApp.swift */; };
 /* End PBXBuildFile section */
@@ -23,15 +28,20 @@
 /* Begin PBXFileReference section */
 		0A63BFA37FD3C74D01808FA4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0B3C54094507B36DC31C7C76 /* PiBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiBrowser.swift; sourceTree = "<group>"; };
+		10DA38EC1D96409C50598DB5 /* MoonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoonView.swift; sourceTree = "<group>"; };
+		5BCEA6F65BFB1AF66825E854 /* ManufacturingConsent-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "ManufacturingConsent-Regular.ttf"; sourceTree = "<group>"; };
+		61DD62983158D3984EC63FFB /* Cinzel.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Cinzel.ttf; sourceTree = "<group>"; };
 		63DD5EE230242228C007145D /* HomeDashboardApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeDashboardApp.swift; sourceTree = "<group>"; };
 		660A98750F7DEDD3E9B93FCE /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		708E7FA2EC39FD82617171C5 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
 		8986DA2F23A6044A8D92D3B4 /* DashboardStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardStore.swift; sourceTree = "<group>"; };
 		9740313FCCA386C7F996F6FA /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		A4CAFF9985B9F380C5555D3D /* DashboardScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardScreen.swift; sourceTree = "<group>"; };
+		A68DDBCA1329C420B50A6188 /* CormorantGaramond.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = CormorantGaramond.ttf; sourceTree = "<group>"; };
 		B11D136C433B5D7FD6C407D9 /* Home Dashboard.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "Home Dashboard.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		BDBCC482A09982EB05EE52C5 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		C73B1F8A158D7CE5DE173E01 /* DashboardCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = DashboardCore; path = Packages/DashboardCore; sourceTree = SOURCE_ROOT; };
+		F2343E09D5ADE1C0F4096554 /* CormorantGaramond-Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "CormorantGaramond-Italic.ttf"; sourceTree = "<group>"; };
 		F31AD003A5C8873570D9A9F2 /* demo-snapshot.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "demo-snapshot.json"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -63,11 +73,23 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		51176171595685C45C216FB2 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				61DD62983158D3984EC63FFB /* Cinzel.ttf */,
+				F2343E09D5ADE1C0F4096554 /* CormorantGaramond-Italic.ttf */,
+				A68DDBCA1329C420B50A6188 /* CormorantGaramond.ttf */,
+				5BCEA6F65BFB1AF66825E854 /* ManufacturingConsent-Regular.ttf */,
+			);
+			path = Fonts;
+			sourceTree = "<group>";
+		};
 		8435F5BBC9087767063A50A3 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
 				0A63BFA37FD3C74D01808FA4 /* Assets.xcassets */,
 				F31AD003A5C8873570D9A9F2 /* demo-snapshot.json */,
+				51176171595685C45C216FB2 /* Fonts */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -77,6 +99,7 @@
 			children = (
 				A4CAFF9985B9F380C5555D3D /* DashboardScreen.swift */,
 				660A98750F7DEDD3E9B93FCE /* DashboardView.swift */,
+				10DA38EC1D96409C50598DB5 /* MoonView.swift */,
 				BDBCC482A09982EB05EE52C5 /* SettingsView.swift */,
 			);
 			path = UI;
@@ -179,6 +202,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				E683ABB11290452C9675BF4E /* Assets.xcassets in Resources */,
+				460AFA6DC7DC369E67096935 /* Cinzel.ttf in Resources */,
+				EB6312D619DA25549CF17252 /* CormorantGaramond-Italic.ttf in Resources */,
+				4743623BB70CE9459A0B24DD /* CormorantGaramond.ttf in Resources */,
+				18033621437C98349750E47C /* ManufacturingConsent-Regular.ttf in Resources */,
 				D022FE87E73DB8C7AF8A49A8 /* PrivacyInfo.xcprivacy in Resources */,
 				B4314A66BEB07B6ADB8167FC /* demo-snapshot.json in Resources */,
 			);
@@ -196,6 +223,7 @@
 				7E84F655354C4B325DAE7DF9 /* DashboardView.swift in Sources */,
 				F307849DC1335E469A4963A0 /* HomeDashboardApp.swift in Sources */,
 				00B3C70A424BF2CD94123F64 /* Keychain.swift in Sources */,
+				A702BE2F6D6D411D256D80BE /* MoonView.swift in Sources */,
 				60B9ABEACDE09E876B36F3F1 /* PiBrowser.swift in Sources */,
 				BB501FDE97EAB93BA7415424 /* SettingsView.swift in Sources */,
 			);

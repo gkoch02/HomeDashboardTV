@@ -29,6 +29,13 @@
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Home Dashboard finds your dashboard's Raspberry Pi on your network and reads its calendar and weather from it.</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Cinzel.ttf</string>
+		<string>CormorantGaramond.ttf</string>
+		<string>CormorantGaramond-Italic.ttf</string>
+		<string>ManufacturingConsent-Regular.ttf</string>
+	</array>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>

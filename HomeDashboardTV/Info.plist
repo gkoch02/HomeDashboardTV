@@ -35,6 +35,8 @@
 		<string>CormorantGaramond.ttf</string>
 		<string>CormorantGaramond-Italic.ttf</string>
 		<string>ManufacturingConsent-Regular.ttf</string>
+		<string>Righteous-Regular.ttf</string>
+		<string>DMSans.ttf</string>
 	</array>
 	<key>UILaunchScreen</key>
 	<dict>

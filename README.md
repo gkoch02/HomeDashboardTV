@@ -15,6 +15,17 @@ moon value (the `moon` block of `/api/dashboard`); the app only draws it.
 
 ![The Moon layout on an Apple TV, from HomeDashboard's dummy data](docs/moon.png)
 
+**Halftone** (settings → Show → Halftone) is the spiritual successor to the Pi's
+`halftone_agenda`: a print plate on warm newsprint, the weather engraving and its reading on
+the left, the day's agenda on the right. The engraving is a true halftone (round dots on a
+45° screen, sized by tone) of a scene for each kind of weather, printed in black plus two spot
+inks after the Pi's Inky palette: ochre for the sun, moon and lightning, red for the event in
+progress and the next one up. Elapsed events print through a fine dot screen, the Pi's
+perforated type; after sunset, once the day's events are over, the agenda rolls over to
+tomorrow, as on the Pi.
+
+![The Halftone layout, from HomeDashboard's dummy data](docs/halftone.png)
+
 ## What the TV needs
 
 - The Pi's web UI running, with HomeDashboard 6.2 or later (the `/api/dashboard` route):
@@ -48,9 +59,11 @@ with no Pi at all. Click anywhere on the dashboard to come back to settings; Men
   agenda (events per day in the Pi's zone), the HTTP client and the demo-data shift. No UI;
   `swift test` runs it on the Mac.
 - `HomeDashboardTV/App`: the polling store, Bonjour discovery and the Keychain.
-- `HomeDashboardTV/UI`: the dashboard, the moon, and the settings panel.
-- `HomeDashboardTV/Resources/Fonts`: Cinzel, Cormorant Garamond and Manufacturing Consent
-  from HomeDashboard's `fonts/` (SIL OFL; each licence beside its font). The moon
+- `HomeDashboardTV/UI`: the dashboard, the halftone plate, the moon, and the settings panel.
+  The halftone scenes are tone fields in `DashboardCore` (`HalftoneScene`), so the view only
+  screens them; `docs/halftone-scenes.png` shows six of them.
+- `HomeDashboardTV/Resources/Fonts`: Cinzel, Cormorant Garamond, Manufacturing Consent,
+  Righteous and DM Sans from HomeDashboard's `fonts/` (SIL OFL; each licence beside its font). The moon
   photograph (`MoonPhoto`) is the author's own full moon: the full-resolution original of
   the Pi's `assets/moon_full.png`, cropped to the disc at its native 1288 px with the
   disc's levels stretched, enough for the hero moon at 4K without upscaling.
@@ -83,7 +96,7 @@ cd Packages/DashboardCore && swift test
 ```
 
 In the simulator, `-server <address>` or `-demo YES` sets the source for one run, and
-`-layout moon` the layout:
+`-layout dashboard|halftone|moon` the layout:
 
 ```bash
 xcrun simctl launch booted dev.plumpbug.homedashboard -server 127.0.0.1:8080

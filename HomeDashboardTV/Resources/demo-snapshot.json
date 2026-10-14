@@ -1,0 +1,638 @@
+{
+  "generated_at": "2026-10-14T01:42:13.553625-04:00",
+  "quote": {
+    "author": "Aristotle",
+    "text": "We are what we repeatedly do. Excellence, then, is not an act, but a habit."
+  },
+  "schema_version": 1,
+  "sources": {
+    "birthdays": {
+      "data": [
+        {
+          "age": null,
+          "date": "2026-10-17",
+          "name": "Mom"
+        },
+        {
+          "age": 30,
+          "date": "2026-10-21",
+          "name": "Jake"
+        },
+        {
+          "age": 25,
+          "date": "2026-10-26",
+          "name": "Alice"
+        },
+        {
+          "age": null,
+          "date": "2026-11-01",
+          "name": "Bob"
+        }
+      ],
+      "fetched_at": "2026-10-14T05:42:13.482276+00:00",
+      "staleness": "fresh"
+    },
+    "events": {
+      "data": [
+        {
+          "calendar_name": null,
+          "end": "2026-10-12T09:30:00-04:00",
+          "event_id": null,
+          "is_all_day": false,
+          "location": "Zoom",
+          "start": "2026-10-12T09:00:00-04:00",
+          "summary": "Team Standup"
+        },
+        {
+          "calendar_name": null,
+          "end": "2026-10-12T14:30:00-04:00",
+          "event_id": null,
+          "is_all_day": false,
+          "location": "Conference Room B",
+          "start": "2026-10-12T14:00:00-04:00",
+          "summary": "1:1 with Alex"
+        },
+        {
+          "calendar_name": null,
+          "end": "2026-10-13T09:15:00-04:00",
+          "event_id": null,
+          "is_all_day": false,
+          "location": null,
+          "start": "2026-10-13T09:00:00-04:00",
+          "summary": "Morning Standup"
+        },
+        {
+          "calendar_name": null,
+          "end": "2026-10-13T11:00:00-04:00",
+          "event_id": null,
+          "is_all_day": false,
+          "location": "123 Main St, Suite 4",
+          "start": "2026-10-13T10:00:00-04:00",
+          "summary": "Dentist Appointment"
+        },
+        {
+          "calendar_name": null,
+          "end": "2026-10-13T12:00:00-04:00",
+          "event_id": null,
+          "is_all_day": false,
+          "location": null,
+          "start": "2026-10-13T11:00:00-04:00",
+          "summary": "Sprint Review"
+        },
+        {
+          "calendar_name": null,
+          "end": "2026-10-13T13:00:00-04:00",
+          "event_id": null,
+          "is_all_day": false,
+          "location": "Tartine Manufactory",
+          "start": "2026-10-13T12:00:00-04:00",
+          "summary": "Lunch with Team"
+        },
+        {
+          "calendar_name": null,
+          "end": "2026-10-13T16:00:00-04:00",
+          "event_id": null,
+          "is_all_day": false,
+          "location": null,
+          "start": "2026-10-13T15:30:00-04:00",
+          "summary": "Design Sync"
+        },
+        {
+          "calendar_name": null,
+          "end": "2026-10-13T17:30:00-04:00",
+          "event_id": null,
+          "is_all_day": false,
+          "location": null,
+          "start": "2026-10-13T16:30:00-04:00",
+          "summary": "Code Review"
+        },
+        {
+          "calendar_name": null,
+          "end": "2026-10-17T00:00:00-04:00",
+          "event_id": null,
+          "is_all_day": true,
+          "location": null,
+          "start": "2026-10-14T00:00:00-04:00",
+          "summary": "Tech Conference"
+        },
+        {
+          "calendar_name": null,
+          "end": "2026-10-14T18:30:00-04:00",
+          "event_id": null,
+          "is_all_day": false,
+          "location": "Studio 12",
+          "start": "2026-10-14T17:30:00-04:00",
+          "summary": "Yoga"
+        },
+        {
+          "calendar_name": null,
+          "end": "2026-10-15T09:15:00-04:00",
+          "event_id": null,
+          "is_all_day": false,
+          "location": null,
+          "start": "2026-10-15T09:00:00-04:00",
+          "summary": "Morning Standup"
+        },
+        {
+          "calendar_name": null,
+          "end": "2026-10-15T11:30:00-04:00",
+          "event_id": null,
+          "is_all_day": false,
+          "location": null,
+          "start": "2026-10-15T10:00:00-04:00",
+          "summary": "Project Planning"
+        },
+        {
+          "calendar_name": null,
+          "end": "2026-10-15T12:30:00-04:00",
+          "event_id": null,
+          "is_all_day": false,
+          "location": "Conf Room A",
+          "start": "2026-10-15T11:30:00-04:00",
+          "summary": "Architecture Review"
+        },
+        {
+          "calendar_name": null,
+          "end": "2026-10-15T13:30:00-04:00",
+          "event_id": null,
+          "is_all_day": false,
+          "location": null,
+          "start": "2026-10-15T13:00:00-04:00",
+          "summary": "HR Check-in"
+        },
+        {
+          "calendar_name": null,
+          "end": "2026-10-15T14:30:00-04:00",
+          "event_id": null,
+          "is_all_day": false,
+          "location": "Board Room",
+          "start": "2026-10-15T13:30:00-04:00",
+          "summary": "Stakeholder Briefing"
+        },
+        {
+          "calendar_name": null,
+          "end": "2026-10-15T15:45:00-04:00",
+          "event_id": null,
+          "is_all_day": false,
+          "location": "Blue Bottle, Market St",
+          "start": "2026-10-15T15:00:00-04:00",
+          "summary": "Coffee with Sam"
+        },
+        {
+          "calendar_name": null,
+          "end": "2026-10-15T16:15:00-04:00",
+          "event_id": null,
+          "is_all_day": false,
+          "location": null,
+          "start": "2026-10-15T15:45:00-04:00",
+          "summary": "Bug Triage"
+        },
+        {
+          "calendar_name": null,
+          "end": "2026-10-15T17:30:00-04:00",
+          "event_id": null,
+          "is_all_day": false,
+          "location": null,
+          "start": "2026-10-15T16:30:00-04:00",
+          "summary": "Sprint Retro"
+        },
+        {
+          "calendar_name": null,
+          "end": "2026-10-16T15:00:00-04:00",
+          "event_id": null,
+          "is_all_day": false,
+          "location": "Main Auditorium",
+          "start": "2026-10-16T14:00:00-04:00",
+          "summary": "Demo Day"
+        },
+        {
+          "calendar_name": null,
+          "end": "2026-10-16T09:30:00-04:00",
+          "event_id": null,
+          "is_all_day": false,
+          "location": null,
+          "start": "2026-10-16T09:00:00-04:00",
+          "summary": "Weekly Wrap-up"
+        },
+        {
+          "calendar_name": null,
+          "end": "2026-10-16T13:00:00-04:00",
+          "event_id": null,
+          "is_all_day": false,
+          "location": "Rooftop Lounge",
+          "start": "2026-10-16T12:00:00-04:00",
+          "summary": "Lunch & Learn"
+        },
+        {
+          "calendar_name": null,
+          "end": "2026-10-17T11:00:00-04:00",
+          "event_id": null,
+          "is_all_day": false,
+          "location": null,
+          "start": "2026-10-17T09:00:00-04:00",
+          "summary": "Farmers Market"
+        },
+        {
+          "calendar_name": null,
+          "end": "2026-10-17T14:00:00-04:00",
+          "event_id": null,
+          "is_all_day": false,
+          "location": "Golden Gate Park",
+          "start": "2026-10-17T12:00:00-04:00",
+          "summary": "Bike Ride"
+        },
+        {
+          "calendar_name": null,
+          "end": "2026-10-17T22:00:00-04:00",
+          "event_id": null,
+          "is_all_day": false,
+          "location": "Chris & Dana's",
+          "start": "2026-10-17T19:00:00-04:00",
+          "summary": "Dinner Party"
+        },
+        {
+          "calendar_name": null,
+          "end": "2026-10-19T00:00:00-04:00",
+          "event_id": null,
+          "is_all_day": true,
+          "location": null,
+          "start": "2026-10-18T00:00:00-04:00",
+          "summary": "Weekend"
+        },
+        {
+          "calendar_name": null,
+          "end": "2026-10-18T08:15:00-04:00",
+          "event_id": null,
+          "is_all_day": false,
+          "location": "Embarcadero",
+          "start": "2026-10-18T07:30:00-04:00",
+          "summary": "Morning Run"
+        },
+        {
+          "calendar_name": null,
+          "end": "2026-10-18T12:00:00-04:00",
+          "event_id": null,
+          "is_all_day": false,
+          "location": "The Griddle Cafe",
+          "start": "2026-10-18T10:00:00-04:00",
+          "summary": "Brunch"
+        }
+      ],
+      "fetched_at": "2026-10-14T05:42:13.480914+00:00",
+      "staleness": "fresh"
+    },
+    "weather": {
+      "data": {
+        "alerts": [
+          {
+            "event": "Wind Advisory"
+          }
+        ],
+        "current_description": "partly cloudy",
+        "current_icon": "02d",
+        "current_temp": 42.0,
+        "feels_like": 38.0,
+        "forecast": [
+          {
+            "date": "2026-10-15",
+            "description": "rain",
+            "high": 45.0,
+            "icon": "10d",
+            "low": 33.0,
+            "precip_chance": 0.8
+          },
+          {
+            "date": "2026-10-16",
+            "description": "clear",
+            "high": 50.0,
+            "icon": "01d",
+            "low": 38.0,
+            "precip_chance": 0.05
+          },
+          {
+            "date": "2026-10-17",
+            "description": "cloudy",
+            "high": 47.0,
+            "icon": "04d",
+            "low": 36.0,
+            "precip_chance": 0.3
+          },
+          {
+            "date": "2026-10-18",
+            "description": "partly cloudy",
+            "high": 52.0,
+            "icon": "02d",
+            "low": 40.0,
+            "precip_chance": null
+          },
+          {
+            "date": "2026-10-19",
+            "description": "drizzle",
+            "high": 55.0,
+            "icon": "09d",
+            "low": 42.0,
+            "precip_chance": 0.6
+          }
+        ],
+        "high": 48.0,
+        "hourly": [
+          {
+            "icon": "03n",
+            "precip_chance": 0.03,
+            "precip_mm": null,
+            "temp": 37.2,
+            "time": "2026-10-14T02:00:00-04:00"
+          },
+          {
+            "icon": "03n",
+            "precip_chance": 0.03,
+            "precip_mm": null,
+            "temp": 35.1,
+            "time": "2026-10-14T05:00:00-04:00"
+          },
+          {
+            "icon": "03d",
+            "precip_chance": 0.03,
+            "precip_mm": null,
+            "temp": 36.5,
+            "time": "2026-10-14T08:00:00-04:00"
+          },
+          {
+            "icon": "03d",
+            "precip_chance": 0.03,
+            "precip_mm": null,
+            "temp": 42.6,
+            "time": "2026-10-14T11:00:00-04:00"
+          },
+          {
+            "icon": "03d",
+            "precip_chance": 0.03,
+            "precip_mm": null,
+            "temp": 47.6,
+            "time": "2026-10-14T14:00:00-04:00"
+          },
+          {
+            "icon": "03d",
+            "precip_chance": 0.03,
+            "precip_mm": null,
+            "temp": 47.4,
+            "time": "2026-10-14T17:00:00-04:00"
+          },
+          {
+            "icon": "03n",
+            "precip_chance": 0.03,
+            "precip_mm": null,
+            "temp": 44.2,
+            "time": "2026-10-14T20:00:00-04:00"
+          },
+          {
+            "icon": "03n",
+            "precip_chance": 0.03,
+            "precip_mm": null,
+            "temp": 39.7,
+            "time": "2026-10-14T23:00:00-04:00"
+          },
+          {
+            "icon": "02n",
+            "precip_chance": 0.24,
+            "precip_mm": null,
+            "temp": 35.5,
+            "time": "2026-10-15T02:00:00-04:00"
+          },
+          {
+            "icon": "02n",
+            "precip_chance": 0.24,
+            "precip_mm": null,
+            "temp": 33.2,
+            "time": "2026-10-15T05:00:00-04:00"
+          },
+          {
+            "icon": "02d",
+            "precip_chance": 0.24,
+            "precip_mm": null,
+            "temp": 34.4,
+            "time": "2026-10-15T08:00:00-04:00"
+          },
+          {
+            "icon": "10d",
+            "precip_chance": 0.8,
+            "precip_mm": 1.9,
+            "temp": 40.0,
+            "time": "2026-10-15T11:00:00-04:00"
+          },
+          {
+            "icon": "10d",
+            "precip_chance": 0.8,
+            "precip_mm": 1.9,
+            "temp": 44.6,
+            "time": "2026-10-15T14:00:00-04:00"
+          },
+          {
+            "icon": "10d",
+            "precip_chance": 0.8,
+            "precip_mm": 1.9,
+            "temp": 44.7,
+            "time": "2026-10-15T17:00:00-04:00"
+          },
+          {
+            "icon": "10n",
+            "precip_chance": 0.8,
+            "precip_mm": 1.9,
+            "temp": 43.2,
+            "time": "2026-10-15T20:00:00-04:00"
+          },
+          {
+            "icon": "02n",
+            "precip_chance": 0.24,
+            "precip_mm": null,
+            "temp": 41.1,
+            "time": "2026-10-15T23:00:00-04:00"
+          },
+          {
+            "icon": "01n",
+            "precip_chance": 0.01,
+            "precip_mm": null,
+            "temp": 39.2,
+            "time": "2026-10-16T02:00:00-04:00"
+          },
+          {
+            "icon": "01n",
+            "precip_chance": 0.01,
+            "precip_mm": null,
+            "temp": 38.1,
+            "time": "2026-10-16T05:00:00-04:00"
+          },
+          {
+            "icon": "01d",
+            "precip_chance": 0.01,
+            "precip_mm": null,
+            "temp": 39.4,
+            "time": "2026-10-16T08:00:00-04:00"
+          },
+          {
+            "icon": "01d",
+            "precip_chance": 0.01,
+            "precip_mm": null,
+            "temp": 45.0,
+            "time": "2026-10-16T11:00:00-04:00"
+          },
+          {
+            "icon": "01d",
+            "precip_chance": 0.01,
+            "precip_mm": null,
+            "temp": 49.6,
+            "time": "2026-10-16T14:00:00-04:00"
+          },
+          {
+            "icon": "01d",
+            "precip_chance": 0.01,
+            "precip_mm": null,
+            "temp": 49.4,
+            "time": "2026-10-16T17:00:00-04:00"
+          },
+          {
+            "icon": "01n",
+            "precip_chance": 0.01,
+            "precip_mm": null,
+            "temp": 46.5,
+            "time": "2026-10-16T20:00:00-04:00"
+          },
+          {
+            "icon": "01n",
+            "precip_chance": 0.01,
+            "precip_mm": null,
+            "temp": 42.3,
+            "time": "2026-10-16T23:00:00-04:00"
+          },
+          {
+            "icon": "04n",
+            "precip_chance": 0.09,
+            "precip_mm": null,
+            "temp": 38.3,
+            "time": "2026-10-17T02:00:00-04:00"
+          },
+          {
+            "icon": "04n",
+            "precip_chance": 0.09,
+            "precip_mm": null,
+            "temp": 36.2,
+            "time": "2026-10-17T05:00:00-04:00"
+          },
+          {
+            "icon": "04d",
+            "precip_chance": 0.09,
+            "precip_mm": null,
+            "temp": 37.3,
+            "time": "2026-10-17T08:00:00-04:00"
+          },
+          {
+            "icon": "04d",
+            "precip_chance": 0.3,
+            "precip_mm": null,
+            "temp": 42.5,
+            "time": "2026-10-17T11:00:00-04:00"
+          },
+          {
+            "icon": "04d",
+            "precip_chance": 0.3,
+            "precip_mm": null,
+            "temp": 46.7,
+            "time": "2026-10-17T14:00:00-04:00"
+          },
+          {
+            "icon": "04d",
+            "precip_chance": 0.3,
+            "precip_mm": null,
+            "temp": 46.7,
+            "time": "2026-10-17T17:00:00-04:00"
+          },
+          {
+            "icon": "04n",
+            "precip_chance": 0.3,
+            "precip_mm": null,
+            "temp": 45.2,
+            "time": "2026-10-17T20:00:00-04:00"
+          },
+          {
+            "icon": "04n",
+            "precip_chance": 0.09,
+            "precip_mm": null,
+            "temp": 43.1,
+            "time": "2026-10-17T23:00:00-04:00"
+          },
+          {
+            "icon": "02n",
+            "precip_chance": 0.03,
+            "precip_mm": null,
+            "temp": 41.2,
+            "time": "2026-10-18T02:00:00-04:00"
+          },
+          {
+            "icon": "02n",
+            "precip_chance": 0.03,
+            "precip_mm": null,
+            "temp": 40.1,
+            "time": "2026-10-18T05:00:00-04:00"
+          },
+          {
+            "icon": "02d",
+            "precip_chance": 0.03,
+            "precip_mm": null,
+            "temp": 41.4,
+            "time": "2026-10-18T08:00:00-04:00"
+          },
+          {
+            "icon": "02d",
+            "precip_chance": 0.03,
+            "precip_mm": null,
+            "temp": 47.0,
+            "time": "2026-10-18T11:00:00-04:00"
+          },
+          {
+            "icon": "02d",
+            "precip_chance": 0.03,
+            "precip_mm": null,
+            "temp": 51.6,
+            "time": "2026-10-18T14:00:00-04:00"
+          },
+          {
+            "icon": "02d",
+            "precip_chance": 0.03,
+            "precip_mm": null,
+            "temp": 51.6,
+            "time": "2026-10-18T17:00:00-04:00"
+          },
+          {
+            "icon": "02n",
+            "precip_chance": 0.03,
+            "precip_mm": null,
+            "temp": 49.5,
+            "time": "2026-10-18T20:00:00-04:00"
+          },
+          {
+            "icon": "02n",
+            "precip_chance": 0.03,
+            "precip_mm": null,
+            "temp": 46.5,
+            "time": "2026-10-18T23:00:00-04:00"
+          }
+        ],
+        "humidity": 65,
+        "location_name": null,
+        "low": 35.0,
+        "pressure": 1013.0,
+        "sunrise": "2026-10-14T06:24:00-04:00",
+        "sunset": "2026-10-14T19:51:00-04:00",
+        "units": "imperial",
+        "uv_index": 5.0,
+        "wind_deg": 315.0,
+        "wind_speed": 12.0
+      },
+      "fetched_at": "2026-10-14T05:42:13.481557+00:00",
+      "staleness": "fresh"
+    }
+  },
+  "timezone": "America/New_York",
+  "units": "imperial",
+  "utc_offset_seconds": -14400
+}

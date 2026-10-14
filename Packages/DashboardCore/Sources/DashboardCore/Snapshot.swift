@@ -170,6 +170,8 @@ public struct HourlyForecast: Decodable, Sendable, Equatable, Hashable {
     public var temp: Double
     public var icon: String
     public var precipChance: Double?
+    /// Expected rain or snow over the slot, when the forecast gives one.
+    public var precipMm: Double?
 }
 
 public struct WeatherAlert: Decodable, Sendable, Equatable, Hashable {

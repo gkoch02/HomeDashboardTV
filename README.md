@@ -60,9 +60,10 @@ with no Pi at all. Click anywhere on the dashboard to come back to settings; Men
   agenda (events per day in the Pi's zone), the HTTP client and the demo-data shift. No UI;
   `swift test` runs it on the Mac.
 - `HomeDashboardTV/App`: the polling store, Bonjour discovery and the Keychain.
-- `HomeDashboardTV/UI`: the dashboard, the agenda plate, the moon, and the settings panel.
-  The weather scenes' composition is `WeatherScene` in `DashboardCore`;
-  `docs/agenda-scenes.png` shows six of them.
+- `HomeDashboardTV/UI`: the three layouts, each a `Theme` (`Theme.swift`), and the settings
+  panel. `UI/Parts` holds what layouts share: the painted weather window (`WeatherArt`, its
+  composition `WeatherScene` in `DashboardCore`; `docs/agenda-scenes.png` shows six of them),
+  the moon disc, a starfield.
 - `HomeDashboardTV/Resources/Fonts`: Cinzel, Cormorant Garamond, Manufacturing Consent,
   Righteous and DM Sans from HomeDashboard's `fonts/` (SIL OFL; each licence beside its font). The moon
   photograph (`MoonPhoto`) is the author's own full moon: the full-resolution original of
@@ -70,6 +71,16 @@ with no Pi at all. Click anywhere on the dashboard to come back to settings; Men
   disc's levels stretched, enough for the hero moon at 4K without upscaling.
 - `HomeDashboardTV/Resources/demo-snapshot.json` and the test fixture are real output of the
   Pi's route over HomeDashboard's dummy data.
+
+## Adding a layout
+
+A layout is a view conforming to `Theme`: its body is the plate, `backdrop` what sits still
+behind it, and optionally `notice(_:)` its style for the corner line. `ThemeFrame` adds the
+burn-in drift, the notice's place and the Pi's time zone, so a layout only draws. Set
+`fullBleed` to have the whole screen instead of the overscan safe area, and keep a 10 pt margin
+for the drift. Then add a case to `DashboardStore.Layout` and a line to
+`DashboardScreen.content`; the settings list picks it up. Keep its inks and faces `private` to
+its file, and list any new font under `UIAppFonts` in `project.yml`.
 
 ## Icon
 

@@ -26,7 +26,7 @@ struct DashboardScreen: View {
                     .transition(.opacity)
             }
         }
-        .background(Palette.night)
+        .background(Color(red: 0.05, green: 0.06, blue: 0.09))
         .animation(.easeInOut(duration: 0.25), value: store.settingsVisible)
         .onAppear { claimFocus() }
         .onChange(of: store.settingsVisible) { _, _ in claimFocus() }
@@ -41,17 +41,18 @@ struct DashboardScreen: View {
             TimelineView(.everyMinute) { context in
                 if let snapshot = store.snapshot {
                     switch store.layout {
-                    case .dashboard:
-                        DashboardView(snapshot: snapshot, now: context.date, notice: notice(now: context.date))
-                    case .agenda:
-                        AgendaPlateView(snapshot: snapshot, now: context.date, notice: notice(now: context.date))
-                    case .moon:
-                        MoonView(snapshot: snapshot, now: context.date, notice: notice(now: context.date))
+                    case .dashboard: frame(DashboardView.self, snapshot, context.date)
+                    case .agenda: frame(AgendaPlateView.self, snapshot, context.date)
+                    case .moon: frame(MoonView.self, snapshot, context.date)
                     }
                 } else if store.connection != nil {
                     Waiting(problem: store.problem)
                 }
             }
+    }
+
+    private func frame<T: Theme>(_ theme: T.Type, _ snapshot: Snapshot, _ now: Date) -> some View {
+        ThemeFrame(theme: T(snapshot: snapshot, now: now), now: now, notice: notice(now: now))
     }
 
     /// One line for the corner: the connection is down, or a source the Pi is still showing has

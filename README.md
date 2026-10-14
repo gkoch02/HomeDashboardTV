@@ -27,9 +27,9 @@ with no Pi at all. Click anywhere on the dashboard to come back to settings; Men
   A source the Pi reports as stale is named in the corner; an expired one is not drawn.
 - Days and times are in the Pi's configured zone, so the TV agrees with the panel.
 - Air quality (when the Pi has PurpleAir on) shows under the weather, in the EPA band's colour.
-- Nothing is cut off by a busy week: the day cards always keep their room, and Today and each
-  card pick the richest layout that fits (wrapped titles, then single lines, then a count of
-  the rest).
+- A busy week never overflows: the day cards always keep their room, and Today and each card
+  pick the richest layout that fits (wrapped titles, then single lines, then a count of the
+  rest). A title too long even for two lines ends in "…".
 - The layout drifts a few points every ten minutes, so an OLED TV never holds one image.
 - The screensaver is off while the app is open.
 

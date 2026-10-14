@@ -78,7 +78,16 @@ final class DashboardCoreTests: XCTestCase {
         var body = minimal()
         body["timezone"] = NSNull()
         body["utc_offset_seconds"] = 3600
-        XCTAssertEqual(try Snapshot.decode(json(body)).timeZone.secondsFromGMT(), 3600)
+        let snapshot = try Snapshot.decode(json(body))
+        XCTAssertEqual(snapshot.timeZone(local: newYork).secondsFromGMT(), 3600,
+                       "a TV in another zone falls back to the Pi's offset")
+    }
+
+    func testLocalPiUsesTheTVsZoneWhenTheyAgree() throws {
+        var body = minimal()
+        body["timezone"] = NSNull()  // generated_at is -04:00, New York's October offset
+        let zone = try Snapshot.decode(json(body)).timeZone(local: newYork)
+        XCTAssertEqual(zone, newYork, "the named zone keeps DST for next week's days")
     }
 
     // MARK: Agenda

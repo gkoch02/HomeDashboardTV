@@ -20,10 +20,15 @@ public struct Snapshot: Decodable, Sendable, Equatable {
     public var sources: Sources
 
     /// The zone the dashboard's days are counted in, which is the Pi's, not necessarily the TV's.
-    public var timeZone: TimeZone {
-        timezone.flatMap(TimeZone.init(identifier:))
-            ?? TimeZone(secondsFromGMT: utcOffsetSeconds)
-            ?? .current
+    public var timeZone: TimeZone { timeZone(local: .current) }
+
+    /// A Pi on `timezone: local` sends no zone name, only today's offset. A fixed offset
+    /// would count next week's days an hour out across a DST change, so the TV's own zone
+    /// is used when it agrees with the Pi now, as it does when both are in one house.
+    func timeZone(local: TimeZone) -> TimeZone {
+        if let named = timezone.flatMap(TimeZone.init(identifier:)) { return named }
+        if local.secondsFromGMT(for: generatedAt) == utcOffsetSeconds { return local }
+        return TimeZone(secondsFromGMT: utcOffsetSeconds) ?? local
     }
 
     public var isMetric: Bool { units == "metric" }

@@ -48,7 +48,7 @@ with no Pi at all. Click anywhere on the dashboard to come back to settings; Men
 
 `scripts/generate_brand_assets.py` renders the layered app icon and the Top Shelf images into
 the asset catalog (Pillow). The icon is a calendar page over an amber sun on the app's sky,
-with today's square in amber; the parallax tilt slides the page across the sun. Previews are
+showing one week as the app does, today's column in amber; the parallax tilt slides the page across the sun. Previews are
 in `docs/app-icon.png` and `docs/top-shelf.png`.
 
 ```bash

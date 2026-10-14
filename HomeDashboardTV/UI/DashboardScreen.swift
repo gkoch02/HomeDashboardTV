@@ -3,11 +3,41 @@ import SwiftUI
 
 /// The root: the dashboard, or a placeholder until the first snapshot, with settings over it.
 /// A click opens settings; Menu closes them.
+///
+/// Focus and the click handler belong to the dashboard layer alone, never to a container that
+/// also holds the settings panel: on tvOS a non-focusable ancestor took the panel's buttons
+/// out of the focus engine with it, so the panel showed but the remote could not reach it.
+/// While the panel is open the dashboard is not focusable; when it shuts, the dashboard claims
+/// focus back (on the next run-loop turn, once it is focusable again), as IdleHoursTV does.
 struct DashboardScreen: View {
     @Environment(DashboardStore.self) private var store
+    @FocusState private var screenFocused: Bool
 
     var body: some View {
         ZStack {
+            content
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .focusable(!store.settingsVisible)
+                .focused($screenFocused)
+                .onTapGesture { if !store.settingsVisible { store.settingsVisible = true } }
+                .accessibilityIdentifier("dashboard")
+            if store.settingsVisible {
+                SettingsView()
+                    .transition(.opacity)
+            }
+        }
+        .background(Palette.night)
+        .animation(.easeInOut(duration: 0.25), value: store.settingsVisible)
+        .onAppear { claimFocus() }
+        .onChange(of: store.settingsVisible) { _, _ in claimFocus() }
+    }
+
+    private func claimFocus() {
+        guard !store.settingsVisible else { return }
+        DispatchQueue.main.async { screenFocused = true }
+    }
+
+    private var content: some View {
             TimelineView(.everyMinute) { context in
                 if let snapshot = store.snapshot {
                     switch store.layout {
@@ -20,15 +50,6 @@ struct DashboardScreen: View {
                     Waiting(problem: store.problem)
                 }
             }
-            if store.settingsVisible {
-                SettingsView()
-                    .transition(.opacity)
-            }
-        }
-        .background(Palette.night)
-        .focusable(!store.settingsVisible)
-        .onTapGesture { store.settingsVisible = true }
-        .animation(.easeInOut(duration: 0.25), value: store.settingsVisible)
     }
 
     /// One line for the corner: the connection is down, or a source the Pi is still showing has

@@ -39,6 +39,17 @@
          </BuildableReference>
       </MacroExpansion>
       <Testables>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "B04779F0352A3EBCAB0BBB12"
+               BuildableName = "HomeDashboardUITests.xctest"
+               BlueprintName = "HomeDashboardUITests"
+               ReferencedContainer = "container:HomeDashboardTV.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>

@@ -13,7 +13,7 @@ struct SettingsView: View {
 
     /// The controls focus can be sent to by name.
     enum Field: Hashable {
-        case layout(DashboardStore.Layout), pi(String), address, connect, demo, username, password, done
+        case layout(DashboardStore.Layout), awake(Int), pi(String), address, connect, demo, username, password, done
     }
 
     var body: some View {
@@ -31,6 +31,7 @@ struct SettingsView: View {
                     HStack(spacing: 24) {
                         ForEach(DashboardStore.Layout.allCases, id: \.self) { layout in
                             Button {
+                                store.noteInteraction()
                                 store.layout = layout
                             } label: {
                                 Label(layout.title, systemImage: store.layout == layout ? "checkmark.circle.fill" : "circle")
@@ -38,6 +39,23 @@ struct SettingsView: View {
                             .focused($focus, equals: .layout(layout))
                         }
                     }
+                }
+
+                Section("Keep awake") {
+                    HStack(spacing: 24) {
+                        ForEach(DashboardStore.keepAwakeChoices, id: \.self) { hours in
+                            Button {
+                                store.keepAwakeHours = hours
+                            } label: {
+                                Label(awakeLabel(hours), systemImage: store.keepAwakeHours == hours ? "checkmark.circle.fill" : "circle")
+                            }
+                            .focused($focus, equals: .awake(hours))
+                        }
+                    }
+                    Text("For that long after a remote press; then the Apple TV's own screensaver and sleep timers apply. Set the screensaver's Start After to Never to go straight to sleep.")
+                        .font(.system(size: 22))
+                        .fixedSize(horizontal: false, vertical: true)
+                        .foregroundStyle(.tertiary)
                 }
 
                 Section("On this network") {
@@ -63,9 +81,13 @@ struct SettingsView: View {
                             .textContentType(.URL)
                             .frame(width: 640)
                             .focused($focus, equals: .address)
-                        Button("Connect") { connectTyped() }
+                        Button("Connect") {
+                            store.noteInteraction()
+                            connectTyped()
+                        }
                             .focused($focus, equals: .connect)
                         Button("Demo data") {
+                            store.noteInteraction()
                             store.connect(.demo)
                             store.settingsVisible = false
                         }
@@ -87,7 +109,10 @@ struct SettingsView: View {
                     }
                 }
 
-                Button("Done") { store.settingsVisible = false }
+                Button("Done") {
+                    store.noteInteraction()
+                    store.settingsVisible = false
+                }
                     .disabled(store.connection == nil)
                     .focused($focus, equals: .done)
             }
@@ -107,8 +132,15 @@ struct SettingsView: View {
                 focus = .pi(first.name)
             }
         }
+        // Every remote use in the panel restarts Keep awake, including a press or keystroke
+        // that leaves focus where it was.
+        .onChange(of: focus) { _, _ in store.noteInteraction() }
+        .onChange(of: typedAddress) { _, _ in store.noteInteraction() }
+        .onChange(of: store.username) { _, _ in store.noteInteraction() }
+        .onChange(of: store.password) { _, _ in store.noteInteraction() }
         .onDisappear { browser.stop() }
         .onExitCommand {
+            store.noteInteraction()
             if store.connection != nil { store.settingsVisible = false }
         }
     }
@@ -119,6 +151,14 @@ struct SettingsView: View {
         if store.connection != nil { return .done }
         if let first = browser.found.first { return .pi(first.name) }
         return .address
+    }
+
+    private func awakeLabel(_ hours: Int) -> String {
+        switch hours {
+        case 0: return "Always"
+        case 1: return "1 hour"
+        default: return "\(hours) hours"
+        }
     }
 
     private var status: String {
@@ -137,6 +177,7 @@ struct SettingsView: View {
     }
 
     private func choose(_ found: PiBrowser.Found) async {
+        store.noteInteraction()
         resolving = found.name
         defer { resolving = nil }
         guard let url = await PiBrowser.resolve(found.endpoint) else {

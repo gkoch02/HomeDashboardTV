@@ -1,6 +1,7 @@
 import DashboardCore
 import Foundation
 import Observation
+import UIKit
 
 /// Where the snapshot comes from, and the polling loop that keeps it current.
 ///
@@ -56,6 +57,19 @@ final class DashboardStore {
         didSet { defaults.set(layout.rawValue, forKey: Keys.layout) }
     }
 
+    /// Hours without a remote press for which the app holds tvOS's idle timer; 0 is always.
+    /// tvOS runs the screensaver and "Sleep After" off that one timer, so holding it keeps
+    /// both away, and letting go hands both back: the screensaver at its usual delay, then
+    /// sleep. An app can neither read "Sleep After" nor put the Apple TV to sleep itself.
+    var keepAwakeHours: Int {
+        didSet {
+            defaults.set(keepAwakeHours, forKey: Keys.keepAwakeHours)
+            noteInteraction()
+        }
+    }
+
+    static let keepAwakeChoices = [0, 1, 2, 4, 8]
+
     var username: String {
         didSet { defaults.set(username, forKey: Keys.username) }
     }
@@ -66,6 +80,8 @@ final class DashboardStore {
 
     private let defaults = UserDefaults.standard
     private var loop: Task<Void, Never>?
+    private var idleCheck: Task<Void, Never>?
+    private var lastInteraction = Date.now
 
     static let pollInterval: Duration = .seconds(300)
     static let retryInterval: Duration = .seconds(60)
@@ -74,6 +90,7 @@ final class DashboardStore {
         static let connection = "connection"
         static let username = "username"
         static let layout = "layout"
+        static let keepAwakeHours = "keepAwakeHours"
     }
 
     init() {
@@ -81,6 +98,7 @@ final class DashboardStore {
         // `-layout moon` sets it for a run too, since launch arguments land in UserDefaults.
         layout = defaults.string(forKey: Keys.layout).flatMap(Layout.init(saved:)) ?? .dashboard
         password = Keychain.password ?? ""
+        keepAwakeHours = defaults.integer(forKey: Keys.keepAwakeHours)
         // `-demo YES` and `-server <url>` set the source for a run (screenshots, the simulator).
         if defaults.bool(forKey: "demo") {
             connection = .demo
@@ -93,6 +111,15 @@ final class DashboardStore {
     }
 
     func start() {
+        noteInteraction()
+        if idleCheck == nil {
+            idleCheck = Task { [weak self] in
+                while !Task.isCancelled {
+                    try? await Task.sleep(for: .seconds(60))
+                    self?.updateIdleTimer()
+                }
+            }
+        }
         guard loop == nil else { return }
         loop = Task { [weak self] in
             while !Task.isCancelled {
@@ -101,6 +128,18 @@ final class DashboardStore {
                 try? await Task.sleep(for: self.problem == nil ? Self.pollInterval : Self.retryInterval)
             }
         }
+    }
+
+    /// Any remote press, and the app coming back to the foreground: restarts "Keep awake".
+    func noteInteraction() {
+        lastInteraction = .now
+        updateIdleTimer()
+    }
+
+    /// Holds the idle timer until "Keep awake" has run out since the last remote press.
+    private func updateIdleTimer(now: Date = .now) {
+        let hold = keepAwakeHours == 0 || now.timeIntervalSince(lastInteraction) < Double(keepAwakeHours * 3600)
+        if UIApplication.shared.isIdleTimerDisabled != hold { UIApplication.shared.isIdleTimerDisabled = hold }
     }
 
     func connect(_ connection: Connection) {

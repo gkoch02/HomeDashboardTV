@@ -31,6 +31,7 @@ struct SettingsView: View {
                     HStack(spacing: 24) {
                         ForEach(DashboardStore.Layout.allCases, id: \.self) { layout in
                             Button {
+                                store.noteInteraction()
                                 store.layout = layout
                             } label: {
                                 Label(layout.title, systemImage: store.layout == layout ? "checkmark.circle.fill" : "circle")
@@ -80,9 +81,13 @@ struct SettingsView: View {
                             .textContentType(.URL)
                             .frame(width: 640)
                             .focused($focus, equals: .address)
-                        Button("Connect") { connectTyped() }
+                        Button("Connect") {
+                            store.noteInteraction()
+                            connectTyped()
+                        }
                             .focused($focus, equals: .connect)
                         Button("Demo data") {
+                            store.noteInteraction()
                             store.connect(.demo)
                             store.settingsVisible = false
                         }
@@ -104,7 +109,10 @@ struct SettingsView: View {
                     }
                 }
 
-                Button("Done") { store.settingsVisible = false }
+                Button("Done") {
+                    store.noteInteraction()
+                    store.settingsVisible = false
+                }
                     .disabled(store.connection == nil)
                     .focused($focus, equals: .done)
             }
@@ -124,10 +132,15 @@ struct SettingsView: View {
                 focus = .pi(first.name)
             }
         }
-        // Moving through the panel is remote use too.
+        // Every remote use in the panel restarts Keep awake, including a press or keystroke
+        // that leaves focus where it was.
         .onChange(of: focus) { _, _ in store.noteInteraction() }
+        .onChange(of: typedAddress) { _, _ in store.noteInteraction() }
+        .onChange(of: store.username) { _, _ in store.noteInteraction() }
+        .onChange(of: store.password) { _, _ in store.noteInteraction() }
         .onDisappear { browser.stop() }
         .onExitCommand {
+            store.noteInteraction()
             if store.connection != nil { store.settingsVisible = false }
         }
     }
@@ -164,6 +177,7 @@ struct SettingsView: View {
     }
 
     private func choose(_ found: PiBrowser.Found) async {
+        store.noteInteraction()
         resolving = found.name
         defer { resolving = nil }
         guard let url = await PiBrowser.resolve(found.endpoint) else {

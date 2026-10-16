@@ -66,3 +66,18 @@ extension Snapshot {
         return copy
     }
 }
+
+extension Snapshot {
+    /// The snapshot as if every source had just been fetched at *time*: for the demo, whose
+    /// refresh is its fetch. Its recorded fetch times would otherwise stay on the day it was
+    /// made, so the update stamps read hours stale and the Weatherglass trend, which stamps each
+    /// pressure reading with its fetch time, could never gather a second one.
+    public func fetched(at time: Date) -> Snapshot {
+        var copy = self
+        copy.sources.events?.fetchedAt = time
+        copy.sources.weather?.fetchedAt = time
+        copy.sources.birthdays?.fetchedAt = time
+        copy.sources.airQuality?.fetchedAt = time
+        return copy
+    }
+}

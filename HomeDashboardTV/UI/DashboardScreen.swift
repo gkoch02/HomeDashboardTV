@@ -40,12 +40,13 @@ struct DashboardScreen: View {
                 }
                 .accessibilityIdentifier("dashboard")
             if store.settingsVisible {
+                // The fade belongs to the panel alone: an animation on the whole screen also
+                // animated whatever the layout behind re-laid out in the same update.
                 SettingsView()
-                    .transition(.opacity)
+                    .transition(.opacity.animation(.easeInOut(duration: 0.25)))
             }
         }
         .background(Color(red: 0.05, green: 0.06, blue: 0.09))
-        .animation(.easeInOut(duration: 0.25), value: store.settingsVisible)
         .onAppear { claimFocus() }
         .onChange(of: store.settingsVisible) { _, _ in claimFocus() }
     }

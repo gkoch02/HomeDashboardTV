@@ -102,6 +102,7 @@ struct DashboardScreen: View {
                     case .light: frame(LightCycleView.self, snapshot, now)
                     case .quote: frame(QuoteView.self, snapshot, now)
                     case .night: frame(NightView.self, snapshot, now)
+                    case .skylight: frame(SkylightView.self, snapshot, now)
                     }
     }
 

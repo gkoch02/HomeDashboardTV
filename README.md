@@ -10,14 +10,6 @@ Apple TV yourself with Xcode ([Building it yourself](#building-it-yourself)).
 
 ![The dashboard on an Apple TV 4K, from HomeDashboard's dummy data](docs/dashboard.png)
 
-**Moon** (settings → Layout → Moon) is the Pi's `moonphase_photo` theme, drawn natively: today's
-moon from the photograph, cut by the true terminator with a faint earthshine copy on the dark
-side, three days either side, then moonrise and moonset, sunrise, sunset and the weather, the
-next full or new moon, and the panel's quote, in the panel's own faces. The Pi computes every
-moon value (the `moon` block of `/api/dashboard`); the app only draws it.
-
-![The Moon layout on an Apple TV, from HomeDashboard's dummy data](docs/moon.png)
-
 **Agenda** (settings → Layout → Agenda) is the spiritual successor to the Pi's
 `halftone_agenda`, as a dark plate for a big screen: the weather and its reading on the left,
 the day's agenda on the right, in cream type on warm charcoal with the Pi's Inky spot inks,
@@ -45,31 +37,6 @@ panel's own fallback, an arc between the day's sunrise and sunset.
 
 ![The Horizon layout, from HomeDashboard's dummy data](docs/horizon.png)
 
-**Light Cycle** (settings → Layout → Light Cycle) is the Pi's `light_cycle` theme: today as one
-24-hour dial, midnight at the top. Its band is the sky through the day, coloured by the sun's
-altitude as Horizon colours its sky, with stars in the darkest stretch and a rule at sunrise
-and sunset. Today's timed events ride inside it as arcs over their hours (red while one runs,
-ochre to come, hollow once over), and the sun, or after dark the moon at tonight's phase,
-rides the band at the current minute on a needle from the date at the centre. Beside it:
-sunrise, sunset, the day's length and how much shorter or longer tomorrow is, the weather now
-and the day's agenda. With the Pi's `sun` block the times are the Pi's astronomical ones;
-without it, the weather's sunrise and sunset, and no change for tomorrow.
-
-![The Light Cycle layout, from HomeDashboard's dummy data](docs/light-cycle.png)
-
-**Quote** (settings → Layout → Quote) is the Pi's `qotd` theme: the dashboard's quote of the
-day set as large as it fits in Playfair Display, between oversized ochre quotation marks,
-over a strip of the weather now, the next three days and the moon.
-
-![The Quote layout, from HomeDashboard's dummy data](docs/quote.png)
-
-**Night** (settings → Layout → Night) is the Pi's `wide_night` plate in its inverse,
-`wide_night_invert`, for a dark room: the moon's phase, the temperature, the air-quality
-index and the sky, in dim red on black and nothing else. A mark without data (the AQI on a Pi
-without PurpleAir) is left out and the rest re-spaced.
-
-![The Night layout, from HomeDashboard's dummy data](docs/night.png)
-
 **Skylight** (settings → Layout → Skylight) has no Pi theme behind it; it is drawn for a big
 OLED TV. The top of the screen is the sky outside, live: a Metal shader running at 30 frames a
 second, coloured by the sun's altitude now, with the sun crossing it from sunrise to sunset,
@@ -83,12 +50,17 @@ their ranges, and the sun and moon times.
 
 ![The Skylight layout at dusk, from HomeDashboard's dummy data](docs/skylight.png)
 
-**Fuzzy Clock** (settings → Layout → Fuzzy Clock) is the Pi's `fuzzyclock` theme: the time in
-words ("twenty five to nine", "noon"), snapped to the nearest five minutes and set as large as
-it fits in DM Sans, the minutes gold and the hour blue on black, over the date and a strip of
-the weather now, the next three days and the moon. The words cross-fade when they change.
+**Light Cycle** (settings → Layout → Light Cycle) is the Pi's `light_cycle` theme: today as one
+24-hour dial, midnight at the top. Its band is the sky through the day, coloured by the sun's
+altitude as Horizon colours its sky, with stars in the darkest stretch and a rule at sunrise
+and sunset. Today's timed events ride inside it as arcs over their hours (red while one runs,
+ochre to come, hollow once over), and the sun, or after dark the moon at tonight's phase,
+rides the band at the current minute on a needle from the date at the centre. Beside it:
+sunrise, sunset, the day's length and how much shorter or longer tomorrow is, the weather now
+and the day's agenda. With the Pi's `sun` block the times are the Pi's astronomical ones;
+without it, the weather's sunrise and sunset, and no change for tomorrow.
 
-![The Fuzzy Clock layout, from HomeDashboard's dummy data](docs/fuzzy-clock.png)
+![The Light Cycle layout, from HomeDashboard's dummy data](docs/light-cycle.png)
 
 **Weatherglass** (settings → Layout → Weatherglass) is the Pi's `weatherglass` theme, a deck of
 Victorian instruments drawn as black enamel dials in brass: a thermometer with its cold,
@@ -102,6 +74,34 @@ layout appears.
 
 ![The Weatherglass layout, from HomeDashboard's dummy data](docs/weatherglass.png)
 
+**Fuzzy Clock** (settings → Layout → Fuzzy Clock) is the Pi's `fuzzyclock` theme: the time in
+words ("twenty five to nine", "noon"), snapped to the nearest five minutes and set as large as
+it fits in DM Sans, the minutes gold and the hour blue on black, over the date and a strip of
+the weather now, the next three days and the moon. The words cross-fade when they change.
+
+![The Fuzzy Clock layout, from HomeDashboard's dummy data](docs/fuzzy-clock.png)
+
+**Quote** (settings → Layout → Quote) is the Pi's `qotd` theme: the dashboard's quote of the
+day set as large as it fits in Playfair Display, between oversized ochre quotation marks,
+over a strip of the weather now, the next three days and the moon.
+
+![The Quote layout, from HomeDashboard's dummy data](docs/quote.png)
+
+**Moon** (settings → Layout → Moon) is the Pi's `moonphase_photo` theme, drawn natively: today's
+moon from the photograph, cut by the true terminator with a faint earthshine copy on the dark
+side, three days either side, then moonrise and moonset, sunrise, sunset and the weather, the
+next full or new moon, and the panel's quote, in the panel's own faces. The Pi computes every
+moon value (the `moon` block of `/api/dashboard`); the app only draws it.
+
+![The Moon layout on an Apple TV, from HomeDashboard's dummy data](docs/moon.png)
+
+**Night** (settings → Layout → Night) is the Pi's `wide_night` plate in its inverse,
+`wide_night_invert`, for a dark room: the moon's phase, the temperature, the air-quality
+index and the sky, in dim red on black and nothing else. A mark without data (the AQI on a Pi
+without PurpleAir) is left out and the rest re-spaced.
+
+![The Night layout, from HomeDashboard's dummy data](docs/night.png)
+
 ## What the TV needs
 
 - The Pi's web UI running, with HomeDashboard 6.2 or later (the `/api/dashboard` route):
@@ -114,8 +114,8 @@ On first launch the app opens its settings drawer at **Source**: pick the Pi und
 Network**, or type its address (`dashboard.local`, `192.168.1.20:8080`). **Demo data** shows a
 bundled week with no Pi at all. Click anywhere on the dashboard to open the drawer again;
 Menu goes back a page, then closes it.
-Left and right on the remote step through the layouts (Dashboard, Agenda, Moon, Horizon,
-Light Cycle, Quote, Night, Skylight, Fuzzy Clock, Weatherglass), and
+Left and right on the remote step through the layouts (Dashboard, Agenda, Horizon, Skylight,
+Light Cycle, Weatherglass, Fuzzy Clock, Quote, Moon, Night), and
 the one you land on is remembered.
 
 ## Building it yourself

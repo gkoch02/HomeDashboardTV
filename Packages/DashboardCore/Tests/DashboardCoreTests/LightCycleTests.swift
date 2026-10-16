@@ -82,6 +82,37 @@ final class LightCycleTests: XCTestCase {
         XCTAssertNil(LightCycle.dayLengthChange(fallback, from: day))
     }
 
+    func testTheBandSamplesClockPositionsAcrossDST() {
+        // 2026-03-08 springs forward at 02:00, 2026-11-01 falls back at 02:00.
+        for (iso, day) in [("2026-03-08T00:00:00-05:00", CivilDate(year: 2026, month: 3, day: 8)),
+                           ("2026-11-01T00:00:00-04:00", CivilDate(year: 2026, month: 11, day: 1))] {
+            // Altitude as hours since the sun block's start: a ramp, so a sample names its moment.
+            let sun = SunModel(weather: nil, sun: Sun(start: date(iso), stepMinutes: 15,
+                                                      altitudes: (0...200).map { Double($0) / 4 }, noons: []),
+                               zone: newYork)
+            let band = LightCycle.altitudes(sun, on: day)
+            let clockNoon = Calendar.gregorian(newYork)
+                .date(bySettingHour: 12, minute: 0, second: 0, of: day.start(in: newYork))!
+            XCTAssertEqual(band[12 * 6], clockNoon.timeIntervalSince(date(iso)) / 3600, accuracy: 1e-9,
+                           "the sample at the dial's 12 is the sun at clock noon on \(day)")
+            XCTAssertEqual(band.last!, day.adding(days: 1).start(in: newYork).timeIntervalSince(date(iso)) / 3600,
+                           accuracy: 1e-9, "24:00 is the next midnight")
+        }
+    }
+
+    func testSunTimesNeedTheSamplesToCoverTheDay() throws {
+        let snapshot = try snapshot()
+        let sun = SunModel(snapshot: snapshot)  // four days, from 2026-10-14
+        let lastDay = CivilDate(year: 2026, month: 10, day: 17)
+        XCTAssertTrue(sun.isExact(from: day, through: lastDay))
+        XCTAssertFalse(sun.isExact(from: day, through: lastDay.adding(days: 1)))
+        XCTAssertFalse(sun.isExact(from: day.adding(days: -1), through: day))
+        XCTAssertNotNil(LightCycle.dayLengthChange(sun, from: lastDay.adding(days: -1)))
+        XCTAssertNil(LightCycle.dayLengthChange(sun, from: lastDay), "tomorrow is past the samples")
+        XCTAssertNil(LightCycle.daylight(snapshot, sun: sun, on: lastDay.adding(days: 1)),
+                     "past the samples it falls back to the weather, which is today's only")
+    }
+
     func testFormatsMatchThePanel() {
         XCTAssertEqual(LightCycle.formatChange(112), "+1m 52s")
         XCTAssertEqual(LightCycle.formatChange(-125), "−2m 05s")

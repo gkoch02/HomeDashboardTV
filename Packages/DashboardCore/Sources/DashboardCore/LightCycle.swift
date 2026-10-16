@@ -40,12 +40,21 @@ public enum LightCycle {
             }
     }
 
-    /// The sun's altitude every *stepMinutes* through *day*, from 00:00 to 24:00, for
-    /// colouring the dial's band.
+    /// The sun's altitude at every *stepMinutes* of the clock through *day*, 00:00 to 24:00,
+    /// for colouring the dial's band. Samples sit on clock positions, not elapsed time, so on
+    /// a daylight-saving day the band stays aligned with the dial's hours: a clock time the
+    /// change skips reads the moment just after it, and one it repeats reads the first.
     public static func altitudes(_ sun: SunModel, on day: CivilDate, stepMinutes: Int = 10) -> [Double] {
-        let start = day.start(in: sun.zone)
         let n = 24 * 60 / stepMinutes
-        return (0...n).map { sun.altitude(at: start.addingTimeInterval(Double($0 * stepMinutes * 60))) }
+        return (0...n).map { sun.altitude(at: clockTime(minutes: $0 * stepMinutes, on: day, zone: sun.zone)) }
+    }
+
+    /// The moment *day*'s clock reads *minutes* past midnight; 24:00 is the next midnight.
+    static func clockTime(minutes: Int, on day: CivilDate, zone: TimeZone) -> Date {
+        guard minutes < 24 * 60 else { return day.adding(days: 1).start(in: zone) }
+        let components = DateComponents(year: day.year, month: day.month, day: day.day,
+                                        hour: minutes / 60, minute: minutes % 60)
+        return Calendar.gregorian(zone).date(from: components) ?? day.start(in: zone)
     }
 
     /// Sunrise and sunset on *day*: where the altitude crosses the horizon (-0.833°, the
@@ -76,19 +85,20 @@ public enum LightCycle {
     }
 
     /// Today's sunrise and sunset, as the panel resolves them: from the Pi's altitudes when it
-    /// has coordinates, so the times agree with the band's colours, else the weather's.
+    /// has coordinates and they cover the day, so the times agree with the band's colours,
+    /// else the weather's.
     public static func daylight(_ snapshot: Snapshot, sun: SunModel, on day: CivilDate) -> (rise: Date, set: Date)? {
-        if sun.isExact { return sunTimes(sun, on: day) }
+        if sun.isExact(from: day, through: day) { return sunTimes(sun, on: day) }
         let zone = snapshot.timeZone
         guard let rise = snapshot.sources.weather?.data?.sunrise, let set = snapshot.sources.weather?.data?.sunset,
               CivilDate(rise, in: zone) == day, CivilDate(set, in: zone) == day, set > rise else { return nil }
         return (rise, set)
     }
 
-    /// Tomorrow's daylight minus today's, from the Pi's altitudes. Nil without them: the
-    /// fallback arc has the same day every day, which would read as no change.
+    /// Tomorrow's daylight minus today's, from the Pi's altitudes. Nil unless they cover both
+    /// days: the fallback arc has the same day every day, which would read as no change.
     public static func dayLengthChange(_ sun: SunModel, from day: CivilDate) -> TimeInterval? {
-        guard sun.isExact,
+        guard sun.isExact(from: day, through: day.adding(days: 1)),
               let today = sunTimes(sun, on: day),
               let tomorrow = sunTimes(sun, on: day.adding(days: 1)) else { return nil }
         return tomorrow.set.timeIntervalSince(tomorrow.rise) - today.set.timeIntervalSince(today.rise)

@@ -12,6 +12,8 @@ import SwiftUI
 struct DashboardScreen: View {
     @Environment(DashboardStore.self) private var store
     @FocusState private var screenFocused: Bool
+    /// Which way the last layout change went: -1 left, 1 right, 0 from settings.
+    @State private var step = 0
 
     var body: some View {
         ZStack {
@@ -27,8 +29,8 @@ struct DashboardScreen: View {
                     guard !store.settingsVisible else { return }
                     store.noteInteraction()
                     switch direction {
-                    case .left: store.layout = store.layout.advanced(by: -1)
-                    case .right: store.layout = store.layout.advanced(by: 1)
+                    case .left: change(by: -1)
+                    case .right: change(by: 1)
                     default: break
                     }
                 }
@@ -41,7 +43,18 @@ struct DashboardScreen: View {
         .background(Color(red: 0.05, green: 0.06, blue: 0.09))
         .animation(.easeInOut(duration: 0.25), value: store.settingsVisible)
         .onAppear { claimFocus() }
-        .onChange(of: store.settingsVisible) { _, _ in claimFocus() }
+        .onChange(of: store.settingsVisible) { _, visible in
+            // A pick in settings crossfades; only the remote's steps slide.
+            if visible { step = 0 }
+            claimFocus()
+        }
+    }
+
+    /// Steps the layout, noting the direction a run-loop turn first: the leaving layout takes
+    /// its transition from the last frame it was drawn in, so that frame must carry it.
+    private func change(by steps: Int) {
+        step = steps
+        DispatchQueue.main.async { store.layout = store.layout.advanced(by: steps) }
     }
 
     private func claimFocus() {
@@ -52,19 +65,28 @@ struct DashboardScreen: View {
     private var content: some View {
             TimelineView(.everyMinute) { context in
                 if let snapshot = store.snapshot {
-                    switch store.layout {
-                    case .dashboard: frame(DashboardView.self, snapshot, context.date)
-                    case .agenda: frame(AgendaPlateView.self, snapshot, context.date)
-                    case .moon: frame(MoonView.self, snapshot, context.date)
-                    case .horizon: frame(HorizonView.self, snapshot, context.date)
-                    case .light: frame(LightCycleView.self, snapshot, context.date)
-                    case .quote: frame(QuoteView.self, snapshot, context.date)
-                    case .night: frame(NightView.self, snapshot, context.date)
+                    ZStack {
+                        layout(snapshot, context.date)
+                            .id(store.layout)
+                            .transition(LayoutSlide.transition(step: step))
                     }
+                    .animation(.easeInOut(duration: 0.55), value: store.layout)
                 } else if store.connection != nil {
                     Waiting(problem: store.problem)
                 }
             }
+    }
+
+    @ViewBuilder private func layout(_ snapshot: Snapshot, _ now: Date) -> some View {
+                    switch store.layout {
+                    case .dashboard: frame(DashboardView.self, snapshot, now)
+                    case .agenda: frame(AgendaPlateView.self, snapshot, now)
+                    case .moon: frame(MoonView.self, snapshot, now)
+                    case .horizon: frame(HorizonView.self, snapshot, now)
+                    case .light: frame(LightCycleView.self, snapshot, now)
+                    case .quote: frame(QuoteView.self, snapshot, now)
+                    case .night: frame(NightView.self, snapshot, now)
+                    }
     }
 
     private func frame<T: Theme>(_ theme: T.Type, _ snapshot: Snapshot, _ now: Date) -> some View {
@@ -84,6 +106,30 @@ struct DashboardScreen: View {
             ("Birthdays", sources.birthdays?.staleness),
         ].filter { $0.1?.isWorthFlagging == true }.map(\.0)
         return stale.isEmpty ? nil : "\(ListFormatter.localizedString(byJoining: stale)) not updated lately"
+    }
+}
+
+/// Moving between layouts with the remote: the new one drifts in from the side pressed as
+/// the old one drifts out the other way, both a fraction of the screen, crossfading as they
+/// go. A layout picked in settings (no direction) just crossfades.
+private struct LayoutSlide: ViewModifier {
+    let offset: CGFloat
+
+    func body(content: Content) -> some View {
+        content.offset(x: offset)
+    }
+
+    /// How far a layout travels: enough to read as a move, short of a full push.
+    static let travel: CGFloat = 220
+
+    static func transition(step: Int) -> AnyTransition {
+        let d = CGFloat(step.signum())
+        return .asymmetric(
+            insertion: .modifier(active: LayoutSlide(offset: d * travel), identity: LayoutSlide(offset: 0))
+                .combined(with: .opacity),
+            removal: .modifier(active: LayoutSlide(offset: -d * travel), identity: LayoutSlide(offset: 0))
+                .combined(with: .opacity)
+        )
     }
 }
 

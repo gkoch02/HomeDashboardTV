@@ -19,22 +19,37 @@ struct LightCycleView: Theme {
     private var zone: TimeZone { snapshot.timeZone }
     private var today: CivilDate { CivilDate(now, in: zone) }
 
+    /// The whole screen, so the dial can run nearly to its top and bottom edges: a circle
+    /// leaves the corners empty, and only its rim and the 00 and 12 come near them. The column
+    /// keeps to the overscan-safe margins on its own.
+    static let fullBleed = true
+
     var body: some View {
         GeometryReader { geometry in
             let size = geometry.size
-            let dial = min(size.height, size.width * 0.52)
-            HStack(alignment: .center, spacing: size.width * 0.05) {
+            let dial = min(size.height - 2 * Margin.dial, size.width * 0.55)
+            HStack(alignment: .center, spacing: size.width * 0.04) {
                 Dial(snapshot: snapshot, now: now, day: today)
                     .frame(width: dial, height: dial)
-                Column(snapshot: snapshot, now: now, day: today, height: size.height)
+                Column(snapshot: snapshot, now: now, day: today, height: size.height - 2 * Margin.columnV)
+                    .padding(.vertical, Margin.columnV)
+                    .padding(.trailing, Margin.columnH)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
+            .padding(.leading, Margin.columnH - 20)
             .frame(width: size.width, height: size.height)
         }
-        .padding(.vertical, 10)
     }
 
     var backdrop: some View { Ink.plate }
+}
+
+private enum Margin {
+    /// Above and below the dial's numerals: clear of the 10 pt burn-in drift.
+    static let dial: CGFloat = 22
+    /// tvOS's overscan-safe insets, kept by the column.
+    static let columnV: CGFloat = 60
+    static let columnH: CGFloat = 90
 }
 
 private enum Ink {
@@ -77,7 +92,7 @@ private struct Dial: View {
     var body: some View {
         GeometryReader { geometry in
             let side = min(geometry.size.width, geometry.size.height)
-            let r = side / 2 / 1.17
+            let r = side / 2 / 1.155
             let centre = CGPoint(x: geometry.size.width / 2, y: geometry.size.height / 2)
             let sun = SunModel(snapshot: snapshot)
             let nowHour = LightCycle.hour(now, in: zone)

@@ -55,7 +55,7 @@ struct AgendaPlateView: Theme {
                     .opacity(build.band)
                     .offset(x: 56, y: artHeight + 28 + (1 - build.band) * 24)
 
-                ScreenRule()
+                PaneRule()
                     .frame(width: 10, height: size.height + 48)
                     .wipe(build.rule, from: .top, softness: 0.1)
                     .offset(x: artWidth, y: -24)
@@ -120,25 +120,18 @@ private enum Print {
     static let text = "DMSans-9ptRegular"
 }
 
-/// The full-height rule between the panes: a narrow strip of fine screen.
-private struct ScreenRule: View {
+/// The full-height rule between the panes: a fine line in the ink, fading out toward the
+/// top and bottom of the screen.
+private struct PaneRule: View {
     var body: some View {
-        Canvas { context, size in
-            let p: CGFloat = 4
-            var path = Path()
-            var y: CGFloat = 0
-            var row = 0
-            while y < size.height {
-                var x: CGFloat = row.isMultiple(of: 2) ? 0 : p / 2
-                while x < size.width {
-                    path.addEllipse(in: CGRect(x: x, y: y, width: 2.6, height: 2.6))
-                    x += p
-                }
-                y += p / 2
-                row += 1
-            }
-            context.fill(path, with: .color(Print.ink.opacity(0.35)))
-        }
+        LinearGradient(stops: [
+            .init(color: Print.ink.opacity(0), location: 0),
+            .init(color: Print.ink.opacity(0.6), location: 0.18),
+            .init(color: Print.ink.opacity(0.6), location: 0.82),
+            .init(color: Print.ink.opacity(0), location: 1),
+        ], startPoint: .top, endPoint: .bottom)
+        .frame(width: 3)
+        .frame(maxWidth: .infinity)
     }
 }
 
@@ -415,12 +408,14 @@ private struct BirthdayRow: View {
                 .font(.system(size: 30))
                 .foregroundStyle(Print.red)
                 .frame(width: EventRow.timeWidth, alignment: .trailing)
-            Rectangle().fill(.clear).frame(width: 7)
+            Color.clear.frame(width: 7, height: 1)
             Text(birthday.age.map { "\(birthday.name) turns \($0)" } ?? "\(birthday.name)'s birthday")
                 .font(.custom(Print.text, size: 40).weight(.bold))
                 .foregroundStyle(Print.ink)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
         }
+        // Its own height and no more: without this the row took a share of the pane's slack.
+        .fixedSize(horizontal: false, vertical: true)
     }
 }

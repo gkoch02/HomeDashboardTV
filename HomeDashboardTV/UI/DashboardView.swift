@@ -316,9 +316,11 @@ private struct TodayPanel: View {
     }
 
     /// All *events* rows, then fewer, never one fewer: "+1 more" takes the line the event
-    /// would have.
+    /// would have. The fewer stop at eight, more than the panel's budget ever holds, so a
+    /// flooded calendar costs a handful of measurements rather than one per event.
     private static func layouts(events: Int) -> [(rows: Int, locations: Bool)] {
-        [(events, true), (events, false)] + (0..<max(events - 1, 0)).reversed().map { ($0, false) }
+        [(events, true), (events, false)]
+            + stride(from: min(events - 2, 8), through: 0, by: -1).map { ($0, false) }
     }
 
     private func content(rows: Int, locations: Bool) -> some View {
@@ -433,10 +435,11 @@ private struct DayCard: View {
     let zone: TimeZone
 
     /// All *events* rows, then fewer, never one fewer: "+1 more" takes the line the event
-    /// would have.
+    /// would have. The fewer stop at eight, more than a card ever holds, so a flooded
+    /// calendar costs a handful of measurements rather than one per event.
     private static func layouts(events: Int) -> [(rows: Int, titleLines: Int, nameLines: Int)] {
         [(events, 2, 2), (events, 1, 2), (events, 1, 1)]
-            + (0..<max(events - 1, 0)).reversed().map { ($0, 1, 1) }
+            + stride(from: min(events - 2, 8), through: 0, by: -1).map { ($0, 1, 1) }
     }
 
     var body: some View {

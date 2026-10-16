@@ -66,6 +66,7 @@ struct SettingsView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+            .drawerMargins()
             .navigationDestination(for: Page.self) { page in
                 switch page {
                 case .layout:
@@ -82,8 +83,7 @@ struct SettingsView: View {
                 }
             }
         }
-        // Inset, so a focused row's lift and highlight stay inside the drawer.
-        .padding(.horizontal, 28)
+        .padding(.horizontal, 40)
         .padding(.vertical, 24)
         .frame(width: Self.width)
         .background(.thickMaterial)
@@ -168,6 +168,7 @@ struct SettingsView: View {
                 .accessibilityLabel(title(option))
             }
         }
+        .drawerMargins()
         .navigationTitle(name)
         .onAppear { DispatchQueue.main.async { focus = .firstChoice } }
     }
@@ -239,6 +240,7 @@ struct SettingsView: View {
                         .foregroundStyle(.secondary)
             }
         }
+        .drawerMargins()
         .navigationTitle("Source")
         .onAppear {
             DispatchQueue.main.async { focus = .firstSource }
@@ -310,5 +312,14 @@ struct SettingsView: View {
         addressError = nil
         store.connect(.server(url))
         store.settingsVisible = false
+    }
+}
+
+private extension View {
+    /// A drawer list's scroll view crops whatever leaves its bounds, which cut a focused row's
+    /// lifted pill off flat at both ends. The lists are inset from the drawer's edge (and too
+    /// short to scroll), so they draw unclipped and only the drawer's rounded edge clips.
+    func drawerMargins() -> some View {
+        scrollClipDisabled()
     }
 }

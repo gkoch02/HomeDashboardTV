@@ -398,18 +398,6 @@ private enum Clock {
     static let minHeight: CGFloat = 90
     /// DM Sans's line box over its size: the clock's height for a given size.
     static let lineHeight: CGFloat = 1.3
-
-    /// "11:42" and "PM" in a 12-hour locale, "23:42" and nil in a 24-hour one.
-    static func parts(_ now: Date, in zone: TimeZone) -> (time: String, period: String?) {
-        var cal = Calendar(identifier: .gregorian)
-        cal.timeZone = zone
-        let c = cal.dateComponents([.hour, .minute], from: now)
-        let hour = c.hour ?? 0
-        let minute = c.minute ?? 0
-        let twelve = DateFormatter.dateFormat(fromTemplate: "j", options: 0, locale: .current)?.contains("a") ?? true
-        guard twelve else { return (String(format: "%02d:%02d", hour, minute), nil) }
-        return (String(format: "%d:%02d", hour % 12 == 0 ? 12 : hour % 12, minute), hour < 12 ? "AM" : "PM")
-    }
 }
 
 // MARK: Build-in pieces
@@ -648,7 +636,7 @@ private struct Column: View {
     /// long agenda leaves less height, and the clock shrinks with it. The minute redraws keep
     /// it current. A 12-hour locale gets a small ochre AM or PM after the figures.
     private func clock(fitting space: CGSize) -> some View {
-        let parts = Clock.parts(now, in: zone)
+        let parts = ClockTime.parts(now, in: zone)
         let size = max(24, min(Clock.maxSize, space.height / Clock.lineHeight))
         var text = Text(parts.time)
             .font(.custom(Face.sans, size: size).weight(.light))

@@ -736,7 +736,7 @@ private struct EventsBand: View {
 
 // MARK: - The hero column
 
-/// The conditions now, the outlook, and when the Pi last read the weather.
+/// The conditions now, the time, the outlook, and when the Pi last read the weather.
 private struct HeroColumn: View {
     let snapshot: Snapshot
     let now: Date
@@ -757,7 +757,11 @@ private struct HeroColumn: View {
                     .foregroundStyle(Ink.cream)
             }
             Spacer(minLength: 20)
+            clock
+            Spacer(minLength: 20)
+            // The outlook keeps its size; the clock gives way to it.
             outlook
+                .fixedSize(horizontal: false, vertical: true)
             foot
                 .padding(.top, 22)
         }
@@ -769,6 +773,7 @@ private struct HeroColumn: View {
             .font(.custom(Face.black, size: 230))
             .lineLimit(1)
             .minimumScaleFactor(0.5)
+            .fixedSize(horizontal: false, vertical: true)  // the clock gives way, not the reading
             .padding(.top, -14)
             .padding(.bottom, -22)
         Text(w.currentDescription.uppercased())
@@ -806,6 +811,25 @@ private struct HeroColumn: View {
                 .background(Ink.red)
                 .padding(.top, 18)
         }
+    }
+
+    /// The time now, in the column's display face, centred in the room between the reading
+    /// and the outlook and shrinking when that room is short; the minute redraws keep it
+    /// current. A 12-hour locale gets a small yellow AM or PM.
+    private var clock: some View {
+        let parts = ClockTime.parts(now, in: axis.zone)
+        var text = Text(parts.time)
+            .font(.custom(Face.black, size: 120))
+        if let period = parts.period {
+            text = text + Text(" " + period)
+                .font(.custom(Face.label, size: 26).weight(.bold))
+                .tracking(2)
+                .foregroundColor(Ink.yellow)
+        }
+        return text
+            .lineLimit(1)
+            .minimumScaleFactor(0.4)
+            .frame(maxHeight: 150, alignment: .leading)
     }
 
     private func extras(_ w: Weather) -> String? {

@@ -34,6 +34,10 @@ float fbm(float2 p, int octaves) {
     return value;
 }
 
+/// *v* folded into 0..<1024: precipitation phases wrap at 1024 cells, and a cell's id folded
+/// the same way hashes alike either side of the wrap, so the fall never jumps.
+float fold(float v) { return v - 1024.0 * floor(v / 1024.0); }
+
 /// A ridge line's height at *x*, 0 to about 1: one-dimensional fractal noise.
 float ridge(float x, float seed) {
     float value = 0.0;
@@ -52,7 +56,12 @@ float ridge(float x, float seed) {
 }  // namespace skylight
 
 /// - size: the view, in points.
-/// - time: seconds, for the motion; wraps daily.
+/// - time: seconds, wrapping hourly: what moves in a cycle (the stars' twinkle, the snow's sway,
+///   the lightning) runs at rates that fit an hour exactly, so the wrap is seamless.
+/// - clouds: how far the cloud has drifted with the wind (x) and changed shape (y, z), summed
+///   frame by frame in Swift so a change of wind changes its speed, not its place.
+/// - rain: each layer's fall, in cells, folded at 1024 (`fold`).
+/// - snow: each layer's fall, and the wind's sideways carry (w), likewise folded.
 /// - zenith, horizon: the sky's colours at the top and at the horizon.
 /// - glow: the sun's glow colour.
 /// - sun: its centre (x, y), radius, and how much of the disc shows (0 below the horizon or
@@ -65,7 +74,7 @@ float ridge(float x, float seed) {
 /// - motion: the wind's push (x), and the burn-in drift (z, w) the ridges move with, so
 ///   their edge never holds one place.
 [[ stitchable ]] half4 skylightSky(float2 pos, half4 current,
-                                   float2 size, float time,
+                                   float2 size, float time, float4 clouds, float4 rain4, float4 snow4,
                                    half4 zenith, half4 horizon, half4 glow,
                                    float4 sun, float4 light, float4 weather,
                                    half4 cloudLit, half4 cloudShade,
@@ -106,8 +115,10 @@ float ridge(float x, float seed) {
         if (h > 0.986) {
             float2 centre = (cell + 0.2 + 0.6 * float2(hash(cell + 3.1), hash(cell + 7.7))) * 7.0;
             float r = 0.45 + 1.15 * fract(h * 91.0) * fract(h * 37.0);
-            float spot = smoothstep(r + 0.75, r - 0.45, length(pos - centre));
-            float twinkle = 0.7 + 0.3 * sin(time * (0.7 + 2.0 * fract(h * 13.0)) + h * 80.0);
+            float spot = 1.0 - smoothstep(r - 0.45, r + 0.75, length(pos - centre));
+            // A whole number of cycles an hour, from about 0.7 to 2.7 radians a second.
+            float rate = 6.2831853 * (400.0 + floor(1150.0 * fract(h * 13.0))) / 3600.0;
+            float twinkle = 0.7 + 0.3 * sin(time * rate + h * 80.0);
             col += float3(0.92, 0.95, 1.0) * spot * twinkle * light.z * (1.0 - 0.75 * ty);
         }
     }
@@ -115,7 +126,7 @@ float ridge(float x, float seed) {
     // The sun's disc.
     if (sun.w > 0.0) {
         float d = length(toSun);
-        float disc = smoothstep(sun.z + 1.2, sun.z - 1.2, d);
+        float disc = 1.0 - smoothstep(sun.z - 1.2, sun.z + 1.2, d);
         col = mix(col, float3(1.0, 0.97, 0.9), disc * sun.w);
     }
 
@@ -125,8 +136,8 @@ float ridge(float x, float seed) {
     if (cover > 0.0) {
         float persp = mix(1.0, 3.4, ty * ty);
         float2 q = float2(x / size.y * 1.4, pos.y / size.y * 3.0 * persp);
-        q.x -= time * drift * 0.007;
-        float2 evolve = float2(time * 0.0021, -time * 0.0013);
+        q.x -= clouds.x;
+        float2 evolve = float2(clouds.y, -clouds.z);
         float n = fbm(q * 1.6 + evolve, 5);
         float density = smoothstep(0.75 - 0.55 * cover, 0.97 - 0.55 * cover, n);
         if (density > 0.001) {
@@ -170,14 +181,15 @@ float ridge(float x, float seed) {
             float s = 1.0 + float(layer) * 0.7;
             float2 cellSize = float2(12.0, 74.0) * s;
             float2 g = rp / cellSize;
-            g.y -= time * (13.0 + 3.0 * float(layer)) / s;
+            g.y -= rain4[layer];
             g.x += float(layer) * 0.37;
             float2 id = floor(g);
+            id.y = fold(id.y);
             if (hash(id + float(layer) * 17.0) < rain * 0.55) {
                 float2 f = fract(g);
                 float off = (f.x - (0.25 + 0.5 * hash(id + 1.7))) * cellSize.x;
-                float streak = smoothstep(0.6 + 0.4 * s, 0.0, abs(off))
-                    * smoothstep(0.15, 0.45, f.y) * smoothstep(0.95, 0.6, f.y);
+                float streak = (1.0 - smoothstep(0.0, 0.6 + 0.4 * s, abs(off)))
+                    * smoothstep(0.15, 0.45, f.y) * (1.0 - smoothstep(0.6, 0.95, f.y));
                 col += float3(0.72, 0.78, 0.88) * streak * (0.16 + 0.08 * float(layer)) * (0.6 + 0.4 * float(horizon.g + 0.3));
             }
         }
@@ -189,14 +201,15 @@ float ridge(float x, float seed) {
             float s = 1.0 + float(layer) * 0.8;
             float cellSize = 36.0 * s;
             float2 g = pos / cellSize;
-            g.y -= time * (0.32 + 0.14 * float(layer));
-            g.x += time * drift * 0.12 + sin(time * 0.6 + g.y * 2.1 + float(layer) * 1.7) * 0.14;
+            g.y -= snow4[layer];
+            g.x += snow4.w + sin(time * 0.62831853 + g.y * 2.1 + float(layer) * 1.7) * 0.14;
             float2 id = floor(g);
+            id = float2(fold(id.x), fold(id.y));
             if (hash(id + float(layer) * 23.0) < snow * 0.6) {
                 float2 f = fract(g);
                 float2 centre = 0.25 + 0.5 * float2(hash(id + 4.2), hash(id + 9.1));
                 float r = 1.1 + 0.9 * float(layer);
-                float flake = smoothstep(r + 0.9, r - 0.6, length((f - centre) * cellSize));
+                float flake = 1.0 - smoothstep(r - 0.6, r + 0.9, length((f - centre) * cellSize));
                 col += float3(0.94, 0.96, 1.0) * flake * (0.5 + 0.18 * float(layer));
             }
         }
@@ -204,7 +217,7 @@ float ridge(float x, float seed) {
 
     // Darker behind the text: the clock and agenda on the left, the weather on the right.
     float u = pos.x / size.x;
-    float shade = mix(0.5, 1.0, smoothstep(0.0, 0.44, u)) * mix(0.68, 1.0, smoothstep(1.0, 0.74, u));
+    float shade = mix(0.5, 1.0, smoothstep(0.0, 0.44, u)) * mix(0.68, 1.0, 1.0 - smoothstep(0.74, 1.0, u));
     col *= mix(shade, 1.0, flash * 0.5);
 
     // A step of dither breaks up banding in the long dark gradients.

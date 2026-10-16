@@ -108,6 +108,7 @@ private struct SkyBackdrop: View {
     let now: Date
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var clock = SkyClock()
 
     var body: some View {
         let sky = Skylight.sky(snapshot, now: now)
@@ -120,12 +121,12 @@ private struct SkyBackdrop: View {
             let drift = BurnIn.drift(at: now)
             ZStack(alignment: .topLeading) {
                 TimelineView(.animation(minimumInterval: 1.0 / 30, paused: reduceMotion)) { context in
-                    let time = Float(context.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 86_400))
+                    let motion = clock.advance(to: context.date, drift: sky.drift)
                     Rectangle()
                         .fill(.black)
                         .colorEffect(ShaderLibrary.skylightSky(
                             .float2(size),
-                            .float(time),
+                            .float(motion.time), vector(motion.clouds), vector(motion.rain), vector(motion.snow),
                             .color(palette.zenith), .color(palette.horizon), .color(palette.glow),
                             .float4(Float(sun.centre.x), Float(sun.centre.y), Float(sun.radius), Float(sun.shown)),
                             .float4(Float(palette.glowStrength), Float(palette.twilight), Float(palette.stars),
@@ -166,6 +167,39 @@ private struct SkyBackdrop: View {
         return (CGPoint(x: x, y: y), 24, sky.hidesBodies ? 0 : up * (1 - 0.6 * sky.cover))
     }
 }
+
+/// The sky's motion, summed frame by frame in doubles: how far the cloud has drifted and
+/// changed shape, and how far each layer of rain and snow has fallen. Summing, rather than
+/// multiplying the time by the wind, means a new wind changes the cloud's speed and never
+/// jumps it to another place. The falls fold at 1024 cells, as the shader's ids do, and the
+/// cyclic clock at an hour, so nothing in the sky ever jumps; the cloud's sums stay small
+/// enough for the shader's floats over weeks.
+private final class SkyClock {
+    private var last: Date?
+    private var cloud = 0.0, evolve = 0.0
+    private var rain = [0.0, 0.0, 0.0], snow = [0.0, 0.0, 0.0], carry = 0.0
+
+    func advance(to date: Date, drift: Double) -> (time: Float, clouds: SIMD4<Float>, rain: SIMD4<Float>, snow: SIMD4<Float>) {
+        // A gap (the app in the background, a paused timeline) resumes from where it stopped.
+        let dt = last.map { min(max(date.timeIntervalSince($0), 0), 0.25) } ?? 0
+        last = date
+        cloud += dt * drift * 0.007
+        evolve += dt
+        for layer in 0..<3 {
+            let s = 1 + Double(layer) * 0.7
+            rain[layer] = (rain[layer] + dt * (13 + 3 * Double(layer)) / s).truncatingRemainder(dividingBy: 1024)
+            snow[layer] = (snow[layer] + dt * (0.32 + 0.14 * Double(layer))).truncatingRemainder(dividingBy: 1024)
+        }
+        carry = (carry + dt * drift * 0.12).truncatingRemainder(dividingBy: 1024)
+        let time = Float(date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 3600))
+        return (time,
+                SIMD4(Float(cloud), Float(evolve * 0.0021), Float(evolve * 0.0013), 0),
+                SIMD4(Float(rain[0]), Float(rain[1]), Float(rain[2]), 0),
+                SIMD4(Float(snow[0]), Float(snow[1]), Float(snow[2]), Float(carry)))
+    }
+}
+
+private func vector(_ v: SIMD4<Float>) -> Shader.Argument { .float4(v.x, v.y, v.z, v.w) }
 
 /// Where the sun and moon cross the sky: the open middle between the agenda and the weather,
 /// so neither ever sits behind text. Rise is on the left, set on the right.

@@ -745,10 +745,14 @@ private struct Outlook: View {
                             .font(.system(size: 26, weight: .semibold))
                             .foregroundStyle(Ink.text)
                         Spacer(minLength: 0)
+                        // One box for every symbol: a tall one (rain under a cloud) pushed its
+                        // day's bar and figures below the others'.
                         Image(systemName: WeatherSymbol.name(for: day.icon))
                             .symbolRenderingMode(.multicolor)
                             .font(.system(size: 28))
+                            .frame(width: 40, height: 32)
                     }
+                    .frame(height: 32)
                     RangeBar(low: day.low, high: day.high, weekLow: lo, weekHigh: hi, isMetric: isMetric)
                         .frame(height: 6)
                     HStack {

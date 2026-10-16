@@ -224,7 +224,7 @@ private struct SkyArt: View, Equatable {
             let haze = alt > 0 ? min(1, alt / 15) * 0.45 : 0
             for j in 0..<h {
                 let frac = Double(j) / Double(h - 1)
-                var c = skyColour(alt + horizonGlow * frac)
+                var c = SkyColour.rgb(alt + horizonGlow * frac)
                 let k = haze * frac * frac
                 c = (c.0 + (0.72 - c.0) * k, c.1 + (0.82 - c.1) * k, c.2 + (0.93 - c.2) * k)
                 let o = (j * w + i) * 4
@@ -238,30 +238,6 @@ private struct SkyArt: View, Equatable {
         return CGImage(width: w, height: h, bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: w * 4,
                        space: space, bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.noneSkipLast.rawValue),
                        provider: provider, decode: nil, shouldInterpolate: true, intent: .defaultIntent)
-    }
-
-    /// Day blue through gold, orange and plum to night, by altitude in degrees.
-    private static let stops: [(h: Double, c: (Double, Double, Double))] = [
-        (60, (0.10, 0.33, 0.66)),
-        (25, (0.20, 0.47, 0.80)),
-        (12, (0.46, 0.67, 0.89)),
-        (5, (0.93, 0.80, 0.62)),
-        (1, (0.99, 0.65, 0.36)),
-        (-2, (0.93, 0.44, 0.30)),
-        (-5, (0.68, 0.29, 0.38)),
-        (-8, (0.34, 0.19, 0.39)),
-        (-12, (0.13, 0.12, 0.29)),
-        (-16, (0.05, 0.06, 0.15)),
-        (-90, (0.025, 0.03, 0.08)),
-    ]
-
-    static func skyColour(_ h: Double) -> (Double, Double, Double) {
-        if h >= stops[0].h { return stops[0].c }
-        for (a, b) in zip(stops, stops.dropFirst()) where h >= b.h {
-            let t = (h - b.h) / (a.h - b.h)
-            return (b.c.0 + (a.c.0 - b.c.0) * t, b.c.1 + (a.c.1 - b.c.1) * t, b.c.2 + (a.c.2 - b.c.2) * t)
-        }
-        return stops[stops.count - 1].c
     }
 
     // MARK: Stars, midnights, the sun
@@ -837,16 +813,10 @@ private struct HeroColumn: View {
         if let feels = w.feelsLike { parts.append("Feels \(Int(feels.rounded()))°") }
         if let speed = w.windSpeed {
             var wind = "\(Int(speed.rounded())) \(snapshot.isMetric ? "m/s" : "mph")"
-            if let deg = w.windDeg { wind += " \(Self.compass(deg))" }
+            if let deg = w.windDeg { wind += " \(Compass.point(deg))" }
             parts.append(wind)
         }
         return parts.isEmpty ? nil : parts.joined(separator: "  ·  ")
-    }
-
-    static func compass(_ deg: Double) -> String {
-        let points = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
-        let i = Int((deg.truncatingRemainder(dividingBy: 360) + 360).truncatingRemainder(dividingBy: 360) / 22.5 + 0.5) % 16
-        return points[i]
     }
 
     @ViewBuilder private var outlook: some View {

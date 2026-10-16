@@ -40,6 +40,9 @@
 		<string>BigShouldersDisplay-Black.ttf</string>
 		<string>BigShouldersDisplay-ExtraBold.ttf</string>
 		<string>Figtree-ExtraBold.ttf</string>
+		<string>PlayfairDisplay-Bold.ttf</string>
+		<string>Jura-Variable.ttf</string>
+		<string>Oxanium-Variable.ttf</string>
 	</array>
 	<key>UILaunchScreen</key>
 	<dict>

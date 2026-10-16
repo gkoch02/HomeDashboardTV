@@ -57,6 +57,9 @@ struct DashboardScreen: View {
                     case .agenda: frame(AgendaPlateView.self, snapshot, context.date)
                     case .moon: frame(MoonView.self, snapshot, context.date)
                     case .horizon: frame(HorizonView.self, snapshot, context.date)
+                    case .light: frame(LightCycleView.self, snapshot, context.date)
+                    case .quote: frame(QuoteView.self, snapshot, context.date)
+                    case .night: frame(NightView.self, snapshot, context.date)
                     }
                 } else if store.connection != nil {
                     Waiting(problem: store.problem)

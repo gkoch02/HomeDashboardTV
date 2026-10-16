@@ -19,3 +19,12 @@ public enum WeatherSymbol {
         }
     }
 }
+
+/// The sixteen-point compass name for a wind bearing in degrees: "NW", "SSE".
+public enum Compass {
+    public static func point(_ deg: Double) -> String {
+        let points = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
+        let i = Int((deg.truncatingRemainder(dividingBy: 360) + 360).truncatingRemainder(dividingBy: 360) / 22.5 + 0.5) % 16
+        return points[i]
+    }
+}

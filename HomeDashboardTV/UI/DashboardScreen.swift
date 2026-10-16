@@ -12,8 +12,14 @@ import SwiftUI
 struct DashboardScreen: View {
     @Environment(DashboardStore.self) private var store
     @FocusState private var screenFocused: Bool
-    /// Which way the last layout change went: -1 left, 1 right, 0 from settings.
-    @State private var step = 0
+    /// The slide between layouts: the layout leaving, which way the press went (-1 left,
+    /// 1 right), and how far along it is, 0 to 1. Only `progress` animates.
+    @State private var leaving: DashboardStore.Layout?
+    @State private var direction: CGFloat = 0
+    @State private var progress: CGFloat = 1
+    /// Counts slides, so one cut short by the next press does not clear the next one's
+    /// leaving layout when its own animation finishes.
+    @State private var slide = 0
 
     var body: some View {
         ZStack {
@@ -43,18 +49,28 @@ struct DashboardScreen: View {
         .background(Color(red: 0.05, green: 0.06, blue: 0.09))
         .animation(.easeInOut(duration: 0.25), value: store.settingsVisible)
         .onAppear { claimFocus() }
-        .onChange(of: store.settingsVisible) { _, visible in
-            // A pick in settings crossfades; only the remote's steps slide.
-            if visible { step = 0 }
-            claimFocus()
-        }
+        .onChange(of: store.settingsVisible) { _, _ in claimFocus() }
     }
 
-    /// Steps the layout, noting the direction a run-loop turn first: the leaving layout takes
-    /// its transition from the last frame it was drawn in, so that frame must carry it.
+    /// Steps the layout and slides to it. Everything about the slide is set in this one
+    /// update, so the leaving layout and the arriving one always agree on the direction; a
+    /// press during a slide starts the next from where the screen now stands.
     private func change(by steps: Int) {
-        step = steps
-        DispatchQueue.main.async { store.layout = store.layout.advanced(by: steps) }
+        var instant = Transaction()
+        instant.disablesAnimations = true
+        withTransaction(instant) {
+            leaving = store.layout
+            direction = CGFloat(steps.signum())
+            progress = 0
+            store.layout = store.layout.advanced(by: steps)
+            slide += 1
+        }
+        let this = slide
+        withAnimation(.easeInOut(duration: LayoutSlide.duration)) {
+            progress = 1
+        } completion: {
+            if slide == this { leaving = nil }
+        }
     }
 
     private func claimFocus() {
@@ -66,19 +82,25 @@ struct DashboardScreen: View {
             TimelineView(.everyMinute) { context in
                 if let snapshot = store.snapshot {
                     ZStack {
-                        layout(snapshot, context.date)
+                        if let leaving, leaving != store.layout {
+                            layout(leaving, snapshot, context.date)
+                                .id(leaving)
+                                .offset(x: -direction * LayoutSlide.travel * progress)
+                                .opacity(1 - progress)
+                        }
+                        layout(store.layout, snapshot, context.date)
                             .id(store.layout)
-                            .transition(LayoutSlide.transition(step: step))
+                            .offset(x: direction * LayoutSlide.travel * (1 - progress))
+                            .opacity(leaving == nil ? 1 : progress)
                     }
-                    .animation(.easeInOut(duration: 0.55), value: store.layout)
                 } else if store.connection != nil {
                     Waiting(problem: store.problem)
                 }
             }
     }
 
-    @ViewBuilder private func layout(_ snapshot: Snapshot, _ now: Date) -> some View {
-                    switch store.layout {
+    @ViewBuilder private func layout(_ layout: DashboardStore.Layout, _ snapshot: Snapshot, _ now: Date) -> some View {
+                    switch layout {
                     case .dashboard: frame(DashboardView.self, snapshot, now)
                     case .agenda: frame(AgendaPlateView.self, snapshot, now)
                     case .moon: frame(MoonView.self, snapshot, now)
@@ -111,26 +133,13 @@ struct DashboardScreen: View {
 
 /// Moving between layouts with the remote: the new one drifts in from the side pressed as
 /// the old one drifts out the other way, both a fraction of the screen, crossfading as they
-/// go. A layout picked in settings (no direction) just crossfades.
-private struct LayoutSlide: ViewModifier {
-    let offset: CGFloat
-
-    func body(content: Content) -> some View {
-        content.offset(x: offset)
-    }
-
+/// go. Driven by one animated `progress` on the two layers' offset and opacity alone, not by
+/// SwiftUI transitions: an implicit animation also animated each layout's own insides as
+/// they were laid out, and a removal transition keeps the direction of the frame before.
+private enum LayoutSlide {
     /// How far a layout travels: enough to read as a move, short of a full push.
     static let travel: CGFloat = 220
-
-    static func transition(step: Int) -> AnyTransition {
-        let d = CGFloat(step.signum())
-        return .asymmetric(
-            insertion: .modifier(active: LayoutSlide(offset: d * travel), identity: LayoutSlide(offset: 0))
-                .combined(with: .opacity),
-            removal: .modifier(active: LayoutSlide(offset: -d * travel), identity: LayoutSlide(offset: 0))
-                .combined(with: .opacity)
-        )
-    }
+    static let duration = 0.55
 }
 
 private struct Waiting: View {

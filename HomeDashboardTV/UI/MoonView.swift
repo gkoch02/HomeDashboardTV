@@ -10,8 +10,9 @@ import SwiftUI
 /// type, set in the panel's own faces, stays sharp at 4K. All moon values come from the Pi's
 /// `moon` block; nothing astronomical is computed here.
 ///
-/// As the layout appears, today's moon rises out of the dark, the days either side follow
-/// outward, and the words settle in after them.
+/// As the layout appears, today's moon comes slowly out of the dark, growing and sharpening
+/// into focus; once it has landed the days either side follow outward, and the words settle
+/// in after them.
 struct MoonView: Theme {
     let snapshot: Snapshot
     let now: Date
@@ -38,13 +39,13 @@ struct MoonView: Theme {
             .frame(width: geometry.size.width, height: geometry.size.height)
         }
         .onBuildIn(reset: { settled in build = settled ? .settled : .start }) {
-            withAnimation(.easeOut(duration: 1.4).delay(0.1)) { build.days[0] = 1 }
+            withAnimation(.timingCurve(0.3, 0, 0.2, 1, duration: 2.8).delay(0.2)) { build.days[0] = 1 }
             for ring in 1...3 {
-                withAnimation(.easeOut(duration: 0.6).delay(0.75 + 0.18 * Double(ring))) { build.days[ring] = 1 }
+                withAnimation(.easeOut(duration: 0.6).delay(2.6 + 0.2 * Double(ring))) { build.days[ring] = 1 }
             }
-            withAnimation(.easeOut(duration: 0.7).delay(1.2)) { build.header = 1 }
-            withAnimation(.easeInOut(duration: 0.8).delay(1.35)) { build.rule = 1 }
-            withAnimation(.easeOut(duration: 0.8).delay(1.6)) { build.block = 1 }
+            withAnimation(.easeOut(duration: 0.8).delay(3.0)) { build.header = 1 }
+            withAnimation(.easeInOut(duration: 0.8).delay(3.2)) { build.rule = 1 }
+            withAnimation(.easeOut(duration: 0.8).delay(3.4)) { build.block = 1 }
         }
     }
 
@@ -84,9 +85,12 @@ struct MoonView: Theme {
             ForEach(row, id: \.0) { offset, r, x in
                 if let day = moon.days[safe: offset + 3] {
                     let shown = build.days[abs(offset)]
-                    MoonDisc(fraction: day.fraction, radius: r * s, halo: offset == 0)
-                        .scaleEffect(0.9 + 0.1 * shown)
-                        .opacity(shown)
+                    // Today's grows from further back and comes into focus; the rest just fade up.
+                    let today = offset == 0
+                    MoonDisc(fraction: day.fraction, radius: r * s, halo: today)
+                        .scaleEffect(today ? 0.72 + 0.28 * shown : 0.9 + 0.1 * shown)
+                        .blur(radius: today ? (1 - shown) * 14 * s : 0)
+                        .opacity(today ? min(1, shown * 1.6) : shown)
                         .position(x: (400 + x) * s, y: cy * s)
                     if offset != 0 {
                         Text(weekday(day.date))

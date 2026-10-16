@@ -15,13 +15,15 @@ import SwiftUI
 /// labels.
 ///
 /// As the layout appears the 72 hours unroll left to right along their axis, sky, rain and
-/// events together, and the column's sections rise in beside them.
+/// events together, and the column's sections rise in beside them; then the temperature line
+/// draws itself across, its highs and lows landing as it reaches them.
 struct HorizonView: Theme {
     let snapshot: Snapshot
     let now: Date
 
     @State private var unroll = 0.0
     @State private var column = 0.0
+    @State private var line = 0.0
 
     static let fullBleed = true
 
@@ -35,9 +37,15 @@ struct HorizonView: Theme {
             let slots = Horizon.slots(weather: weather, axis: axis)
             ZStack(alignment: .topLeading) {
                 ZStack(alignment: .topLeading) {
-                SkyArt(model: SkyModel(snapshot: snapshot, axis: axis, slots: slots), size: g.skySize)
+                let model = SkyModel(snapshot: snapshot, axis: axis, slots: slots)
+                SkyArt(model: model, size: g.skySize)
                     .equatable()
                     .frame(width: g.skySize.width, height: g.skySize.height)
+                    .offset(x: g.axisX0, y: g.skyY0)
+                SkyArt(model: model, size: g.skySize, layer: .temperature)
+                    .equatable()
+                    .frame(width: g.skySize.width, height: g.skySize.height)
+                    .wipe(line, softness: 0.06)
                     .offset(x: g.axisX0, y: g.skyY0)
 
                 DayHeaders(axis: axis, now: now, g: g)
@@ -61,9 +69,10 @@ struct HorizonView: Theme {
                     .offset(x: -24, y: -24)
             }
         }
-        .onBuildIn(reset: { settled in unroll = settled ? 1 : 0; column = unroll }) {
+        .onBuildIn(reset: { settled in unroll = settled ? 1 : 0; column = unroll; line = unroll }) {
             withAnimation(.linear(duration: 1.3).delay(0.05)) { column = 1 }
             withAnimation(.easeInOut(duration: 2.0).delay(0.25)) { unroll = 1 }
+            withAnimation(.easeInOut(duration: 2.2).delay(2.3)) { line = 1 }
         }
     }
 
@@ -171,12 +180,27 @@ private struct SkyModel: Equatable {
 private let horizonGlow = 12.0
 
 private struct SkyArt: View, Equatable {
+    /// The sky with its weather, or the temperature line over it: apart, so the line can draw
+    /// itself in after the rest.
+    enum Layer { case sky, temperature }
+
     let model: SkyModel
     let size: CGSize
+    var layer = Layer.sky
 
-    static func == (a: SkyArt, b: SkyArt) -> Bool { a.model == b.model && a.size == b.size }
+    static func == (a: SkyArt, b: SkyArt) -> Bool { a.model == b.model && a.size == b.size && a.layer == b.layer }
 
     var body: some View {
+        if layer == .temperature {
+            Canvas(rendersAsynchronously: false) { context, _ in temperature(&context) }
+                .frame(width: size.width, height: size.height)
+                .clipped()
+        } else {
+            sky
+        }
+    }
+
+    private var sky: some View {
         ZStack(alignment: .topLeading) {
             if let image = Self.skyImage(model, size: size) {
                 Image(decorative: image, scale: 1)
@@ -201,7 +225,6 @@ private struct SkyArt: View, Equatable {
             }
             Canvas(rendersAsynchronously: false) { context, _ in
                 weather(&context)
-                temperature(&context)
             }
         }
         .frame(width: size.width, height: size.height)

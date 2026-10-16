@@ -415,25 +415,6 @@ private struct Orbit: GeometryEffect {
     }
 }
 
-/// One section of the column rising into place: the *index*th starts a beat after the one
-/// before, all driven by one progress.
-private struct Rise: ViewModifier, Animatable {
-    var progress: Double
-    let index: Int
-    var animatableData: Double {
-        get { progress }
-        set { progress = newValue }
-    }
-
-    func body(content: Content) -> some View {
-        let local = min(1, max(0, (progress - Double(index) * 0.13) / 0.35))
-        let eased = 1 - pow(1 - local, 3)
-        return content
-            .opacity(eased)
-            .offset(y: (1 - eased) * 28)
-    }
-}
-
 // MARK: - The column
 
 private struct Column: View {
@@ -453,21 +434,21 @@ private struct Column: View {
                 heading
                 rule.padding(.top, 16)
             }
-            .modifier(Rise(progress: rise, index: 0))
+            .rise(rise, index: 0)
             sunRow.padding(.top, 26)
-                .modifier(Rise(progress: rise, index: 1))
+                .rise(rise, index: 1)
             if let weather {
                 VStack(alignment: .leading, spacing: 0) {
                     rule.padding(.top, 26)
                     reading(weather).padding(.top, 26)
                 }
-                .modifier(Rise(progress: rise, index: 2))
+                .rise(rise, index: 2)
             }
             VStack(alignment: .leading, spacing: 0) {
                 rule.padding(.top, 26)
                 agenda.padding(.top, 24)
             }
-            .modifier(Rise(progress: rise, index: 3))
+            .rise(rise, index: 3)
             // The clock takes whatever height the agenda leaves, centred in it.
             GeometryReader { space in
                 clock(fitting: space.size)
@@ -475,7 +456,7 @@ private struct Column: View {
             }
             .padding(.top, 20)
             .frame(minHeight: Clock.minHeight)
-            .modifier(Rise(progress: rise, index: 4))
+            .rise(rise, index: 4)
         }
         .foregroundStyle(Ink.cream)
         .padding(.vertical, 24)

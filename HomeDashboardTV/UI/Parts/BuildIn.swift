@@ -17,6 +17,12 @@ extension View {
     func wipe(_ progress: Double, from edge: Edge = .leading, softness: CGFloat = 0.2) -> some View {
         modifier(Wipe(progress: progress, edge: edge, softness: softness))
     }
+
+    /// One of a column's sections rising into place: the *index*th starts a beat after the
+    /// one before, all driven by one *progress* from 0 to 1.
+    func rise(_ progress: Double, index: Int) -> some View {
+        modifier(Rise(progress: progress, index: index))
+    }
 }
 
 private struct BuildInTrigger: ViewModifier {
@@ -97,5 +103,22 @@ private struct Wipe: ViewModifier, Animatable {
                             y: horizontal ? 0 : shift - (edge == .bottom ? front : 0))
             }
         }
+    }
+}
+
+private struct Rise: ViewModifier, Animatable {
+    var progress: Double
+    let index: Int
+    var animatableData: Double {
+        get { progress }
+        set { progress = newValue }
+    }
+
+    func body(content: Content) -> some View {
+        let local = min(1, max(0, (progress - Double(index) * 0.13) / 0.35))
+        let eased = 1 - pow(1 - local, 3)
+        return content
+            .opacity(eased)
+            .offset(y: (1 - eased) * 28)
     }
 }

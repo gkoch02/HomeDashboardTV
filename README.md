@@ -83,6 +83,25 @@ their ranges, and the sun and moon times.
 
 ![The Skylight layout at dusk, from HomeDashboard's dummy data](docs/skylight.png)
 
+**Fuzzy Clock** (settings → Layout → Fuzzy Clock) is the Pi's `fuzzyclock` theme: the time in
+words ("twenty five to nine", "noon"), snapped to the nearest five minutes and set as large as
+it fits in DM Sans, the minutes gold and the hour blue on black, over the date and a strip of
+the weather now, the next three days and the moon. The words cross-fade when they change.
+
+![The Fuzzy Clock layout, from HomeDashboard's dummy data](docs/fuzzy-clock.png)
+
+**Weatherglass** (settings → Layout → Weatherglass) is the Pi's `weatherglass` theme, a deck of
+Victorian instruments drawn as black enamel dials in brass: a thermometer with its cold,
+comfortable and hot zones and the day's high and low; an aneroid barometer from 950 to
+1050 hPa under the banjo barometer's words; a hygrometer; the UV index; a wind compass; the
+sun's arc from sunrise to sunset; the moon; and the air quality. A hollow needle on the
+barometer marks the pressure one to 36 hours ago, with the change in words (rising, falling,
+steady). The TV keeps those readings itself, as the Pi does for its panel, so the trend shows
+an hour or so after the layout is first used. The needles swing to their readings when the
+layout appears.
+
+![The Weatherglass layout, from HomeDashboard's dummy data](docs/weatherglass.png)
+
 ## What the TV needs
 
 - The Pi's web UI running, with HomeDashboard 6.2 or later (the `/api/dashboard` route):
@@ -96,7 +115,7 @@ Network**, or type its address (`dashboard.local`, `192.168.1.20:8080`). **Demo 
 bundled week with no Pi at all. Click anywhere on the dashboard to open the drawer again;
 Menu goes back a page, then closes it.
 Left and right on the remote step through the layouts (Dashboard, Agenda, Moon, Horizon,
-Light Cycle, Quote, Night, Skylight), and
+Light Cycle, Quote, Night, Skylight, Fuzzy Clock, Weatherglass), and
 the one you land on is remembered.
 
 ## Building it yourself

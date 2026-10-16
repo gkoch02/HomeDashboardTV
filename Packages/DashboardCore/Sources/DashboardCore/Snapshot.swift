@@ -136,6 +136,8 @@ public struct Weather: Decodable, Sendable, Equatable {
     public var high: Double
     public var low: Double
     public var humidity: Int
+    /// Sea-level pressure in hPa; absent when OWM gave none.
+    public var pressure: Double?
     public var feelsLike: Double?
     public var windSpeed: Double?
     public var windDeg: Double?
@@ -149,7 +151,7 @@ public struct Weather: Decodable, Sendable, Equatable {
     public var hourly: [HourlyForecast]
 
     enum CodingKeys: String, CodingKey {
-        case currentTemp, currentIcon, currentDescription, high, low, humidity, feelsLike
+        case currentTemp, currentIcon, currentDescription, high, low, humidity, pressure, feelsLike
         case windSpeed, windDeg, uvIndex, sunrise, sunset, locationName, forecast, alerts, hourly
     }
 
@@ -161,6 +163,7 @@ public struct Weather: Decodable, Sendable, Equatable {
         high = try c.decode(Double.self, forKey: .high)
         low = try c.decode(Double.self, forKey: .low)
         humidity = try c.decode(Int.self, forKey: .humidity)
+        pressure = try c.decodeIfPresent(Double.self, forKey: .pressure)
         feelsLike = try c.decodeIfPresent(Double.self, forKey: .feelsLike)
         windSpeed = try c.decodeIfPresent(Double.self, forKey: .windSpeed)
         windDeg = try c.decodeIfPresent(Double.self, forKey: .windDeg)

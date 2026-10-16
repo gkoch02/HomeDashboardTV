@@ -12,10 +12,10 @@ import UIKit
 @Observable
 final class DashboardStore {
     /// What the screen shows: the week, the day's agenda plate, the Pi's moonphase theme, the
-    /// next 72 hours on one axis, today on a 24-hour dial, the day's quote, a night plate, or the live sky.
+    /// next 72 hours on one axis, today on a 24-hour dial, the day's quote, a night plate, the live sky, the time in words, or a deck of weather instruments.
     /// Each case is a `Theme`, drawn in `DashboardScreen.content`.
     enum Layout: String, CaseIterable {
-        case dashboard, agenda, moon, horizon, light, quote, night, skylight
+        case dashboard, agenda, moon, horizon, light, quote, night, skylight, fuzzy, weatherglass
 
         var title: String {
             switch self {
@@ -27,6 +27,8 @@ final class DashboardStore {
             case .quote: return "Quote"
             case .night: return "Night"
             case .skylight: return "Skylight"
+            case .fuzzy: return "Fuzzy Clock"
+            case .weatherglass: return "Weatherglass"
             }
         }
 
@@ -56,6 +58,8 @@ final class DashboardStore {
     private(set) var problem: String?
     private(set) var failingSince: Date?
     var settingsVisible = false
+    /// The weather's pressure readings, for the Weatherglass barometer's trend needle.
+    private(set) var pressureHistory: PressureHistory
 
     var layout: Layout {
         didSet { defaults.set(layout.rawValue, forKey: Keys.layout) }
@@ -95,6 +99,8 @@ final class DashboardStore {
         static let username = "username"
         static let layout = "layout"
         static let keepAwakeHours = "keepAwakeHours"
+        static let pressureHistory = "pressureHistory"
+        static let pressureSource = "pressureSource"
     }
 
     init() {
@@ -103,6 +109,7 @@ final class DashboardStore {
         layout = defaults.string(forKey: Keys.layout).flatMap(Layout.init(saved:)) ?? .dashboard
         password = Keychain.password ?? ""
         keepAwakeHours = defaults.integer(forKey: Keys.keepAwakeHours)
+        pressureHistory = PressureHistory()
         // `-demo YES` and `-server <url>` set the source for a run (screenshots, the simulator).
         if defaults.bool(forKey: "demo") {
             connection = .demo
@@ -112,6 +119,12 @@ final class DashboardStore {
             connection = Self.decode(defaults.string(forKey: Keys.connection))
         }
         settingsVisible = connection == nil
+        // Readings from another source (a `-demo` run, another Pi) would make a trend out of
+        // two places, so the history is kept only for the source it came from.
+        if let connection, defaults.string(forKey: Keys.pressureSource) == Self.encode(connection) {
+            pressureHistory = defaults.data(forKey: Keys.pressureHistory)
+                .flatMap { try? JSONDecoder().decode(PressureHistory.self, from: $0) } ?? PressureHistory()
+        }
     }
 
     func start() {
@@ -151,6 +164,7 @@ final class DashboardStore {
         defaults.set(Self.encode(connection), forKey: Keys.connection)
         // Another source's snapshot must not stay up as if it were this one's.
         snapshot = nil
+        pressureHistory = PressureHistory()
         problem = nil
         failingSince = nil
         loop?.cancel()
@@ -169,6 +183,7 @@ final class DashboardStore {
                 fresh = try await DashboardClient(baseURL: url, username: username, password: password).fetch()
             }
             snapshot = fresh
+            recordPressure(fresh)
             lastSuccess = .now
             problem = nil
             failingSince = nil
@@ -178,6 +193,17 @@ final class DashboardStore {
             problem = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
             if failingSince == nil { failingSince = .now }
         }
+    }
+
+    /// Keeps the weather's pressure, stamped with when the Pi fetched it: polling the same cache
+    /// again adds nothing, and a new fetch is a new reading.
+    private func recordPressure(_ snapshot: Snapshot) {
+        guard let connection, let weather = snapshot.sources.weather, let hPa = weather.data?.pressure else { return }
+        let before = pressureHistory
+        pressureHistory.record(hPa, at: weather.fetchedAt ?? .now)
+        guard pressureHistory != before, let data = try? JSONEncoder().encode(pressureHistory) else { return }
+        defaults.set(data, forKey: Keys.pressureHistory)
+        defaults.set(Self.encode(connection), forKey: Keys.pressureSource)
     }
 
     private static func demoSnapshot() throws -> Snapshot {

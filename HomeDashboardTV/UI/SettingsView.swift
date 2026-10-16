@@ -66,7 +66,7 @@ struct SettingsView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            .drawerMargins()
+            .drawerUnclipped()
             .navigationDestination(for: Page.self) { page in
                 switch page {
                 case .layout:
@@ -168,7 +168,7 @@ struct SettingsView: View {
                 .accessibilityLabel(title(option))
             }
         }
-        .drawerMargins()
+        .drawerUnclipped()
         .navigationTitle(name)
         .onAppear { DispatchQueue.main.async { focus = .firstChoice } }
     }
@@ -240,7 +240,7 @@ struct SettingsView: View {
                         .foregroundStyle(.secondary)
             }
         }
-        .drawerMargins()
+        .drawerUnclipped()
         .navigationTitle("Source")
         .onAppear {
             DispatchQueue.main.async { focus = .firstSource }
@@ -319,7 +319,7 @@ private extension View {
     /// A drawer list's scroll view crops whatever leaves its bounds, which cut a focused row's
     /// lifted pill off flat at both ends. The lists are inset from the drawer's edge (and too
     /// short to scroll), so they draw unclipped and only the drawer's rounded edge clips.
-    func drawerMargins() -> some View {
+    func drawerUnclipped() -> some View {
         scrollClipDisabled()
     }
 }

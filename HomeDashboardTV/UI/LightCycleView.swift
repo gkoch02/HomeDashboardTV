@@ -19,6 +19,12 @@ struct LightCycleView: Theme {
     private var zone: TimeZone { snapshot.timeZone }
     private var today: CivilDate { CivilDate(now, in: zone) }
 
+    @State private var build = BuildIn.start
+    /// Appeared under the settings panel: the build-in waits for it to close.
+    @State private var pending = false
+    @Environment(DashboardStore.self) private var store
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     /// The whole screen, so the dial can run nearly to its top and bottom edges: a circle
     /// leaves the corners empty, and only its rim and the 00 and 12 come near them. The column
     /// keeps to the overscan-safe margins on its own.
@@ -29,15 +35,58 @@ struct LightCycleView: Theme {
             let size = geometry.size
             let dial = min(size.height - 2 * Margin.dial, size.width * 0.55)
             HStack(alignment: .center, spacing: size.width * 0.04) {
-                Dial(snapshot: snapshot, now: now, day: today)
+                Dial(snapshot: snapshot, now: now, day: today, build: build)
                     .frame(width: dial, height: dial)
-                Column(snapshot: snapshot, now: now, day: today, height: size.height - 2 * Margin.columnV)
+                Column(snapshot: snapshot, now: now, day: today, height: size.height - 2 * Margin.columnV,
+                       rise: build.column)
                     .padding(.vertical, Margin.columnV)
                     .padding(.trailing, Margin.columnH)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
             .padding(.leading, Margin.columnH - 20)
             .frame(width: size.width, height: size.height)
+        }
+        .overlay(alignment: .bottomLeading) {
+            // The update stamp in the corner the round dial leaves empty.
+            UpdateStamp(snapshot: snapshot)
+                .padding(.leading, Margin.stampH)
+                .padding(.bottom, Margin.stampV)
+                .opacity(build.column)
+        }
+        .onAppear {
+            // Picked in settings: wait for the panel to close, so the build-in is seen.
+            if store.settingsVisible { pending = true; hold() } else { playBuildIn() }
+        }
+        .onChange(of: store.settingsVisible) { _, visible in
+            if !visible && pending {
+                pending = false
+                playBuildIn()
+            }
+        }
+    }
+
+    /// Holds the dial at the start of its build-in, with no animation.
+    private func hold() {
+        var instant = Transaction()
+        instant.disablesAnimations = true
+        withTransaction(instant) { build = reduceMotion ? .settled : .start }
+    }
+
+    /// Builds the dial in whenever the layout appears (at launch, stepped to, picked in
+    /// settings once they close), not on the minute redraws, which keep this view and its
+    /// state. Each part fades or draws in after the one before; skipped under Reduce Motion.
+    private func playBuildIn() {
+        hold()
+        guard !reduceMotion else { return }
+        // A turn later, so the start is drawn before anything animates away from it.
+        DispatchQueue.main.async {
+            withAnimation(.easeInOut(duration: 0.8).delay(0.05)) { build.rim = 1 }
+            withAnimation(.easeOut(duration: 0.5).delay(0.45)) { build.ticks = 1 }
+            withAnimation(.easeOut(duration: 0.7).delay(0.65)) { build.band = 1 }
+            withAnimation(.easeOut(duration: 0.6).delay(0.9)) { build.disc = 1 }
+            withAnimation(.easeOut(duration: 0.5).delay(1.25)) { build.events = 1 }
+            withAnimation(.easeOut(duration: 0.5).delay(1.5)) { build.hand = 1 }
+            withAnimation(.linear(duration: 1.3).delay(0.5)) { build.column = 1 }
         }
     }
 
@@ -50,6 +99,29 @@ private enum Margin {
     /// tvOS's overscan-safe insets, kept by the column.
     static let columnV: CGFloat = 60
     static let columnH: CGFloat = 90
+    /// The update stamp, tucked further into its corner than the overscan inset: still clear
+    /// of the 10 pt burn-in drift, and of a set that crops a little.
+    static let stampH: CGFloat = 40
+    static let stampV: CGFloat = 28
+}
+
+/// How far the build-in has got, each part 0 to 1; `settled` is the dial at rest.
+///
+/// In turn: the rim draws itself round from midnight, the ticks and numerals fade in, then
+/// the sky band, the date disc, the event arcs, and last the hand with the sun or moon; the
+/// column's sections rise in alongside. Only these numbers animate (as opacities, a trim and
+/// the column's `Rise`), so nothing inside the layout is animated by accident.
+private struct BuildIn {
+    var rim: Double
+    var ticks: Double
+    var band: Double
+    var disc: Double
+    var events: Double
+    var hand: Double
+    var column: Double
+
+    static let start = BuildIn(rim: 0, ticks: 0, band: 0, disc: 0, events: 0, hand: 0, column: 0)
+    static let settled = BuildIn(rim: 1, ticks: 1, band: 1, disc: 1, events: 1, hand: 1, column: 1)
 }
 
 private enum Ink {
@@ -71,6 +143,8 @@ private enum Face {
 
 /// Proportions of the rim's radius, after the panel's (`_OUTER_R` 196 px).
 private enum Ring {
+    /// The dial's half-side over the rim's radius: room for the numerals outside the rim.
+    static let fit = 1.155
     static let label = 1.11
     static let rim = 1.0
     static let bandOuter = 0.885
@@ -86,29 +160,44 @@ private struct Dial: View {
     let snapshot: Snapshot
     let now: Date
     let day: CivilDate
+    let build: BuildIn
 
     private var zone: TimeZone { snapshot.timeZone }
 
     var body: some View {
         GeometryReader { geometry in
             let side = min(geometry.size.width, geometry.size.height)
-            let r = side / 2 / 1.155
+            let r = side / 2 / Ring.fit
             let centre = CGPoint(x: geometry.size.width / 2, y: geometry.size.height / 2)
             let sun = SunModel(snapshot: snapshot)
             let nowHour = LightCycle.hour(now, in: zone)
             ZStack {
                 Band(altitudes: LightCycle.altitudes(sun, on: day), horizons: horizons(sun), r: r)
                     .equatable()
-                Canvas { context, _ in
-                    ticks(&context, centre: centre, r: r)
-                    events(&context, centre: centre, r: r, nowHour: nowHour)
-                    needle(&context, centre: centre, r: r, hour: nowHour)
-                }
-                labels(centre: centre, r: r)
-                CentreDisc(day: day, zone: zone, r: r)
+                    .opacity(build.band)
+                Circle()
+                    .trim(from: 0, to: build.rim)
+                    .stroke(Ink.cream, lineWidth: 3)
+                    .rotationEffect(.degrees(-90))
+                    .frame(width: 2 * r, height: 2 * r)
                     .position(centre)
+                Canvas { context, _ in ticks(&context, centre: centre, r: r) }
+                    .opacity(build.ticks)
+                labels(centre: centre, r: r)
+                    .opacity(build.ticks)
+                Canvas { context, _ in events(&context, centre: centre, r: r, nowHour: nowHour) }
+                    .opacity(build.events)
+                CentreDisc(day: day, zone: zone, r: r)
+                    .scaleEffect(0.92 + 0.08 * build.disc)
+                    .opacity(build.disc)
+                    .position(centre)
+                Needle(hour: nowHour)
+                    .fill(Ink.cream)
+                    .opacity(build.hand)
                 glyph(r: r, isDay: sun.altitude(at: now) > -0.833)
-                    .position(polar(centre, (Ring.bandOuter + Ring.bandInner) / 2 * r, nowHour))
+                    .opacity(build.hand)
+                    .modifier(Orbit(hour: nowHour, radius: (Ring.bandOuter + Ring.bandInner) / 2 * r))
+                    .position(centre)
             }
         }
     }
@@ -119,8 +208,6 @@ private struct Dial: View {
     }
 
     private func ticks(_ context: inout GraphicsContext, centre: CGPoint, r: CGFloat) {
-        context.stroke(Path(ellipseIn: CGRect(x: centre.x - r, y: centre.y - r, width: 2 * r, height: 2 * r)),
-                       with: .color(Ink.cream), lineWidth: 3)
         for quarter in 0..<96 {
             let hour = Double(quarter) / 4
             let (inner, width, ink): (Double, CGFloat, Color) =
@@ -147,21 +234,6 @@ private struct Dial: View {
                 context.fill(path, with: .color(span.start <= nowHour ? Ink.red : Ink.yellow))
             }
         }
-    }
-
-    private func needle(_ context: inout GraphicsContext, centre: CGPoint, r: CGFloat, hour: Double) {
-        let base = Ring.disc * r + 2
-        let tip = ((Ring.bandOuter + Ring.bandInner) / 2 - Ring.halo) * r - 4
-        let half = 0.025 * r
-        let a = angle(hour)
-        let across = CGPoint(x: -sin(a) * half, y: cos(a) * half)
-        let root = polar(centre, base, hour)
-        var path = Path()
-        path.move(to: CGPoint(x: root.x + across.x, y: root.y + across.y))
-        path.addLine(to: polar(centre, tip, hour))
-        path.addLine(to: CGPoint(x: root.x - across.x, y: root.y - across.y))
-        path.closeSubpath()
-        context.fill(path, with: .color(Ink.cream))
     }
 
     private func labels(centre: CGPoint, r: CGFloat) -> some View {
@@ -306,6 +378,103 @@ private func sector(_ centre: CGPoint, inner: CGFloat, outer: CGFloat, from: Dou
     return path
 }
 
+/// "updated 3:27a": when the Pi last fetched the weather, or built the snapshot.
+private struct UpdateStamp: View {
+    let snapshot: Snapshot
+
+    var body: some View {
+        let stamp = snapshot.sources.weather?.fetchedAt ?? snapshot.generatedAt
+        Text("updated \(CompactTime.string(stamp, in: snapshot.timeZone))")
+            .font(.custom(Face.sans, size: 20).weight(.semibold))
+            .foregroundStyle(Ink.faint)
+    }
+}
+
+// MARK: The clock
+
+private enum Clock {
+    /// The tallest the figures get, and the least height kept free for them.
+    static let maxSize: CGFloat = 190
+    static let minHeight: CGFloat = 90
+    /// DM Sans's line box over its size: the clock's height for a given size.
+    static let lineHeight: CGFloat = 1.3
+
+    /// "11:42" and "PM" in a 12-hour locale, "23:42" and nil in a 24-hour one.
+    static func parts(_ now: Date, in zone: TimeZone) -> (time: String, period: String?) {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = zone
+        let c = cal.dateComponents([.hour, .minute], from: now)
+        let hour = c.hour ?? 0
+        let minute = c.minute ?? 0
+        let twelve = DateFormatter.dateFormat(fromTemplate: "j", options: 0, locale: .current)?.contains("a") ?? true
+        guard twelve else { return (String(format: "%02d:%02d", hour, minute), nil) }
+        return (String(format: "%d:%02d", hour % 12 == 0 ? 12 : hour % 12, minute), hour < 12 ? "AM" : "PM")
+    }
+}
+
+// MARK: Build-in pieces
+
+
+/// The needle from the disc to the band, at *hour*: a shape, so a change of hour animates
+/// round the dial rather than across it.
+private struct Needle: Shape {
+    var hour: Double
+    var animatableData: Double {
+        get { hour }
+        set { hour = newValue }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        let centre = CGPoint(x: rect.midX, y: rect.midY)
+        let r = min(rect.width, rect.height) / 2 / Ring.fit
+        let base = Ring.disc * r + 2
+        let tip = ((Ring.bandOuter + Ring.bandInner) / 2 - Ring.halo) * r - 4
+        let half = 0.025 * r
+        let a = angle(hour)
+        let across = CGPoint(x: -sin(a) * half, y: cos(a) * half)
+        let root = polar(centre, base, hour)
+        var path = Path()
+        path.move(to: CGPoint(x: root.x + across.x, y: root.y + across.y))
+        path.addLine(to: polar(centre, tip, hour))
+        path.addLine(to: CGPoint(x: root.x - across.x, y: root.y - across.y))
+        path.closeSubpath()
+        return path
+    }
+}
+
+/// Carries a view placed at the dial's centre out to *radius* at *hour*, along the circle.
+private struct Orbit: GeometryEffect {
+    var hour: Double
+    let radius: CGFloat
+    var animatableData: Double {
+        get { hour }
+        set { hour = newValue }
+    }
+
+    func effectValue(size: CGSize) -> ProjectionTransform {
+        ProjectionTransform(CGAffineTransform(translationX: radius * cos(angle(hour)), y: radius * sin(angle(hour))))
+    }
+}
+
+/// One section of the column rising into place: the *index*th starts a beat after the one
+/// before, all driven by one progress.
+private struct Rise: ViewModifier, Animatable {
+    var progress: Double
+    let index: Int
+    var animatableData: Double {
+        get { progress }
+        set { progress = newValue }
+    }
+
+    func body(content: Content) -> some View {
+        let local = min(1, max(0, (progress - Double(index) * 0.13) / 0.35))
+        let eased = 1 - pow(1 - local, 3)
+        return content
+            .opacity(eased)
+            .offset(y: (1 - eased) * 28)
+    }
+}
+
 // MARK: - The column
 
 private struct Column: View {
@@ -313,23 +482,41 @@ private struct Column: View {
     let now: Date
     let day: CivilDate
     let height: CGFloat
+    /// The build-in's progress for the column, 0 to 1.
+    let rise: Double
 
     private var zone: TimeZone { snapshot.timeZone }
     private var weather: Weather? { snapshot.sources.weather?.data }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            heading
-            rule.padding(.top, 16)
-            sunRow.padding(.top, 26)
-            if let weather {
-                rule.padding(.top, 26)
-                reading(weather).padding(.top, 26)
+            VStack(alignment: .leading, spacing: 0) {
+                heading
+                rule.padding(.top, 16)
             }
-            rule.padding(.top, 26)
-            agenda.padding(.top, 24)
-            Spacer(minLength: 16)
-            foot
+            .modifier(Rise(progress: rise, index: 0))
+            sunRow.padding(.top, 26)
+                .modifier(Rise(progress: rise, index: 1))
+            if let weather {
+                VStack(alignment: .leading, spacing: 0) {
+                    rule.padding(.top, 26)
+                    reading(weather).padding(.top, 26)
+                }
+                .modifier(Rise(progress: rise, index: 2))
+            }
+            VStack(alignment: .leading, spacing: 0) {
+                rule.padding(.top, 26)
+                agenda.padding(.top, 24)
+            }
+            .modifier(Rise(progress: rise, index: 3))
+            // The clock takes whatever height the agenda leaves, centred in it.
+            GeometryReader { space in
+                clock(fitting: space.size)
+                    .frame(width: space.size.width, height: space.size.height)
+            }
+            .padding(.top, 20)
+            .frame(minHeight: Clock.minHeight)
+            .modifier(Rise(progress: rise, index: 4))
         }
         .foregroundStyle(Ink.cream)
         .padding(.vertical, 24)
@@ -409,7 +596,9 @@ private struct Column: View {
     private var agenda: some View {
         let events = Agenda.days(from: snapshot, now: now, count: 1)[0].events
         let count = events.count
-        let rows = max(1, Int((height - 640) / 54))
+        // Rows start about 505 pt down the column and fall every 56; the agenda takes all the
+        // rows that leave the clock its least height (and its 20 pt gap) below.
+        let rows = max(1, Int((height - 505 - Clock.minHeight - 20) / 56))
         let shown = count > rows ? Array(events.prefix(rows - 1)) : events
         return VStack(alignment: .leading, spacing: 14) {
             label(count == 0 ? "TODAY" : "TODAY · \(count) EVENT\(count == 1 ? "" : "S")")
@@ -455,10 +644,25 @@ private struct Column: View {
         }
     }
 
-    private var foot: some View {
-        let stamp = snapshot.sources.weather?.fetchedAt ?? snapshot.generatedAt
-        return Text("updated \(CompactTime.string(stamp, in: zone))")
-            .font(.custom(Face.sans, size: 20).weight(.semibold))
-            .foregroundStyle(Ink.faint)
+    /// The time now in the dashboard's zone, as large as the space allows up to a cap: a
+    /// long agenda leaves less height, and the clock shrinks with it. The minute redraws keep
+    /// it current. A 12-hour locale gets a small ochre AM or PM after the figures.
+    private func clock(fitting space: CGSize) -> some View {
+        let parts = Clock.parts(now, in: zone)
+        let size = max(24, min(Clock.maxSize, space.height / Clock.lineHeight))
+        var text = Text(parts.time)
+            .font(.custom(Face.sans, size: size).weight(.light))
+            .monospacedDigit()
+        if let period = parts.period {
+            text = text + Text(" " + period)
+                .font(.custom(Face.sans, size: size * 0.24).weight(.bold))
+                .tracking(size * 0.02)
+                .foregroundColor(Ink.yellow)
+        }
+        return text
+            .foregroundStyle(Ink.cream)
+            .lineLimit(1)
+            .minimumScaleFactor(0.5)
     }
+
 }

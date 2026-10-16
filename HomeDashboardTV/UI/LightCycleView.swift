@@ -19,6 +19,9 @@ struct LightCycleView: Theme {
     private var zone: TimeZone { snapshot.timeZone }
     private var today: CivilDate { CivilDate(now, in: zone) }
 
+    @State private var build = BuildIn.start
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     /// The whole screen, so the dial can run nearly to its top and bottom edges: a circle
     /// leaves the corners empty, and only its rim and the 00 and 12 come near them. The column
     /// keeps to the overscan-safe margins on its own.
@@ -29,15 +32,34 @@ struct LightCycleView: Theme {
             let size = geometry.size
             let dial = min(size.height - 2 * Margin.dial, size.width * 0.55)
             HStack(alignment: .center, spacing: size.width * 0.04) {
-                Dial(snapshot: snapshot, now: now, day: today)
+                Dial(snapshot: snapshot, now: now, day: today, build: build)
                     .frame(width: dial, height: dial)
-                Column(snapshot: snapshot, now: now, day: today, height: size.height - 2 * Margin.columnV)
+                Column(snapshot: snapshot, now: now, day: today, height: size.height - 2 * Margin.columnV,
+                       rise: build.column)
                     .padding(.vertical, Margin.columnV)
                     .padding(.trailing, Margin.columnH)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
             .padding(.leading, Margin.columnH - 20)
             .frame(width: size.width, height: size.height)
+        }
+        .onAppear(perform: playBuildIn)
+    }
+
+    /// Builds the dial in whenever the layout appears (at launch, stepped to, picked in
+    /// settings), not on the minute redraws, which keep this view and its state. Skipped
+    /// under Reduce Motion.
+    private func playBuildIn() {
+        var instant = Transaction()
+        instant.disablesAnimations = true
+        withTransaction(instant) { build = reduceMotion ? .settled : .start }
+        guard !reduceMotion else { return }
+        // A turn later, so the start is drawn before anything animates away from it.
+        DispatchQueue.main.async {
+            withAnimation(.easeInOut(duration: 1.5).delay(0.1)) { build.sweep = 1 }
+            withAnimation(.spring(response: 0.7, dampingFraction: 0.72).delay(0.35)) { build.disc = 1 }
+            withAnimation(.easeInOut(duration: 1.6).delay(0.75)) { build.hand = 1 }
+            withAnimation(.linear(duration: 1.3).delay(0.45)) { build.column = 1 }
         }
     }
 
@@ -50,6 +72,23 @@ private enum Margin {
     /// tvOS's overscan-safe insets, kept by the column.
     static let columnV: CGFloat = 60
     static let columnH: CGFloat = 90
+}
+
+/// How far the build-in has got, each part 0 to 1; `settled` is the dial at rest.
+///
+/// The sweep reveals the rim, the band and the events clockwise from midnight, fading the
+/// numerals in as it reaches them; the disc grows in; the hand travels from midnight to now;
+/// the column's sections rise in one after another. Only these numbers animate, each through
+/// its own `Animatable` shape or modifier, so nothing inside the layout is animated by
+/// accident.
+private struct BuildIn {
+    var sweep: Double
+    var disc: Double
+    var hand: Double
+    var column: Double
+
+    static let start = BuildIn(sweep: 0, disc: 0, hand: 0, column: 0)
+    static let settled = BuildIn(sweep: 1, disc: 1, hand: 1, column: 1)
 }
 
 private enum Ink {
@@ -71,6 +110,8 @@ private enum Face {
 
 /// Proportions of the rim's radius, after the panel's (`_OUTER_R` 196 px).
 private enum Ring {
+    /// The dial's half-side over the rim's radius: room for the numerals outside the rim.
+    static let fit = 1.155
     static let label = 1.11
     static let rim = 1.0
     static let bandOuter = 0.885
@@ -86,29 +127,43 @@ private struct Dial: View {
     let snapshot: Snapshot
     let now: Date
     let day: CivilDate
+    let build: BuildIn
 
     private var zone: TimeZone { snapshot.timeZone }
 
     var body: some View {
         GeometryReader { geometry in
             let side = min(geometry.size.width, geometry.size.height)
-            let r = side / 2 / 1.155
+            let r = side / 2 / Ring.fit
             let centre = CGPoint(x: geometry.size.width / 2, y: geometry.size.height / 2)
             let sun = SunModel(snapshot: snapshot)
             let nowHour = LightCycle.hour(now, in: zone)
+            let hand = nowHour * build.hand
             ZStack {
-                Band(altitudes: LightCycle.altitudes(sun, on: day), horizons: horizons(sun), r: r)
-                    .equatable()
-                Canvas { context, _ in
-                    ticks(&context, centre: centre, r: r)
-                    events(&context, centre: centre, r: r, nowHour: nowHour)
-                    needle(&context, centre: centre, r: r, hour: nowHour)
+                ZStack {
+                    Band(altitudes: LightCycle.altitudes(sun, on: day), horizons: horizons(sun), r: r)
+                        .equatable()
+                    Canvas { context, _ in
+                        ticks(&context, centre: centre, r: r)
+                        events(&context, centre: centre, r: r, nowHour: nowHour)
+                    }
                 }
+                .mask { Sweep(progress: build.sweep) }
                 labels(centre: centre, r: r)
+                SweepArm(progress: build.sweep)
+                    .stroke(Ink.cream.opacity(0.75), style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                    .shadow(color: Ink.cream.opacity(0.6), radius: 10)
                 CentreDisc(day: day, zone: zone, r: r)
+                    .scaleEffect(0.6 + 0.4 * build.disc)
+                    .opacity(build.disc)
                     .position(centre)
+                Needle(hour: hand)
+                    .fill(Ink.cream)
+                    .opacity(build.disc)
                 glyph(r: r, isDay: sun.altitude(at: now) > -0.833)
-                    .position(polar(centre, (Ring.bandOuter + Ring.bandInner) / 2 * r, nowHour))
+                    .opacity(build.disc)
+                    .modifier(Orbit(hour: hand, radius: (Ring.bandOuter + Ring.bandInner) / 2 * r))
+                    .position(centre)
             }
         }
     }
@@ -149,21 +204,6 @@ private struct Dial: View {
         }
     }
 
-    private func needle(_ context: inout GraphicsContext, centre: CGPoint, r: CGFloat, hour: Double) {
-        let base = Ring.disc * r + 2
-        let tip = ((Ring.bandOuter + Ring.bandInner) / 2 - Ring.halo) * r - 4
-        let half = 0.025 * r
-        let a = angle(hour)
-        let across = CGPoint(x: -sin(a) * half, y: cos(a) * half)
-        let root = polar(centre, base, hour)
-        var path = Path()
-        path.move(to: CGPoint(x: root.x + across.x, y: root.y + across.y))
-        path.addLine(to: polar(centre, tip, hour))
-        path.addLine(to: CGPoint(x: root.x - across.x, y: root.y - across.y))
-        path.closeSubpath()
-        context.fill(path, with: .color(Ink.cream))
-    }
-
     private func labels(centre: CGPoint, r: CGFloat) -> some View {
         ForEach(0..<8, id: \.self) { i in
             let hour = i * 3
@@ -171,6 +211,7 @@ private struct Dial: View {
             Text(String(format: "%02d", hour))
                 .font(.custom(Face.sans, size: (major ? 0.085 : 0.06) * r).weight(major ? .bold : .semibold))
                 .foregroundStyle(major ? Ink.cream : Ink.faint)
+                .modifier(Reveal(progress: build.sweep, hour: Double(hour)))
                 .position(polar(centre, Ring.label * r, Double(hour)))
         }
     }
@@ -306,6 +347,123 @@ private func sector(_ centre: CGPoint, inner: CGFloat, outer: CGFloat, from: Dou
     return path
 }
 
+// MARK: Build-in pieces
+
+/// Everything clockwise from midnight to *progress* of the way round, as a mask.
+private struct Sweep: Shape {
+    var progress: Double
+    var animatableData: Double {
+        get { progress }
+        set { progress = newValue }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        if progress >= 1 { return Path(rect) }
+        guard progress > 0 else { return Path() }
+        let centre = CGPoint(x: rect.midX, y: rect.midY)
+        var path = Path()
+        path.move(to: centre)
+        path.addArc(center: centre, radius: hypot(rect.width, rect.height), startAngle: .radians(angle(0)),
+                    endAngle: .radians(angle(24 * progress)), clockwise: false)
+        path.closeSubpath()
+        return path
+    }
+}
+
+/// The sweep's leading edge, a ray from the disc out past the rim, there only while it moves.
+private struct SweepArm: Shape {
+    var progress: Double
+    var animatableData: Double {
+        get { progress }
+        set { progress = newValue }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        guard progress > 0, progress < 1 else { return Path() }
+        let centre = CGPoint(x: rect.midX, y: rect.midY)
+        let r = min(rect.width, rect.height) / 2 / Ring.fit
+        var path = Path()
+        path.move(to: polar(centre, Ring.disc * r, 24 * progress))
+        path.addLine(to: polar(centre, Ring.rim * r, 24 * progress))
+        return path
+    }
+}
+
+/// The needle from the disc to the band, at *hour*: a shape, so a change of hour animates
+/// round the dial rather than across it.
+private struct Needle: Shape {
+    var hour: Double
+    var animatableData: Double {
+        get { hour }
+        set { hour = newValue }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        let centre = CGPoint(x: rect.midX, y: rect.midY)
+        let r = min(rect.width, rect.height) / 2 / Ring.fit
+        let base = Ring.disc * r + 2
+        let tip = ((Ring.bandOuter + Ring.bandInner) / 2 - Ring.halo) * r - 4
+        let half = 0.025 * r
+        let a = angle(hour)
+        let across = CGPoint(x: -sin(a) * half, y: cos(a) * half)
+        let root = polar(centre, base, hour)
+        var path = Path()
+        path.move(to: CGPoint(x: root.x + across.x, y: root.y + across.y))
+        path.addLine(to: polar(centre, tip, hour))
+        path.addLine(to: CGPoint(x: root.x - across.x, y: root.y - across.y))
+        path.closeSubpath()
+        return path
+    }
+}
+
+/// Carries a view placed at the dial's centre out to *radius* at *hour*, along the circle.
+private struct Orbit: GeometryEffect {
+    var hour: Double
+    let radius: CGFloat
+    var animatableData: Double {
+        get { hour }
+        set { hour = newValue }
+    }
+
+    func effectValue(size: CGSize) -> ProjectionTransform {
+        ProjectionTransform(CGAffineTransform(translationX: radius * cos(angle(hour)), y: radius * sin(angle(hour))))
+    }
+}
+
+/// A numeral fading in as the sweep reaches its hour. The numerals stay out of the sweep's
+/// mask: the 00 straddles the line the sweep starts from, so the mask showed half of it.
+private struct Reveal: ViewModifier, Animatable {
+    var progress: Double
+    let hour: Double
+    var animatableData: Double {
+        get { progress }
+        set { progress = newValue }
+    }
+
+    func body(content: Content) -> some View {
+        content.opacity(min(1, max(0, (progress * 24 - hour + 0.3) / 1.2)))
+    }
+}
+
+/// One section of the column rising into place: the *index*th starts a beat after the one
+/// before, all driven by one progress.
+private struct Rise: ViewModifier, Animatable {
+    var progress: Double
+    let index: Int
+    var animatableData: Double {
+        get { progress }
+        set { progress = newValue }
+    }
+
+    func body(content: Content) -> some View {
+        let local = min(1, max(0, (progress - Double(index) * 0.13) / 0.35))
+        let eased = 1 - pow(1 - local, 3)
+        return content
+            .opacity(eased)
+            .offset(y: (1 - eased) * 28)
+    }
+}
+
 // MARK: - The column
 
 private struct Column: View {
@@ -313,23 +471,36 @@ private struct Column: View {
     let now: Date
     let day: CivilDate
     let height: CGFloat
+    /// The build-in's progress for the column, 0 to 1.
+    let rise: Double
 
     private var zone: TimeZone { snapshot.timeZone }
     private var weather: Weather? { snapshot.sources.weather?.data }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            heading
-            rule.padding(.top, 16)
-            sunRow.padding(.top, 26)
-            if let weather {
-                rule.padding(.top, 26)
-                reading(weather).padding(.top, 26)
+            VStack(alignment: .leading, spacing: 0) {
+                heading
+                rule.padding(.top, 16)
             }
-            rule.padding(.top, 26)
-            agenda.padding(.top, 24)
+            .modifier(Rise(progress: rise, index: 0))
+            sunRow.padding(.top, 26)
+                .modifier(Rise(progress: rise, index: 1))
+            if let weather {
+                VStack(alignment: .leading, spacing: 0) {
+                    rule.padding(.top, 26)
+                    reading(weather).padding(.top, 26)
+                }
+                .modifier(Rise(progress: rise, index: 2))
+            }
+            VStack(alignment: .leading, spacing: 0) {
+                rule.padding(.top, 26)
+                agenda.padding(.top, 24)
+            }
+            .modifier(Rise(progress: rise, index: 3))
             Spacer(minLength: 16)
             foot
+                .modifier(Rise(progress: rise, index: 4))
         }
         .foregroundStyle(Ink.cream)
         .padding(.vertical, 24)

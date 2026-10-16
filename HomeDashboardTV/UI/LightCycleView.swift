@@ -49,8 +49,8 @@ struct LightCycleView: Theme {
         .overlay(alignment: .bottomLeading) {
             // The update stamp in the corner the round dial leaves empty.
             UpdateStamp(snapshot: snapshot)
-                .padding(.leading, Margin.columnH)
-                .padding(.bottom, Margin.columnV)
+                .padding(.leading, Margin.stampH)
+                .padding(.bottom, Margin.stampV)
                 .opacity(build.column)
         }
         .onAppear {
@@ -99,6 +99,10 @@ private enum Margin {
     /// tvOS's overscan-safe insets, kept by the column.
     static let columnV: CGFloat = 60
     static let columnH: CGFloat = 90
+    /// The update stamp, tucked further into its corner than the overscan inset: still clear
+    /// of the 10 pt burn-in drift, and of a set that crops a little.
+    static let stampH: CGFloat = 40
+    static let stampV: CGFloat = 28
 }
 
 /// How far the build-in has got, each part 0 to 1; `settled` is the dial at rest.

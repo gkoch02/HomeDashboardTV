@@ -80,6 +80,23 @@ final class WeatherglassTests: XCTestCase {
         XCTAssertNotNil(snapshot.sources.weather?.data?.pressure)
     }
 
+    func testTheDemoIsFetchedWhenItIsRead() throws {
+        let url = try XCTUnwrap(Bundle.module.url(forResource: "Fixtures/snapshot", withExtension: "json"))
+        let now = Date(timeIntervalSince1970: 1_900_000_000)
+        let demo = try DashboardClient.validated(Data(contentsOf: url)).shiftedToToday(now: now).fetched(at: now)
+        XCTAssertEqual(demo.sources.weather?.fetchedAt, now)
+        XCTAssertEqual(demo.sources.events?.fetchedAt, now)
+        // So half-hourly refreshes add readings, and a trend forms after an hour.
+        var history = PressureHistory()
+        for k in 0...2 {
+            let t = now.addingTimeInterval(Double(k) * 1800)
+            let w = try XCTUnwrap(demo.fetched(at: t).sources.weather)
+            history.record(try XCTUnwrap(w.data?.pressure), at: try XCTUnwrap(w.fetchedAt))
+        }
+        XCTAssertEqual(history.samples.count, 3)
+        XCTAssertNotNil(history.previous(now: now.addingTimeInterval(3600)))
+    }
+
     func testHistoryKeepsASampleEveryHalfHourAndTheLast48() {
         let t0 = Date(timeIntervalSince1970: 1_800_000_000)
         var history = PressureHistory()

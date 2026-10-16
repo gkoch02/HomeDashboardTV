@@ -178,7 +178,7 @@ final class DashboardStore {
             let fresh: Snapshot
             switch connection {
             case .demo:
-                fresh = try Self.demoSnapshot().shiftedToToday(now: .now)
+                fresh = try Self.demoSnapshot().shiftedToToday(now: .now).fetched(at: .now)
             case .server(let url):
                 fresh = try await DashboardClient(baseURL: url, username: username, password: password).fetch()
             }

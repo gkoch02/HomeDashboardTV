@@ -9,9 +9,15 @@ import SwiftUI
 /// moonphase_panel.py`) and scaled to the screen, so the layout matches the panel and the
 /// type, set in the panel's own faces, stays sharp at 4K. All moon values come from the Pi's
 /// `moon` block; nothing astronomical is computed here.
+///
+/// As the layout appears, today's moon comes slowly out of the dark, growing and sharpening
+/// into focus; once it has landed the days either side follow outward, and the words settle
+/// in after them.
 struct MoonView: Theme {
     let snapshot: Snapshot
     let now: Date
+
+    @State private var build = MoonBuild.start
 
     private var zone: TimeZone { snapshot.timeZone }
 
@@ -32,6 +38,15 @@ struct MoonView: Theme {
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
         }
+        .onBuildIn(reset: { settled in build = settled ? .settled : .start }) {
+            withAnimation(.timingCurve(0.3, 0, 0.2, 1, duration: 2.8).delay(0.2)) { build.days[0] = 1 }
+            for ring in 1...3 {
+                withAnimation(.easeOut(duration: 0.6).delay(2.6 + 0.2 * Double(ring))) { build.days[ring] = 1 }
+            }
+            withAnimation(.easeOut(duration: 0.8).delay(3.0)) { build.header = 1 }
+            withAnimation(.easeInOut(duration: 0.8).delay(3.2)) { build.rule = 1 }
+            withAnimation(.easeOut(duration: 0.8).delay(3.4)) { build.block = 1 }
+        }
     }
 
     var backdrop: some View { Starfield().background(Color.black) }
@@ -39,22 +54,26 @@ struct MoonView: Theme {
     private func plate(moon: Moon, s: CGFloat) -> some View {
         ZStack(alignment: .topLeading) {
             // Header: dateline, phase name, illumination.
-            centred(y: 20, s: s) {
-                Text(dateline.uppercased())
-                    .font(.custom(MoonFace.caps, size: 17 * s).weight(.bold))
-                    .tracking(1.2 * s)
-                    .foregroundStyle(MoonInk.text)
+            Group {
+                centred(y: 20, s: s) {
+                    Text(dateline.uppercased())
+                        .font(.custom(MoonFace.caps, size: 17 * s).weight(.bold))
+                        .tracking(1.2 * s)
+                        .foregroundStyle(MoonInk.text)
+                }
+                centred(y: 52, s: s) {
+                    Text("~ \(moon.phaseName) ~")
+                        .font(.custom(MoonFace.fraktur, size: 30 * s))
+                        .foregroundStyle(MoonInk.text)
+                }
+                centred(y: 78, s: s) {
+                    Text(illuminationLine(moon))
+                        .font(.custom(MoonFace.body, size: 18 * s).weight(.semibold))
+                        .foregroundStyle(MoonInk.muted)
+                }
             }
-            centred(y: 52, s: s) {
-                Text("~ \(moon.phaseName) ~")
-                    .font(.custom(MoonFace.fraktur, size: 30 * s))
-                    .foregroundStyle(MoonInk.text)
-            }
-            centred(y: 78, s: s) {
-                Text(illuminationLine(moon))
-                    .font(.custom(MoonFace.body, size: 18 * s).weight(.semibold))
-                    .foregroundStyle(MoonInk.muted)
-            }
+            .opacity(build.header)
+            .offset(y: (1 - build.header) * -10 * s)
 
             // The filmstrip: (day offset, radius, x offset from centre), as the panel lays it.
             let row: [(Int, CGFloat, CGFloat)] = [
@@ -65,12 +84,19 @@ struct MoonView: Theme {
             let cy: CGFloat = 205
             ForEach(row, id: \.0) { offset, r, x in
                 if let day = moon.days[safe: offset + 3] {
-                    MoonDisc(fraction: day.fraction, radius: r * s, halo: offset == 0)
+                    let shown = build.days[abs(offset)]
+                    // Today's grows from further back and comes into focus; the rest just fade up.
+                    let today = offset == 0
+                    MoonDisc(fraction: day.fraction, radius: r * s, halo: today)
+                        .scaleEffect(today ? 0.72 + 0.28 * shown : 0.9 + 0.1 * shown)
+                        .blur(radius: today ? (1 - shown) * 14 * s : 0)
+                        .opacity(today ? min(1, shown * 1.6) : shown)
                         .position(x: (400 + x) * s, y: cy * s)
                     if offset != 0 {
                         Text(weekday(day.date))
                             .font(.custom(MoonFace.body, size: 18 * s).weight(.bold))
                             .foregroundStyle(MoonInk.muted)
+                            .opacity(shown)
                             .position(x: (400 + x) * s, y: (cy + r + 16) * s)
                     }
                 }
@@ -79,6 +105,7 @@ struct MoonView: Theme {
             // A dotted rule under the row, star-flecked like the panel's.
             DottedRule()
                 .frame(width: 520 * s, height: 6 * s)
+                .mask { Rectangle().scaleEffect(x: build.rule, y: 1) }
                 .position(x: 400 * s, y: 308 * s)
 
             // The data block and the quote, flowing down from the rule as the panel sets them:
@@ -116,6 +143,8 @@ struct MoonView: Theme {
                 }
             }
             .frame(width: 760 * s, height: (480 - Self.blockTop) * s, alignment: .top)
+            .opacity(build.block)
+            .offset(y: (1 - build.block) * 12 * s)
             .position(x: 400 * s, y: (480 + Self.blockTop) / 2 * s)
         }
     }
@@ -250,4 +279,16 @@ private struct DottedRule: View {
             }
         }
     }
+}
+
+/// How far the build-in has got, each part 0 to 1: the discs by distance from today (0 is
+/// today), the header, the dotted rule drawing out from its middle, and the data block.
+private struct MoonBuild {
+    var days: [Double]
+    var header: Double
+    var rule: Double
+    var block: Double
+
+    static let start = MoonBuild(days: [0, 0, 0, 0], header: 0, rule: 0, block: 0)
+    static let settled = MoonBuild(days: [1, 1, 1, 1], header: 1, rule: 1, block: 1)
 }

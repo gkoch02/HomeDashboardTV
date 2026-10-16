@@ -18,9 +18,15 @@ private enum Palette {
 ///
 /// Every time and day is the Pi's zone (`Snapshot.timeZone`), so the TV agrees with the panel.
 /// It fills the screen to a 56 x 44 pt margin, past tvOS's overscan safe area.
+///
+/// As the layout appears the left column rises in, then today, then the day cards one after
+/// another.
 struct DashboardView: Theme {
     let snapshot: Snapshot
     let now: Date
+
+    @State private var left = 0.0
+    @State private var agenda = 0.0
 
     static let fullBleed = true
 
@@ -35,9 +41,11 @@ struct DashboardView: Theme {
         HStack(alignment: .top, spacing: 52) {
             LeftColumn(snapshot: snapshot, now: now)
                 .frame(width: 540)
+                .rise(left, index: 0, of: 1)
             AgendaColumn(spacing: Self.columnSpacing, minimumGridHeight: Self.minimumGridHeight) {
                 TodayPanel(day: days[0], zone: zone, now: now)
-                UpcomingGrid(days: Array(days.dropFirst()), zone: zone)
+                    .rise(agenda, index: 0, of: days.count)
+                UpcomingGrid(days: Array(days.dropFirst()), zone: zone, rise: agenda)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
@@ -47,6 +55,10 @@ struct DashboardView: Theme {
         .padding(.horizontal, 56)
         .padding(.vertical, 44)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .onBuildIn(reset: { settled in left = settled ? 1 : 0; agenda = left }) {
+            withAnimation(.easeOut(duration: 0.9).delay(0.05)) { left = 1 }
+            withAnimation(.linear(duration: 1.6).delay(0.3)) { agenda = 1 }
+        }
     }
 
     /// Day sky between sunrise and sunset, night sky otherwise, and dusk for the half hour
@@ -405,6 +417,8 @@ private struct TodayRow: View {
 private struct UpcomingGrid: View {
     let days: [AgendaDay]
     let zone: TimeZone
+    /// The build-in's progress: the cards follow today in, in reading order.
+    let rise: Double
 
     private static let spacing: CGFloat = 24
 
@@ -419,6 +433,7 @@ private struct UpcomingGrid: View {
                         ForEach(row) { day in
                             DayCard(day: day, zone: zone)
                                 .frame(height: height)
+                                .rise(rise, index: 1 + (days.firstIndex { $0.id == day.id } ?? 0), of: days.count + 1)
                         }
                     }
                 }

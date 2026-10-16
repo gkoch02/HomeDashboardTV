@@ -8,9 +8,16 @@ import SwiftUI
 /// The words change every five minutes and cross-fade when they do. The minutes are set in
 /// the theme's first accent, the hour in its second, as on the Pi's colour panel; on the TV
 /// they glow on true black.
+///
+/// As the layout appears the words write themselves in, left to right, and the date and the
+/// strip come up under them.
 struct FuzzyClockView: Theme {
     let snapshot: Snapshot
     let now: Date
+
+    /// The build-in: the words' wipe, then the rest, each 0 to 1.
+    @State private var written = 0.0
+    @State private var rest = 0.0
 
     private var zone: TimeZone { snapshot.timeZone }
 
@@ -25,10 +32,12 @@ struct FuzzyClockView: Theme {
                 }
                 // Only the words animate, and only when they change.
                 .animation(.easeInOut(duration: 1.6), value: phrase)
+                .wipe(written, softness: 0.35)
                 Text(now.formatted(Date.FormatStyle(timeZone: zone).weekday(.wide)) + "  ·  "
                      + now.formatted(Date.FormatStyle(timeZone: zone).day().month(.wide)))
                     .font(.custom(Face.sans, size: 58))
                     .foregroundStyle(Ink.secondary)
+                    .opacity(rest)
             }
             .padding(.horizontal, 40)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -36,9 +45,15 @@ struct FuzzyClockView: Theme {
             if let weather = snapshot.sources.weather?.data {
                 Banner(weather: weather, moon: snapshot.moon, isMetric: snapshot.isMetric, now: now, zone: zone)
                     .frame(height: 150)
+                    .opacity(rest)
+                    .offset(y: (1 - rest) * 24)
             }
         }
         .padding(.horizontal, 20)
+        .onBuildIn(reset: { settled in written = settled ? 1 : 0; rest = written }) {
+            withAnimation(.easeInOut(duration: 1.8).delay(0.1)) { written = 1 }
+            withAnimation(.easeOut(duration: 0.8).delay(1.3)) { rest = 1 }
+        }
     }
 
     private func words(_ phrase: String) -> some View {

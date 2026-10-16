@@ -149,19 +149,13 @@ private struct Nameplate: View {
 }
 
 /// The needles swing to their readings once the layout appears: 0 at rest, 1 on the reading.
-/// Skipped under Reduce Motion.
 private struct Swing: ViewModifier {
     @Binding var amount: Double
     let delay: Double
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
     func body(content: Content) -> some View {
-        content.onAppear {
-            guard !reduceMotion else { amount = 1; return }
-            DispatchQueue.main.async {
-                withAnimation(.spring(response: 1.5, dampingFraction: 0.55).delay(delay)) { amount = 1 }
-            }
+        content.onBuildIn(reset: { settled in amount = settled ? 1 : 0 }) {
+            withAnimation(.spring(response: 1.5, dampingFraction: 0.55).delay(delay)) { amount = 1 }
         }
     }
 }

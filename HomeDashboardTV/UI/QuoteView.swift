@@ -7,9 +7,14 @@ import SwiftUI
 /// The quote is the dashboard's (`quote` in `/api/dashboard`), so it changes when the Pi's
 /// does. It is set as large as fits: SwiftUI shrinks the whole block together, so a short
 /// line and a long paragraph both fill the plate at one size.
+///
+/// As the layout appears the opening mark fades in, the quote comes down line by line, then
+/// the byline and the closing mark, and the strip rises under them.
 struct QuoteView: Theme {
     let snapshot: Snapshot
     let now: Date
+
+    @State private var build = QuoteBuild.start
 
     private var zone: TimeZone { snapshot.timeZone }
 
@@ -17,22 +22,37 @@ struct QuoteView: Theme {
         VStack(spacing: 0) {
             quote
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-            Rectangle().fill(Ink.rule).frame(height: 1.5)
-            if let weather = snapshot.sources.weather?.data {
-                WeatherStrip(weather: weather, moon: snapshot.moon, isMetric: snapshot.isMetric, zone: zone)
-                    .frame(height: 150)
-            } else {
-                Text("Weather unavailable")
-                    .font(.custom(Face.sans, size: 28).weight(.semibold))
-                    .foregroundStyle(Ink.faint)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 150)
+            VStack(spacing: 0) {
+                Rectangle().fill(Ink.rule).frame(height: 1.5)
+                weather
             }
+            .opacity(build.strip)
+            .offset(y: (1 - build.strip) * 24)
         }
         .padding(.horizontal, 20)
+        .onBuildIn(reset: { settled in build = settled ? .settled : .start }) {
+            withAnimation(.easeOut(duration: 0.7).delay(0.05)) { build.open = 1 }
+            withAnimation(.easeInOut(duration: 2.0).delay(0.35)) { build.text = 1 }
+            withAnimation(.easeOut(duration: 0.7).delay(1.9)) { build.byline = 1 }
+            withAnimation(.easeOut(duration: 0.7).delay(2.1)) { build.close = 1 }
+            withAnimation(.easeOut(duration: 0.8).delay(1.0)) { build.strip = 1 }
+        }
     }
 
     var backdrop: some View { Ink.plate }
+
+    @ViewBuilder private var weather: some View {
+        if let weather = snapshot.sources.weather?.data {
+            WeatherStrip(weather: weather, moon: snapshot.moon, isMetric: snapshot.isMetric, zone: zone)
+                .frame(height: 150)
+        } else {
+            Text("Weather unavailable")
+                .font(.custom(Face.sans, size: 28).weight(.semibold))
+                .foregroundStyle(Ink.faint)
+                .frame(maxWidth: .infinity)
+                .frame(height: 150)
+        }
+    }
 
     @ViewBuilder private var quote: some View {
         if let quote = snapshot.quote {
@@ -45,11 +65,13 @@ struct QuoteView: Theme {
                         .multilineTextAlignment(.center)
                         .foregroundStyle(Ink.cream)
                         .minimumScaleFactor(0.35)
+                        .wipe(build.text, from: .top, softness: 0.3)
                     Text("— \(quote.author)")
                         .font(.custom(Face.serif, size: 46))
                         .foregroundStyle(Ink.ochre)
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
+                        .opacity(build.byline)
                 }
                 .padding(.horizontal, 170)
                 .padding(.vertical, 70)
@@ -65,8 +87,12 @@ struct QuoteView: Theme {
     private var marks: some View {
         ZStack {
             Text("\u{201C}")
+                .opacity(build.open)
+                .offset(y: (1 - build.open) * -20)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             Text("\u{201D}")
+                .opacity(build.close)
+                .offset(y: (1 - build.close) * 20)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
                 .padding(.bottom, -60)
         }
@@ -74,6 +100,18 @@ struct QuoteView: Theme {
         .foregroundStyle(Ink.ochre.opacity(0.85))
         .padding(.top, -40)
     }
+}
+
+/// How far the build-in has got, each part 0 to 1.
+private struct QuoteBuild {
+    var open: Double
+    var text: Double
+    var byline: Double
+    var close: Double
+    var strip: Double
+
+    static let start = QuoteBuild(open: 0, text: 0, byline: 0, close: 0, strip: 0)
+    static let settled = QuoteBuild(open: 1, text: 1, byline: 1, close: 1, strip: 1)
 }
 
 private enum Ink {

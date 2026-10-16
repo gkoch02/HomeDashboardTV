@@ -20,10 +20,6 @@ struct LightCycleView: Theme {
     private var today: CivilDate { CivilDate(now, in: zone) }
 
     @State private var build = BuildIn.start
-    /// Appeared under the settings panel: the build-in waits for it to close.
-    @State private var pending = false
-    @Environment(DashboardStore.self) private var store
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// The whole screen, so the dial can run nearly to its top and bottom edges: a circle
     /// leaves the corners empty, and only its rim and the 00 and 12 come near them. The column
@@ -53,33 +49,8 @@ struct LightCycleView: Theme {
                 .padding(.bottom, Margin.stampV)
                 .opacity(build.column)
         }
-        .onAppear {
-            // Picked in settings: wait for the panel to close, so the build-in is seen.
-            if store.settingsVisible { pending = true; hold() } else { playBuildIn() }
-        }
-        .onChange(of: store.settingsVisible) { _, visible in
-            if !visible && pending {
-                pending = false
-                playBuildIn()
-            }
-        }
-    }
-
-    /// Holds the dial at the start of its build-in, with no animation.
-    private func hold() {
-        var instant = Transaction()
-        instant.disablesAnimations = true
-        withTransaction(instant) { build = reduceMotion ? .settled : .start }
-    }
-
-    /// Builds the dial in whenever the layout appears (at launch, stepped to, picked in
-    /// settings once they close), not on the minute redraws, which keep this view and its
-    /// state. Each part fades or draws in after the one before; skipped under Reduce Motion.
-    private func playBuildIn() {
-        hold()
-        guard !reduceMotion else { return }
-        // A turn later, so the start is drawn before anything animates away from it.
-        DispatchQueue.main.async {
+        // Each part fades or draws in after the one before.
+        .onBuildIn(reset: { settled in build = settled ? .settled : .start }) {
             withAnimation(.easeInOut(duration: 0.8).delay(0.05)) { build.rim = 1 }
             withAnimation(.easeOut(duration: 0.5).delay(0.45)) { build.ticks = 1 }
             withAnimation(.easeOut(duration: 0.7).delay(0.65)) { build.band = 1 }
@@ -444,25 +415,6 @@ private struct Orbit: GeometryEffect {
     }
 }
 
-/// One section of the column rising into place: the *index*th starts a beat after the one
-/// before, all driven by one progress.
-private struct Rise: ViewModifier, Animatable {
-    var progress: Double
-    let index: Int
-    var animatableData: Double {
-        get { progress }
-        set { progress = newValue }
-    }
-
-    func body(content: Content) -> some View {
-        let local = min(1, max(0, (progress - Double(index) * 0.13) / 0.35))
-        let eased = 1 - pow(1 - local, 3)
-        return content
-            .opacity(eased)
-            .offset(y: (1 - eased) * 28)
-    }
-}
-
 // MARK: - The column
 
 private struct Column: View {
@@ -482,21 +434,21 @@ private struct Column: View {
                 heading
                 rule.padding(.top, 16)
             }
-            .modifier(Rise(progress: rise, index: 0))
+            .rise(rise, index: 0)
             sunRow.padding(.top, 26)
-                .modifier(Rise(progress: rise, index: 1))
+                .rise(rise, index: 1)
             if let weather {
                 VStack(alignment: .leading, spacing: 0) {
                     rule.padding(.top, 26)
                     reading(weather).padding(.top, 26)
                 }
-                .modifier(Rise(progress: rise, index: 2))
+                .rise(rise, index: 2)
             }
             VStack(alignment: .leading, spacing: 0) {
                 rule.padding(.top, 26)
                 agenda.padding(.top, 24)
             }
-            .modifier(Rise(progress: rise, index: 3))
+            .rise(rise, index: 3)
             // The clock takes whatever height the agenda leaves, centred in it.
             GeometryReader { space in
                 clock(fitting: space.size)
@@ -504,7 +456,7 @@ private struct Column: View {
             }
             .padding(.top, 20)
             .frame(minHeight: Clock.minHeight)
-            .modifier(Rise(progress: rise, index: 4))
+            .rise(rise, index: 4)
         }
         .foregroundStyle(Ink.cream)
         .padding(.vertical, 24)

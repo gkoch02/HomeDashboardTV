@@ -13,9 +13,17 @@ import SwiftUI
 /// panel falls back to. Type is the Pi's own:
 /// Big Shoulders Display for names and numbers, Figtree ExtraBold for events, DM Sans for
 /// labels.
+///
+/// As the layout appears the 72 hours unroll left to right along their axis, sky, rain and
+/// events together, and the column's sections rise in beside them; then the temperature line
+/// draws itself across, its highs and lows landing as it reaches them.
 struct HorizonView: Theme {
     let snapshot: Snapshot
     let now: Date
+
+    @State private var unroll = 0.0
+    @State private var column = 0.0
+    @State private var line = 0.0
 
     static let fullBleed = true
 
@@ -28,9 +36,16 @@ struct HorizonView: Theme {
             let weather = snapshot.sources.weather?.data
             let slots = Horizon.slots(weather: weather, axis: axis)
             ZStack(alignment: .topLeading) {
-                SkyArt(model: SkyModel(snapshot: snapshot, axis: axis, slots: slots), size: g.skySize)
+                ZStack(alignment: .topLeading) {
+                let model = SkyModel(snapshot: snapshot, axis: axis, slots: slots)
+                SkyArt(model: model, size: g.skySize)
                     .equatable()
                     .frame(width: g.skySize.width, height: g.skySize.height)
+                    .offset(x: g.axisX0, y: g.skyY0)
+                SkyArt(model: model, size: g.skySize, layer: .temperature)
+                    .equatable()
+                    .frame(width: g.skySize.width, height: g.skySize.height)
+                    .wipe(line, softness: 0.06)
                     .offset(x: g.axisX0, y: g.skyY0)
 
                 DayHeaders(axis: axis, now: now, g: g)
@@ -38,15 +53,26 @@ struct HorizonView: Theme {
                     .frame(width: geometry.size.width + 24, height: g.eventsY0 - g.skyY1)
                     .offset(y: g.skyY1)
                 EventsBand(snapshot: snapshot, axis: axis, g: g)
+                }
+                .frame(width: geometry.size.width, height: geometry.size.height, alignment: .topLeading)
+                // From the column's edge, where the axis starts.
+                .padding(.leading, g.axisX0)
+                .wipe(unroll, softness: 0.15)
+                .padding(.leading, -g.axisX0)
 
                 // The panel bleeds 24 pt past the top, left and bottom for the drift; its
                 // content keeps a 56 x 48 pt margin inside the screen.
-                HeroColumn(snapshot: snapshot, now: now, axis: axis, slots: slots)
+                HeroColumn(snapshot: snapshot, now: now, axis: axis, slots: slots, rise: column)
                     .padding(EdgeInsets(top: 24 + 48, leading: 24 + 56, bottom: 24 + 40, trailing: 28))
                     .frame(width: g.heroW + 24, height: geometry.size.height + 48, alignment: .topLeading)
                     .background(Ink.hero)
                     .offset(x: -24, y: -24)
             }
+        }
+        .onBuildIn(reset: { settled in unroll = settled ? 1 : 0; column = unroll; line = unroll }) {
+            withAnimation(.linear(duration: 1.3).delay(0.05)) { column = 1 }
+            withAnimation(.easeInOut(duration: 2.0).delay(0.25)) { unroll = 1 }
+            withAnimation(.easeInOut(duration: 2.2).delay(2.3)) { line = 1 }
         }
     }
 
@@ -154,12 +180,27 @@ private struct SkyModel: Equatable {
 private let horizonGlow = 12.0
 
 private struct SkyArt: View, Equatable {
+    /// The sky with its weather, or the temperature line over it: apart, so the line can draw
+    /// itself in after the rest.
+    enum Layer { case sky, temperature }
+
     let model: SkyModel
     let size: CGSize
+    var layer = Layer.sky
 
-    static func == (a: SkyArt, b: SkyArt) -> Bool { a.model == b.model && a.size == b.size }
+    static func == (a: SkyArt, b: SkyArt) -> Bool { a.model == b.model && a.size == b.size && a.layer == b.layer }
 
     var body: some View {
+        if layer == .temperature {
+            Canvas(rendersAsynchronously: false) { context, _ in temperature(&context) }
+                .frame(width: size.width, height: size.height)
+                .clipped()
+        } else {
+            sky
+        }
+    }
+
+    private var sky: some View {
         ZStack(alignment: .topLeading) {
             if let image = Self.skyImage(model, size: size) {
                 Image(decorative: image, scale: 1)
@@ -184,7 +225,6 @@ private struct SkyArt: View, Equatable {
             }
             Canvas(rendersAsynchronously: false) { context, _ in
                 weather(&context)
-                temperature(&context)
             }
         }
         .frame(width: size.width, height: size.height)
@@ -742,28 +782,36 @@ private struct HeroColumn: View {
     let now: Date
     let axis: TimeAxis
     let slots: [HorizonSlot]
+    /// The build-in's progress: the reading, the clock, the outlook and the foot in turn.
+    let rise: Double
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("NOW")
-                .font(.custom(Face.label, size: 22).weight(.bold))
-                .tracking(2)
-                .foregroundStyle(Ink.yellow)
-            if let weather = snapshot.sources.weather?.data {
-                reading(weather)
-            } else {
-                Text("NO DATA")
-                    .font(.custom(Face.black, size: 80))
-                    .foregroundStyle(Ink.cream)
+            VStack(alignment: .leading, spacing: 0) {
+                Text("NOW")
+                    .font(.custom(Face.label, size: 22).weight(.bold))
+                    .tracking(2)
+                    .foregroundStyle(Ink.yellow)
+                if let weather = snapshot.sources.weather?.data {
+                    reading(weather)
+                } else {
+                    Text("NO DATA")
+                        .font(.custom(Face.black, size: 80))
+                        .foregroundStyle(Ink.cream)
+                }
             }
+            .rise(rise, index: 0, of: 4)
             Spacer(minLength: 20)
             clock
+                .rise(rise, index: 1, of: 4)
             Spacer(minLength: 20)
             // The outlook keeps its size; the clock gives way to it.
             outlook
                 .fixedSize(horizontal: false, vertical: true)
+                .rise(rise, index: 2, of: 4)
             foot
                 .padding(.top, 22)
+                .rise(rise, index: 3, of: 4)
         }
         .foregroundStyle(Ink.cream)
     }

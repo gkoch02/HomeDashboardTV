@@ -13,9 +13,15 @@ import SwiftUI
 /// Over the sky: the time and the agenda still to come on the left, the weather now on the
 /// right. On the ground: the next 24 hours as a temperature line coloured by the heat, and
 /// the days ahead beside the sun and moon times.
+///
+/// As the layout appears the sky comes up out of the black like a dawn and the sun or moon
+/// rises into place; the clock, the weather and the agenda rise in over it, and the next 24
+/// hours draw themselves across the ground.
 struct SkylightView: Theme {
     let snapshot: Snapshot
     let now: Date
+
+    @State private var build = SkylightBuild.start
 
     private var zone: TimeZone { snapshot.timeZone }
 
@@ -30,7 +36,9 @@ struct SkylightView: Theme {
                 HStack(alignment: .top, spacing: 60) {
                     VStack(alignment: .leading, spacing: 0) {
                         ClockBlock(now: now, zone: zone)
-                        UpNext(snapshot: snapshot, now: now)
+                            .opacity(build.clock)
+                            .offset(y: (1 - build.clock) * 20)
+                        UpNext(snapshot: snapshot, now: now, rise: build.agenda)
                             .padding(.top, 26)
                     }
                     .frame(maxWidth: size.width * 0.44, alignment: .leading)
@@ -38,6 +46,8 @@ struct SkylightView: Theme {
                     if let weather = snapshot.sources.weather?.data {
                         WeatherNow(weather: weather, air: snapshot.sources.airQuality?.data,
                                    isMetric: snapshot.isMetric)
+                            .opacity(build.weather)
+                            .offset(y: (1 - build.weather) * 20)
                     }
                 }
                 .padding(.horizontal, Layout.marginH)
@@ -50,6 +60,7 @@ struct SkylightView: Theme {
                                sunTimes: Skylight.sunTimes(snapshot, now: now),
                                isMetric: snapshot.isMetric, zone: zone)
                             .frame(height: 224)
+                            .wipe(build.ribbon, softness: 0.25)
                     }
                     HStack(alignment: .bottom, spacing: 50) {
                         if let weather = snapshot.sources.weather?.data {
@@ -59,12 +70,22 @@ struct SkylightView: Theme {
                         Spacer(minLength: 0)
                         SunAndMoon(snapshot: snapshot, now: now)
                     }
+                    .opacity(build.ground)
+                    .offset(y: (1 - build.ground) * 20)
                 }
                 .padding(.horizontal, Layout.marginH)
                 .padding(.bottom, Layout.marginBottom)
                 .frame(width: size.width, height: size.height - ground - 18, alignment: .bottom)
                 .offset(y: ground + 18)
             }
+        }
+        // After the sky has begun to lighten (SkyBackdrop's own build-in).
+        .onBuildIn(reset: { settled in build = settled ? .settled : .start }) {
+            withAnimation(.easeOut(duration: 0.8).delay(0.7)) { build.clock = 1 }
+            withAnimation(.easeOut(duration: 0.8).delay(0.9)) { build.weather = 1 }
+            withAnimation(.linear(duration: 1.3).delay(1.0)) { build.agenda = 1 }
+            withAnimation(.easeInOut(duration: 1.6).delay(1.2)) { build.ribbon = 1 }
+            withAnimation(.easeOut(duration: 0.8).delay(1.8)) { build.ground = 1 }
         }
     }
 
@@ -78,6 +99,18 @@ struct SkylightView: Theme {
             .padding(.vertical, 10)
             .background(.black.opacity(0.55), in: Capsule())
     }
+}
+
+/// How far the text's build-in has got, each part 0 to 1.
+private struct SkylightBuild {
+    var clock: Double
+    var weather: Double
+    var agenda: Double
+    var ribbon: Double
+    var ground: Double
+
+    static let start = SkylightBuild(clock: 0, weather: 0, agenda: 0, ribbon: 0, ground: 0)
+    static let settled = SkylightBuild(clock: 1, weather: 1, agenda: 1, ribbon: 1, ground: 1)
 }
 
 private enum Layout {
@@ -109,6 +142,8 @@ private struct SkyBackdrop: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var clock = SkyClock()
+    @State private var dawn = Dawn.dark
+    @State private var moonRise = 0.0
 
     var body: some View {
         let sky = Skylight.sky(snapshot, now: now)
@@ -122,13 +157,17 @@ private struct SkyBackdrop: View {
             ZStack(alignment: .topLeading) {
                 TimelineView(.animation(minimumInterval: 1.0 / 30, paused: reduceMotion)) { context in
                     let motion = clock.advance(to: context.date, drift: sky.drift)
+                    let light = dawn.light(at: context.date)
+                    let rise = dawn.rise(at: context.date)
+                    let risen = (centre: CGPoint(x: sun.centre.x, y: sun.centre.y + (1 - rise) * Dawn.climb),
+                                 shown: sun.shown * rise)
                     Rectangle()
                         .fill(.black)
                         .colorEffect(ShaderLibrary.skylightSky(
                             .float2(size),
                             .float(motion.time), vector(motion.clouds), vector(motion.rain), vector(motion.snow),
                             .color(palette.zenith), .color(palette.horizon), .color(palette.glow),
-                            .float4(Float(sun.centre.x), Float(sun.centre.y), Float(sun.radius), Float(sun.shown)),
+                            .float4(Float(risen.centre.x), Float(risen.centre.y), Float(sun.radius), Float(risen.shown)),
                             .float4(Float(palette.glowStrength), Float(palette.twilight), Float(palette.stars),
                                     sky.precip == .storm ? 1 : 0),
                             .float4(Float(sky.cover), sky.precip == .rain || sky.precip == .storm ? Float(sky.intensity) : 0,
@@ -137,8 +176,10 @@ private struct SkyBackdrop: View {
                             .float(Float(ground)),
                             .float4(Float(sky.drift), 0, Float(drift.width), Float(drift.height))
                         ))
+                        .overlay { Color.black.opacity(1 - light) }
                 }
                 if let moon, !sky.hidesBodies {
+                    // The moon is drawn here, not in the timeline, so it rises by animation.
                     let radius: CGFloat = 46
                     let x = size.width * SkyPath.x(moon.path)
                     let rise = sin(.pi * min(max(moon.path, 0), 1))
@@ -147,13 +188,20 @@ private struct SkyBackdrop: View {
                         // By day the photograph's dark side would sit on the blue as a black
                         // disc; screened, only the lit side shows, as the moon does by day.
                         .blendMode(sky.isNight ? .normal : .screen)
-                        .opacity((sky.isNight ? 1 : 0.7) * (1 - 0.55 * sky.cover))
-                        .position(x: x, y: y)
+                        .opacity((sky.isNight ? 1 : 0.7) * (1 - 0.55 * sky.cover) * moonRise)
+                        .position(x: x, y: y + (1 - moonRise) * Dawn.climb)
                 }
             }
             .frame(width: size.width, height: size.height)
         }
         .background(Color.black)
+        .onBuildIn(reset: { settled in
+            dawn = settled ? .day : .dark
+            moonRise = settled ? 1 : 0
+        }) {
+            dawn = .breaking(.now)
+            withAnimation(.easeOut(duration: 1.4).delay(0.6)) { moonRise = 1 }
+        }
     }
 
     /// The sun's centre, radius and how much shows: across the open middle of the sky from left
@@ -165,6 +213,31 @@ private struct SkyBackdrop: View {
         let y = ground - 30 - CGFloat(height) * (ground - 150)
         let up = min(max((sky.altitude + 1) / 3, 0), 1)
         return (CGPoint(x: x, y: y), 24, sky.hidesBodies ? 0 : up * (1 - 0.6 * sky.cover))
+    }
+}
+
+/// The sky's build-in, timed by the sky's own timeline (its shader's inputs do not animate):
+/// it lightens out of the black, and the sun climbs into its place a beat behind.
+private enum Dawn: Equatable {
+    case dark, breaking(Date), day
+
+    /// How far the sun climbs in from below its place.
+    static let climb: CGFloat = 70
+
+    /// How light the sky is, 0 (black) to 1.
+    func light(at date: Date) -> Double { eased(at: date, from: 0, over: 1.8) }
+
+    /// How far the sun has climbed, 0 to 1.
+    func rise(at date: Date) -> Double { eased(at: date, from: 0.6, over: 1.4) }
+
+    private func eased(at date: Date, from delay: Double, over duration: Double) -> Double {
+        switch self {
+        case .dark: return 0
+        case .day: return 1
+        case .breaking(let start):
+            let t = min(max((date.timeIntervalSince(start) - delay) / duration, 0), 1)
+            return 1 - pow(1 - t, 3)
+        }
     }
 }
 
@@ -321,6 +394,8 @@ private struct ClockBlock: View {
 private struct UpNext: View {
     let snapshot: Snapshot
     let now: Date
+    /// The build-in's progress, 0 to 1: the lines rise in one after another.
+    let rise: Double
 
     private var zone: TimeZone { snapshot.timeZone }
 
@@ -335,14 +410,17 @@ private struct UpNext: View {
                         chipRow(Array(chips.prefix(count)))
                     }
                 }
+                .rise(rise, index: 0)
             }
             if events.isEmpty {
                 Text("Nothing else on the calendar")
                     .font(.system(size: 30, weight: .regular))
                     .foregroundStyle(Ink.faint)
+                    .rise(rise, index: 1)
             }
-            ForEach(events, id: \.self) { event in
+            ForEach(Array(events.enumerated()), id: \.element) { index, event in
                 row(event)
+                    .rise(rise, index: index + 1)
             }
         }
     }
@@ -667,10 +745,14 @@ private struct Outlook: View {
                             .font(.system(size: 26, weight: .semibold))
                             .foregroundStyle(Ink.text)
                         Spacer(minLength: 0)
+                        // One box for every symbol: a tall one (rain under a cloud) pushed its
+                        // day's bar and figures below the others'.
                         Image(systemName: WeatherSymbol.name(for: day.icon))
                             .symbolRenderingMode(.multicolor)
                             .font(.system(size: 28))
+                            .frame(width: 40, height: 32)
                     }
+                    .frame(height: 32)
                     RangeBar(low: day.low, high: day.high, weekLow: lo, weekHigh: hi, isMetric: isMetric)
                         .frame(height: 6)
                     HStack {

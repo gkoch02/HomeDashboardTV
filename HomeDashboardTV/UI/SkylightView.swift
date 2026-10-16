@@ -275,9 +275,11 @@ private final class SkyClock {
 private func vector(_ v: SIMD4<Float>) -> Shader.Argument { .float4(v.x, v.y, v.z, v.w) }
 
 /// Where the sun and moon cross the sky: the open middle between the agenda and the weather,
-/// so neither ever sits behind text. Rise is on the left, set on the right.
+/// so neither ever sits behind text. Rise is on the left, set on the right. The agenda column
+/// may run to 44 % of the width past its 90 pt margin, so the moon's left edge (46 pt out from
+/// its centre) starts clear of it; the weather's lines start at about 71 %.
 private enum SkyPath {
-    static func x(_ path: Double) -> CGFloat { CGFloat(0.47 + 0.18 * path) }
+    static func x(_ path: Double) -> CGFloat { CGFloat(0.52 + 0.14 * path) }
 }
 
 /// The sky's colours for one moment, from the sun's altitude and the weather.

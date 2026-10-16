@@ -52,7 +52,7 @@ struct HorizonView: Theme {
                 RainAndHours(axis: axis, slots: slots, g: g)
                     .frame(width: geometry.size.width + 24, height: g.eventsY0 - g.skyY1)
                     .offset(y: g.skyY1)
-                EventsBand(snapshot: snapshot, axis: axis, g: g)
+                EventsBand(snapshot: snapshot, axis: axis, g: g, now: now)
                 }
                 .frame(width: geometry.size.width, height: geometry.size.height, alignment: .topLeading)
                 // From the column's edge, where the axis starts.
@@ -638,6 +638,8 @@ private struct EventsBand: View {
     let snapshot: Snapshot
     let axis: TimeAxis
     let g: Geometry
+    /// Finished events step back, as on Agenda and Light Cycle.
+    let now: Date
 
     private static let stripH: CGFloat = 14
     private static let chipH: CGFloat = 42
@@ -757,6 +759,7 @@ private struct EventsBand: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .frame(height: Self.rowH)
+                    .opacity(!e.isAllDay && e.end <= now ? 0.4 : 1)
                 }
                 if rows.more > 0 {
                     GridRow {

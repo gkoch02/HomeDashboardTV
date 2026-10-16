@@ -572,6 +572,8 @@ private struct Column: View {
                 .font(.custom(Face.sans, size: 32).weight(.semibold))
                 .foregroundStyle(ended ? Ink.faint : Ink.cream)
                 .lineLimit(1)
+                // A long title shrinks a little before it is cut short.
+                .minimumScaleFactor(0.85)
         }
     }
 

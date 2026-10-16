@@ -145,7 +145,6 @@ private struct WeatherStrip: View {
                 Text("\(Int(weather.currentTemp.rounded()))°")
                     .font(.custom(Face.sans, size: 72).weight(.bold))
             }
-            .frame(width: 330, alignment: .leading)
             VStack(alignment: .leading, spacing: 4) {
                 Text(weather.currentDescription.capitalized)
                     .font(.custom(Face.sans, size: 30).weight(.bold))
@@ -159,6 +158,7 @@ private struct WeatherStrip: View {
             }
             .lineLimit(1)
             .minimumScaleFactor(0.7)
+            .padding(.leading, 36)
             .frame(maxWidth: .infinity, alignment: .leading)
             HStack(spacing: 44) {
                 ForEach(weather.forecast.prefix(3), id: \.date) { day in

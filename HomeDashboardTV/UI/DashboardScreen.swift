@@ -12,6 +12,12 @@ import SwiftUI
 struct DashboardScreen: View {
     @Environment(DashboardStore.self) private var store
     @FocusState private var screenFocused: Bool
+    /// The fade through black between layouts: how much of the layout shows (it falls to 0,
+    /// the layout changes, it rises to 1), and the layout the presses so far lead to.
+    @State private var shown: CGFloat = 1
+    @State private var target: DashboardStore.Layout?
+    /// Counts fades, so one cut short by the next press does not act when it finishes.
+    @State private var fade = 0
 
     var body: some View {
         ZStack {
@@ -27,8 +33,8 @@ struct DashboardScreen: View {
                     guard !store.settingsVisible else { return }
                     store.noteInteraction()
                     switch direction {
-                    case .left: store.layout = store.layout.advanced(by: -1)
-                    case .right: store.layout = store.layout.advanced(by: 1)
+                    case .left: change(by: -1)
+                    case .right: change(by: 1)
                     default: break
                     }
                 }
@@ -44,6 +50,26 @@ struct DashboardScreen: View {
         .onChange(of: store.settingsVisible) { _, _ in claimFocus() }
     }
 
+    /// Steps the layout through black: the screen fades out, the layout changes while it is
+    /// dark, and the new one fades in. Presses during the fade add up, and the screen comes up
+    /// on where they lead.
+    private func change(by steps: Int) {
+        let next = (target ?? store.layout).advanced(by: steps)
+        target = next
+        fade += 1
+        let this = fade
+        withAnimation(.easeIn(duration: FadeThroughBlack.half)) {
+            shown = 0
+        } completion: {
+            guard fade == this else { return }
+            var instant = Transaction()
+            instant.disablesAnimations = true
+            withTransaction(instant) { store.layout = next }
+            target = nil
+            withAnimation(.easeOut(duration: FadeThroughBlack.half)) { shown = 1 }
+        }
+    }
+
     private func claimFocus() {
         guard !store.settingsVisible else { return }
         DispatchQueue.main.async { screenFocused = true }
@@ -52,19 +78,26 @@ struct DashboardScreen: View {
     private var content: some View {
             TimelineView(.everyMinute) { context in
                 if let snapshot = store.snapshot {
-                    switch store.layout {
-                    case .dashboard: frame(DashboardView.self, snapshot, context.date)
-                    case .agenda: frame(AgendaPlateView.self, snapshot, context.date)
-                    case .moon: frame(MoonView.self, snapshot, context.date)
-                    case .horizon: frame(HorizonView.self, snapshot, context.date)
-                    case .light: frame(LightCycleView.self, snapshot, context.date)
-                    case .quote: frame(QuoteView.self, snapshot, context.date)
-                    case .night: frame(NightView.self, snapshot, context.date)
-                    }
+                    layout(store.layout, snapshot, context.date)
+                        .id(store.layout)
+                        .opacity(shown)
+                        .background { Color.black.ignoresSafeArea() }
                 } else if store.connection != nil {
                     Waiting(problem: store.problem)
                 }
             }
+    }
+
+    @ViewBuilder private func layout(_ layout: DashboardStore.Layout, _ snapshot: Snapshot, _ now: Date) -> some View {
+                    switch layout {
+                    case .dashboard: frame(DashboardView.self, snapshot, now)
+                    case .agenda: frame(AgendaPlateView.self, snapshot, now)
+                    case .moon: frame(MoonView.self, snapshot, now)
+                    case .horizon: frame(HorizonView.self, snapshot, now)
+                    case .light: frame(LightCycleView.self, snapshot, now)
+                    case .quote: frame(QuoteView.self, snapshot, now)
+                    case .night: frame(NightView.self, snapshot, now)
+                    }
     }
 
     private func frame<T: Theme>(_ theme: T.Type, _ snapshot: Snapshot, _ now: Date) -> some View {
@@ -85,6 +118,14 @@ struct DashboardScreen: View {
         ].filter { $0.1?.isWorthFlagging == true }.map(\.0)
         return stale.isEmpty ? nil : "\(ListFormatter.localizedString(byJoining: stale)) not updated lately"
     }
+}
+
+/// Moving between layouts with the remote: a fade through black. Driven by one animated
+/// opacity on the layout, not by SwiftUI transitions, whose implicit animation also animated
+/// each layout's insides as it was laid out.
+private enum FadeThroughBlack {
+    /// Each half: out to black, then in from it.
+    static let half = 0.28
 }
 
 private struct Waiting: View {

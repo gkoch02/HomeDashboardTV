@@ -7,9 +7,9 @@ import SwiftUI
 ///
 /// Cream type on a warm charcoal ground, with the Pi's two Inky spot inks: ochre for the sun,
 /// the moon's ring and the lightning, red for the event in progress and the next one up. The
-/// weather window is `WeatherArt`, painted at full resolution. Elapsed events print through a
-/// fine dot screen, the one halftone the plate keeps, after the Pi's perforated type. Type is the Pi's own: Righteous for the weather and
-/// the agenda's chrome, DM Sans for the events.
+/// weather window is `WeatherArt`, painted at full resolution. Elapsed events fade back (the
+/// Pi perforates them, which on a TV reads as a checkerboard). Type is the Pi's own: Righteous
+/// for the weather and the agenda's chrome, DM Sans for the events.
 struct AgendaPlateView: Theme {
     let snapshot: Snapshot
     let now: Date
@@ -306,18 +306,21 @@ private struct EventRow: View {
         let inverted = state == .running
         let ink = Print.ink
         HStack(alignment: .top, spacing: 18) {
+            // The start reads at a glance; the end sits under it, smaller and quieter.
             VStack(alignment: .trailing, spacing: 2) {
                 if event.isAllDay {
                     Text("ALL DAY").font(.custom(Print.text, size: 24).weight(.bold)).tracking(1.5)
+                        .foregroundStyle(ink)
                 } else {
-                    Text("\(CompactTime.string(event.start, in: zone)) –")
-                    Text(CompactTime.string(event.end, in: zone))
+                    Text(CompactTime.string(event.start, in: zone))
+                        .font(.custom(Print.text, size: 30).weight(.semibold))
+                        .foregroundStyle(ink)
+                    Text("to \(CompactTime.string(event.end, in: zone))")
+                        .font(.custom(Print.text, size: 22).weight(.medium))
+                        .foregroundStyle(inverted ? Print.ink.opacity(0.75) : Print.faint)
                 }
             }
-            .font(.custom(Print.text, size: 30).weight(.semibold))
-            .foregroundStyle(ink)
             .frame(width: Self.timeWidth, alignment: .trailing)
-            .perforated(state == .elapsed)
 
             Rectangle()
                 .fill(state == .running || state == .next ? Print.red : .clear)
@@ -329,17 +332,17 @@ private struct EventRow: View {
                     .foregroundStyle(ink)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
-                    .perforated(state == .elapsed)
                 if let location = event.shortLocation {
                     Text(location)
                         .font(.custom(Print.text, size: 28).weight(.medium))
                         .foregroundStyle(inverted ? Print.ink.opacity(0.75) : Print.faint)
                         .lineLimit(1)
-                        .perforated(state == .elapsed)
                 }
             }
             Spacer(minLength: 0)
         }
+        // Finished events step back rather than vanish.
+        .opacity(state == .elapsed ? 0.4 : 1)
         .padding(.vertical, inverted ? 14 : 0)
         .padding(.trailing, inverted ? 18 : 0)
         // On the dark plate "inverted" is a quiet lift, not a cream bar: the brightest block on
@@ -364,41 +367,6 @@ private struct BirthdayRow: View {
                 .foregroundStyle(Print.ink)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
-        }
-    }
-}
-
-// MARK: - Perforated type
-
-private extension View {
-    /// Prints this view through a fine dot screen, as the Pi perforates elapsed events.
-    @ViewBuilder func perforated(_ on: Bool) -> some View {
-        if on {
-            self.hidden().overlay(DotScreen().mask(self))
-        } else {
-            self
-        }
-    }
-}
-
-/// A fine, even screen of ink dots.
-private struct DotScreen: View {
-    var body: some View {
-        Canvas { context, size in
-            let p: CGFloat = 4.2
-            var path = Path()
-            var y: CGFloat = 0
-            var row = 0
-            while y < size.height + p {
-                var x: CGFloat = row.isMultiple(of: 2) ? 0 : p / 2
-                while x < size.width + p {
-                    path.addEllipse(in: CGRect(x: x - 1.35, y: y - 1.35, width: 2.7, height: 2.7))
-                    x += p
-                }
-                y += p * 0.87
-                row += 1
-            }
-            context.fill(path, with: .color(Print.ink.opacity(0.6)))
         }
     }
 }

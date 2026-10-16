@@ -206,7 +206,7 @@ private struct AgendaPane: View {
         let rows = day.birthdays.map(Row.birthday) + day.events.map(Row.event)
         let next = day.events.first { !$0.isAllDay && $0.start > now }
         VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .lastTextBaseline) {
+            HStack(alignment: .lastTextBaseline, spacing: 22) {
                 if tomorrow {
                     Text("TOMORROW")
                         .font(.custom(Print.display, size: 48))
@@ -219,11 +219,12 @@ private struct AgendaPane: View {
                         .font(.custom(Print.display, size: 56))
                         .foregroundStyle(Print.ink)
                 }
-                Spacer()
                 Text(count(day.events.count))
                     .font(.custom(Print.text, size: 24).weight(.bold))
                     .tracking(2)
-                    .foregroundStyle(Print.ink)
+                    .foregroundStyle(Print.faint)
+                Spacer()
+                clock
             }
             Rectangle().fill(Print.ink).frame(height: 4).padding(.top, 10).padding(.bottom, 26)
 
@@ -242,6 +243,22 @@ private struct AgendaPane: View {
                 }
             }
         }
+    }
+
+    /// The time now, set like TODAY across from it; the minute redraws keep it current. A
+    /// 12-hour locale gets a small AM or PM in the faint ink.
+    private var clock: Text {
+        let parts = ClockTime.parts(now, in: zone)
+        var text = Text(parts.time)
+            .font(.custom(Print.display, size: 56))
+            .foregroundColor(Print.ink)
+        if let period = parts.period {
+            text = text + Text(" " + period)
+                .font(.custom(Print.text, size: 24).weight(.bold))
+                .tracking(2)
+                .foregroundColor(Print.faint)
+        }
+        return text
     }
 
     private func count(_ n: Int) -> String {

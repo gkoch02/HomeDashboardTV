@@ -36,6 +36,7 @@
 		A702BE2F6D6D411D256D80BE /* MoonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10DA38EC1D96409C50598DB5 /* MoonView.swift */; };
 		B4314A66BEB07B6ADB8167FC /* demo-snapshot.json in Resources */ = {isa = PBXBuildFile; fileRef = F31AD003A5C8873570D9A9F2 /* demo-snapshot.json */; };
 		BB501FDE97EAB93BA7415424 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBCC482A09982EB05EE52C5 /* SettingsView.swift */; };
+		C16BCCB4AEE8231608362608 /* BuildIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D6560F916DAE5BD81DA2DBC /* BuildIn.swift */; };
 		C5E2D782A5D8AF6532B9A6FA /* MoonDisc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 472A321210B7C12D4CF15E22 /* MoonDisc.swift */; };
 		D022FE87E73DB8C7AF8A49A8 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 9740313FCCA386C7F996F6FA /* PrivacyInfo.xcprivacy */; };
 		DBF586DBDC1455FF0DC4F199 /* SkylightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C30E67A42F18B2067865361F /* SkylightView.swift */; };
@@ -65,6 +66,7 @@
 		10DA38EC1D96409C50598DB5 /* MoonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoonView.swift; sourceTree = "<group>"; };
 		1A7D3CB3930F0208F3F6CD8B /* AgendaPlateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgendaPlateView.swift; sourceTree = "<group>"; };
 		1D5C83EE56FEAB64DF4BCEF1 /* RemoteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteTests.swift; sourceTree = "<group>"; };
+		1D6560F916DAE5BD81DA2DBC /* BuildIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildIn.swift; sourceTree = "<group>"; };
 		24D3FE4C261142D9F0D912CA /* Righteous-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Righteous-Regular.ttf"; sourceTree = "<group>"; };
 		33E802CA050DAA1C01659DD7 /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.xcconfig; sourceTree = "<group>"; };
 		4098608C8444AC0C661DD3D1 /* QuoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteView.swift; sourceTree = "<group>"; };
@@ -172,6 +174,7 @@
 		819153AE226C9E1E05B57C87 /* Parts */ = {
 			isa = PBXGroup;
 			children = (
+				1D6560F916DAE5BD81DA2DBC /* BuildIn.swift */,
 				472A321210B7C12D4CF15E22 /* MoonDisc.swift */,
 				F1982EDDF2B6A3E033A01C63 /* SkyColour.swift */,
 				EAEE458EE1F37F100274CB01 /* SkylightSky.metal */,
@@ -369,6 +372,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9645C744C0BB544F09B9A0CE /* AgendaPlateView.swift in Sources */,
+				C16BCCB4AEE8231608362608 /* BuildIn.swift in Sources */,
 				7E6CE2079A42A622309DEC52 /* DashboardScreen.swift in Sources */,
 				48BB3B40E6E914FDBE11153A /* DashboardStore.swift in Sources */,
 				7E84F655354C4B325DAE7DF9 /* DashboardView.swift in Sources */,

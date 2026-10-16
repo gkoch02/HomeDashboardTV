@@ -164,6 +164,15 @@ public struct SunModel: Sendable, Equatable {
     /// Whether the altitudes are the Pi's, not the fallback arc.
     public var isExact: Bool { sun != nil }
 
+    /// Whether the Pi's samples cover every moment from *first*'s midnight to the end of
+    /// *last*, so nothing on those days falls back to the arc. A snapshot kept through a long
+    /// outage runs off the end of its four days.
+    public func isExact(from first: CivilDate, through last: CivilDate) -> Bool {
+        guard let sun else { return false }
+        let end = sun.start.addingTimeInterval(Double((sun.altitudes.count - 1) * sun.stepMinutes * 60))
+        return first.start(in: zone) >= sun.start && last.adding(days: 1).start(in: zone) <= end
+    }
+
     /// Degrees above the horizon at *t*: the Pi's samples where they reach, else the arc.
     public func altitude(at t: Date) -> Double {
         if let sun {

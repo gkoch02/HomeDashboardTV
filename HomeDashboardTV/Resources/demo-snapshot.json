@@ -65,6 +65,15 @@
   },
   "schema_version": 1,
   "sources": {
+    "air_quality": {
+      "data": {
+        "aqi": 42,
+        "category": "Good",
+        "pm25": 9.8
+      },
+      "fetched_at": "2026-10-14T07:20:12.114203+00:00",
+      "staleness": "fresh"
+    },
     "birthdays": {
       "data": [
         {

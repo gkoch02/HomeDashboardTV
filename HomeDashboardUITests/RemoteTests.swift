@@ -62,10 +62,10 @@ final class RemoteTests: XCTestCase {
         XCTAssertTrue(today.waitForExistence(timeout: 10))
 
         remote.press(.left)
-        XCTAssertTrue(today.waitForNonExistence(timeout: 5), "left wraps from Dashboard to Horizon")
+        XCTAssertTrue(today.waitForNonExistence(timeout: 5), "left wraps from Dashboard to Night")
 
         remote.press(.right)
-        XCTAssertTrue(today.waitForExistence(timeout: 5), "right wraps from Horizon back to Dashboard")
+        XCTAssertTrue(today.waitForExistence(timeout: 5), "right wraps from Night back to Dashboard")
 
         remote.press(.right)
         XCTAssertTrue(today.waitForNonExistence(timeout: 5), "right moves on to Agenda")

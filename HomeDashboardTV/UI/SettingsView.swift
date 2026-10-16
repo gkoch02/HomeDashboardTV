@@ -1,259 +1,245 @@
 import DashboardCore
 import SwiftUI
 
-/// Settings as a system-style drawer: a material panel at the screen's trailing edge with the
-/// layout and Keep awake as system pickers, and where the dashboard comes from (a Pi found on
-/// the network, a typed address, or the bundled demo week) a page deeper, with the web UI's
-/// login. Menu goes back a page, then closes the drawer once a source is set.
+/// Settings as a drawer at the screen's trailing edge, built as IdleHoursTV's settings panel
+/// is: each page a stack of uniform full-width rows, on a material panel flush with the edge.
+/// The root holds the layout, Keep Awake and where the dashboard comes from (a Pi found on
+/// the network, a typed address, or the bundled demo week), with the web UI's login; each
+/// choice opens a page of its own. Menu goes back a page, then closes the drawer once there
+/// is a source to show. The dashboard stays visible beside it, so a layout picked here shows
+/// at once.
 ///
-/// The dashboard stays visible beside it, so a layout picked here shows at once.
+/// No `List` or `NavigationStack`: their scroll and navigation views clipped the focused
+/// row's lifted pill at both ends on the TV, which the simulator never showed. Plain rows in
+/// a padded stack leave the lift room inside the panel.
 struct SettingsView: View {
     @Environment(DashboardStore.self) private var store
     @State private var browser = PiBrowser()
     @State private var typedAddress = ""
     @State private var resolving: String?
     @State private var addressError: String?
-    @State private var path: [Page] = []
-    @FocusState private var focus: Field?
+    @State private var page: Page = .root
+    /// The row last focused on each page, so stepping back lands where you left.
+    @State private var lastFocused: [Page: String] = [:]
+    @FocusState private var focused: String?
 
-    /// The drawer's deeper pages. Layout and Keep Awake are pickers drawn here rather than
-    /// SwiftUI's navigation-link `Picker`, whose pushed list came up blank in a drawer narrower
-    /// than the screen.
-    enum Page: Hashable {
-        case layout, keepAwake, source
-    }
-
-    /// The rows focus is sent to by name as a page opens.
-    enum Field: Hashable {
-        case layout, keepAwake, source, firstChoice, firstSource
-    }
+    enum Page { case root, layout, keepAwake, source }
 
     static let width: CGFloat = 780
 
     var body: some View {
-        @Bindable var store = store
-        NavigationStack(path: $path) {
-            List {
-                Section {
-                    NavigationLink(value: Page.layout) {
-                        LabeledContent("Layout", value: store.layout.title)
-                    }
-                    .focused($focus, equals: .layout)
-                    NavigationLink(value: Page.keepAwake) {
-                        LabeledContent("Keep Awake", value: awakeLabel(store.keepAwakeHours))
-                    }
-                    .focused($focus, equals: .keepAwake)
-                } header: {
-                    header
-                } footer: {
-                    Text("Keep Awake holds off the screensaver for that long after a remote press; then the Apple TV's own screensaver and sleep timers apply.")
-                        .font(.system(size: 22))
-                        .foregroundStyle(.secondary)
-                }
-
-                Section {
-                    NavigationLink(value: Page.source) {
-                        LabeledContent("Source", value: sourceName)
-                    }
-                    .focused($focus, equals: .source)
-                    TextField("Username", text: $store.username)
-                    SecureField("Password", text: $store.password)
-                } header: {
-                    Text("Dashboard")
-                } footer: {
-                    Text("The username and password are the Pi web UI's, if it has one.")
-                        .font(.system(size: 22))
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .drawerUnclipped()
-            .navigationDestination(for: Page.self) { page in
-                switch page {
-                case .layout:
-                    choices("Layout", DashboardStore.Layout.allCases, selected: store.layout, title: \.title) {
-                        store.layout = $0
-                    }
-                case .keepAwake:
-                    choices("Keep Awake", DashboardStore.keepAwakeChoices, selected: store.keepAwakeHours,
-                            title: awakeLabel) {
-                        store.keepAwakeHours = $0
-                    }
-                case .source:
-                    sourcePage
-                }
+        VStack(alignment: .leading, spacing: 18) {
+            switch page {
+            case .root: rootPage
+            case .layout: layoutPage
+            case .keepAwake: keepAwakePage
+            case .source: sourcePage
             }
         }
-        .padding(.horizontal, 40)
-        .padding(.vertical, 24)
+        // Inside tvOS's safe margins on the outer edge (90 across, 60 down), and 48 on the
+        // inner edge: room for a focused row to grow without leaving the panel.
+        .padding(.leading, 48)
+        .padding(.trailing, 90)
+        .padding(.vertical, 60)
         .frame(width: Self.width)
-        .background(.thickMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 40, style: .continuous))
-        .shadow(color: .black.opacity(0.5), radius: 40, x: -10)
-        .padding(.vertical, 40)
-        .padding(.trailing, 40)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
+        .frame(maxHeight: .infinity, alignment: .top)
+        .background(.regularMaterial)
+        // Always a dark panel with light text, whatever the layout behind it.
+        .environment(\.colorScheme, .dark)
+        .frame(maxWidth: .infinity, alignment: .trailing)
+        .ignoresSafeArea()
         .onAppear {
             browser.start()
             if case let .server(url) = store.connection { typedAddress = url.host().map { "\($0):\(url.port ?? 8080)" } ?? "" }
             // A first launch has nothing to show yet: straight to choosing a source.
-            if store.connection == nil { path = [.source] }
-            // The drawer takes focus as it appears; nothing else will hand it over.
-            DispatchQueue.main.async { focus = store.connection == nil ? .firstSource : .layout }
+            if store.connection == nil { page = .source }
+            enter()
         }
-        // Every remote use in the drawer restarts Keep awake, including a keystroke or a pick
-        // that leaves focus where it was.
-        .onChange(of: focus) { _, _ in store.noteInteraction() }
-        .onChange(of: path) { _, _ in store.noteInteraction() }
-        .onChange(of: store.layout) { _, _ in store.noteInteraction() }
+        // Browsing the drawer is remote use too, so it restarts Keep awake: a move, a page
+        // opened, a keystroke.
+        .onChange(of: page) { _, _ in
+            store.noteInteraction()
+            enter()
+        }
+        .onChange(of: focused) { _, id in
+            store.noteInteraction()
+            if let id { lastFocused[page] = id }
+        }
         .onChange(of: typedAddress) { _, _ in store.noteInteraction() }
         .onChange(of: store.username) { _, _ in store.noteInteraction() }
         .onChange(of: store.password) { _, _ in store.noteInteraction() }
+        .onChange(of: browser.found) { _, found in
+            // The first Pi to turn up is the likeliest choice on a first launch.
+            if store.connection == nil, page == .source, let first = found.first {
+                focused = "pi-\(first.name)"
+            }
+        }
         .onDisappear { browser.stop() }
         .onExitCommand {
-            // Menu goes back a page, focus returning to the row that led there; at the root
-            // it closes the drawer, once there is a source to show.
             store.noteInteraction()
-            if let page = path.popLast() {
-                DispatchQueue.main.async { focus = row(for: page) }
+            if page != .root {
+                page = .root
             } else if store.connection != nil {
                 store.settingsVisible = false
             }
         }
     }
 
-    private var header: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("Home Dashboard")
-                .font(.system(size: 38, weight: .bold))
-                .foregroundStyle(.primary)
-                .textCase(nil)
-            Text(status)
-                .font(.system(size: 22))
-                .foregroundStyle(.secondary)
-                .textCase(nil)
-                .fixedSize(horizontal: false, vertical: true)
+    // MARK: Pages
+
+    private var rootPage: some View {
+        @Bindable var store = store
+        return Group {
+            title("Home Dashboard")
+            footnote(status)
+                .padding(.bottom, 8)
+            row(id: "layout", title: "Layout", value: store.layout.title, chevron: true) { page = .layout }
+            row(id: "awake", title: "Keep Awake", detail: "Holds off the screensaver and sleep",
+                value: awakeLabel(store.keepAwakeHours), chevron: true) { page = .keepAwake }
+            row(id: "source", title: "Source", value: sourceName, chevron: true) { page = .source }
+            sectionHeader("Web UI login, if the Pi has a password")
+            TextField("Username", text: $store.username)
+                .focused($focused, equals: "username")
+            SecureField("Password", text: $store.password)
+                .focused($focused, equals: "password")
+            Spacer(minLength: 0)
+            footnote("Left and right on the remote step through the layouts. Menu closes this panel.")
         }
-        .padding(.bottom, 12)
     }
 
-    private func row(for page: Page) -> Field {
-        switch page {
-        case .layout: return .layout
-        case .keepAwake: return .keepAwake
-        case .source: return .source
-        }
-    }
-
-    // MARK: Pickers
-
-    /// A system-style picker page: one row per choice, a checkmark on the current one, and a
-    /// pick goes back a page.
-    private func choices<T: Hashable>(_ name: String, _ options: [T], selected: T, title: @escaping (T) -> String,
-                                      pick: @escaping (T) -> Void) -> some View {
-        List {
-            ForEach(Array(options.enumerated()), id: \.offset) { index, option in
-                Button {
-                    pick(option)
-                    if let page = path.popLast() {
-                        DispatchQueue.main.async { focus = row(for: page) }
-                    }
-                } label: {
-                    HStack {
-                        Text(title(option))
-                        Spacer()
-                        if option == selected { Image(systemName: "checkmark") }
-                    }
+    private var layoutPage: some View {
+        Group {
+            title("Layout")
+            ForEach(DashboardStore.Layout.allCases, id: \.self) { layout in
+                row(id: "layout-\(layout.rawValue)", title: layout.title, value: tick(store.layout == layout)) {
+                    store.layout = layout
+                    page = .root
                 }
-                .focused($focus, equals: option == selected ? .firstChoice : nil)
-                .accessibilityLabel(title(option))
             }
+            Spacer(minLength: 0)
+            footnote("Menu goes back.")
         }
-        .drawerUnclipped()
-        .navigationTitle(name)
-        .onAppear { DispatchQueue.main.async { focus = .firstChoice } }
     }
 
-    // MARK: Source
+    private var keepAwakePage: some View {
+        Group {
+            title("Keep Awake")
+            ForEach(DashboardStore.keepAwakeChoices, id: \.self) { hours in
+                row(id: "awake-\(hours)", title: awakeLabel(hours), value: tick(store.keepAwakeHours == hours)) {
+                    store.keepAwakeHours = hours
+                    page = .root
+                }
+            }
+            Spacer(minLength: 0)
+            footnote("For that long after a remote press, the Apple TV neither starts its screensaver nor goes to sleep. After that its own timers take over: the screensaver, then sleep. Menu goes back.")
+        }
+    }
 
     private var sourcePage: some View {
-        List {
-            Section {
-                if browser.found.isEmpty {
-                    HStack(spacing: 18) {
-                        ProgressView()
-                        Text("Looking for dashboards…")
-                            .foregroundStyle(.secondary)
-                    }
+        Group {
+            title("Source")
+            sectionHeader("On this network")
+            if browser.found.isEmpty {
+                HStack(spacing: 18) {
+                    ProgressView()
+                    footnote("Looking for dashboards… A Pi appears here once `make web-enable` has run on it.")
                 }
-                ForEach(Array(browser.found.enumerated()), id: \.element.id) { index, found in
-                    Button {
-                        Task { await choose(found) }
-                    } label: {
-                        HStack {
-                            Label(found.name, systemImage: "dot.radiowaves.left.and.right")
-                            Spacer()
-                            if resolving == found.name {
-                                ProgressView()
-                            }
-                        }
-                    }
-                    .focused($focus, equals: index == 0 ? .firstSource : nil)
+                .padding(.horizontal, 12)
+            }
+            ForEach(browser.found) { found in
+                row(id: "pi-\(found.name)", title: found.name,
+                    value: resolving == found.name ? "Connecting…" : nil) {
+                    Task { await choose(found) }
                 }
-            } header: {
-                Text("On This Network")
-            } footer: {
-                Text("A Pi advertises itself here once `make web-enable` has run on it.")
-                        .font(.system(size: 22))
-                        .foregroundStyle(.secondary)
             }
-
-            Section {
-                TextField("dashboard.local:8080", text: $typedAddress)
-                    .textContentType(.URL)
-                    // With no Pi found yet, the address is where a first launch starts.
-                    .focused($focus, equals: browser.found.isEmpty ? .firstSource : nil)
-                    .onSubmit(connectTyped)
-                Button("Connect", action: connectTyped)
-                if let addressError {
-                    Text(addressError)
-                        .foregroundStyle(.red)
-                }
-            } header: {
-                Text("By Address")
+            sectionHeader("By address")
+            TextField("dashboard.local:8080", text: $typedAddress)
+                .textContentType(.URL)
+                .onSubmit(connectTyped)
+                .focused($focused, equals: "address")
+            row(id: "connect", title: "Connect", action: connectTyped)
+            if let addressError {
+                Text(addressError)
+                    .font(.callout)
+                    .foregroundStyle(.red)
+                    .padding(.horizontal, 12)
             }
-
-            Section {
-                Button {
-                    store.noteInteraction()
-                    store.connect(.demo)
-                    store.settingsVisible = false
-                } label: {
-                    HStack {
-                        Text("Demo data")
-                        Spacer()
-                        if store.connection == .demo { Image(systemName: "checkmark") }
-                    }
-                }
-            } footer: {
-                Text("A built-in week, with no Pi at all.")
-                        .font(.system(size: 22))
-                        .foregroundStyle(.secondary)
+            sectionHeader("Or")
+            row(id: "demo", title: "Demo data", detail: "A built-in week, with no Pi at all",
+                value: tick(store.connection == .demo)) {
+                store.connect(.demo)
+                store.settingsVisible = false
             }
-        }
-        .drawerUnclipped()
-        .navigationTitle("Source")
-        .onAppear {
-            DispatchQueue.main.async { focus = .firstSource }
-        }
-        .onChange(of: browser.found) { _, found in
-            // The first Pi to turn up is the likeliest choice on a first launch.
-            if store.connection == nil, !found.isEmpty {
-                // The field already holds `.firstSource`: let go, then hand it to the Pi row.
-                focus = nil
-                DispatchQueue.main.async { focus = .firstSource }
-            }
+            Spacer(minLength: 0)
+            footnote(store.connection == nil ? "Choose where the dashboard comes from." : "Menu goes back.")
         }
     }
+
+    /// Focus as a page opens: where it was last left, else the current choice, else the
+    /// page's first row.
+    private func enter() {
+        let target: String
+        if let last = lastFocused[page] {
+            target = last
+        } else {
+            switch page {
+            case .root: target = "layout"
+            case .layout: target = "layout-\(store.layout.rawValue)"
+            case .keepAwake: target = "awake-\(store.keepAwakeHours)"
+            case .source: target = browser.found.first.map { "pi-\($0.name)" } ?? "address"
+            }
+        }
+        // A turn later, once the page's rows exist to take it.
+        DispatchQueue.main.async { focused = target }
+    }
+
+    // MARK: Pieces
+
+    private func title(_ s: String) -> some View {
+        Text(s).font(.title2.weight(.semibold)).padding(.bottom, 6)
+    }
+
+    private func sectionHeader(_ s: String) -> some View {
+        Text(s.uppercased())
+            .font(.caption.weight(.semibold))
+            .tracking(1.2)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, 14)
+            .padding(.horizontal, 12)
+    }
+
+    private func footnote(_ s: String) -> some View {
+        Text(LocalizedStringKey(s)).font(.footnote).foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    /// One uniform row: a title on the left, an optional detail under it, a value or a
+    /// chevron on the right. Every row takes the full width at the same height.
+    private func row(id: String, title: String, detail: String? = nil, value: String? = nil,
+                     chevron: Bool = false, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    // Leading, not the button's centred default, when a long name wraps.
+                    Text(title).font(.headline)
+                        .multilineTextAlignment(.leading)
+                    if let detail {
+                        Text(detail).font(.caption).foregroundStyle(.secondary)
+                            .multilineTextAlignment(.leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                Spacer()
+                if let value { Text(value).font(.headline).foregroundStyle(.secondary) }
+                if chevron { Image(systemName: "chevron.right").font(.headline).foregroundStyle(.secondary) }
+            }
+            .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
+        }
+        .focused($focused, equals: id)
+    }
+
+    private func tick(_ on: Bool) -> String? { on ? "✓" : nil }
 
     // MARK: Text
 
@@ -312,14 +298,5 @@ struct SettingsView: View {
         addressError = nil
         store.connect(.server(url))
         store.settingsVisible = false
-    }
-}
-
-private extension View {
-    /// A drawer list's scroll view crops whatever leaves its bounds, which cut a focused row's
-    /// lifted pill off flat at both ends. The lists are inset from the drawer's edge (and too
-    /// short to scroll), so they draw unclipped and only the drawer's rounded edge clips.
-    func drawerUnclipped() -> some View {
-        scrollClipDisabled()
     }
 }

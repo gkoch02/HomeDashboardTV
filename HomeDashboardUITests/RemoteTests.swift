@@ -17,8 +17,8 @@ final class RemoteTests: XCTestCase {
         app.launchArguments = ["-connection", "", "-layout", "dashboard"]
         app.launch()
 
-        // Focus sits on a list row: the cell, not the button inside it.
-        let demo = app.cells["Demo data"]
+        // A row reads its title, then any detail and value: match on the title.
+        let demo = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Demo data'")).firstMatch
         XCTAssertTrue(demo.waitForExistence(timeout: 10))
         // A Pi's row, or the address field when none has turned up.
         let focused = app.descendants(matching: .any).matching(NSPredicate(format: "hasFocus == true"))
@@ -43,13 +43,13 @@ final class RemoteTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Today"].waitForExistence(timeout: 10))
 
         remote.press(.select)
-        // The row reads "Layout, Dashboard": its name, then the value.
-        let layout = app.cells.matching(NSPredicate(format: "label BEGINSWITH 'Layout'")).firstMatch
+        // The row reads "Layout, Dashboard": its title, then the value.
+        let layout = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Layout'")).firstMatch
         XCTAssertTrue(layout.waitForExistence(timeout: 5), "a click opens settings")
         XCTAssertTrue(layout.waitForHasFocus(timeout: 5), "focus lands in the drawer")
 
         remote.press(.select)
-        let night = app.cells["Night"]
+        let night = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Night'")).firstMatch
         XCTAssertTrue(night.waitForExistence(timeout: 5), "Layout opens the layout list")
         remote.press(.menu)
         XCTAssertTrue(layout.waitForHasFocus(timeout: 5), "Menu goes back a page first")

@@ -77,7 +77,8 @@ struct QuoteView: Theme {
 }
 
 private enum Ink {
-    static let plate = Color(red: 0.085, green: 0.080, blue: 0.075)
+    /// True black: on an OLED the ground switches off and the quote stands alone.
+    static let plate = Color.black
     static let cream = Color(red: 0.95, green: 0.93, blue: 0.88)
     static let faint = cream.opacity(0.55)
     static let rule = cream.opacity(0.3)

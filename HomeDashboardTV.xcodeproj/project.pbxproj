@@ -15,6 +15,7 @@
 		234A879AF993DBACD53A1C57 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2103C0B8C55F989AF037F3 /* Theme.swift */; };
 		323A78D9DFE43D04189A8C2C /* HorizonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB6C810B9D81A542EB0FA9F /* HorizonView.swift */; };
 		460AFA6DC7DC369E67096935 /* Cinzel.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 61DD62983158D3984EC63FFB /* Cinzel.ttf */; };
+		465B5A043627B49E6D691ED8 /* SkylightSky.metal in Sources */ = {isa = PBXBuildFile; fileRef = EAEE458EE1F37F100274CB01 /* SkylightSky.metal */; };
 		4743623BB70CE9459A0B24DD /* CormorantGaramond.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A68DDBCA1329C420B50A6188 /* CormorantGaramond.ttf */; };
 		48BB3B40E6E914FDBE11153A /* DashboardStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8986DA2F23A6044A8D92D3B4 /* DashboardStore.swift */; };
 		4BB3C08A2A618021AF181B82 /* QuoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4098608C8444AC0C661DD3D1 /* QuoteView.swift */; };
@@ -36,6 +37,7 @@
 		BB501FDE97EAB93BA7415424 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBCC482A09982EB05EE52C5 /* SettingsView.swift */; };
 		C5E2D782A5D8AF6532B9A6FA /* MoonDisc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 472A321210B7C12D4CF15E22 /* MoonDisc.swift */; };
 		D022FE87E73DB8C7AF8A49A8 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 9740313FCCA386C7F996F6FA /* PrivacyInfo.xcprivacy */; };
+		DBF586DBDC1455FF0DC4F199 /* SkylightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C30E67A42F18B2067865361F /* SkylightView.swift */; };
 		E683ABB11290452C9675BF4E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0A63BFA37FD3C74D01808FA4 /* Assets.xcassets */; };
 		EB6312D619DA25549CF17252 /* CormorantGaramond-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F2343E09D5ADE1C0F4096554 /* CormorantGaramond-Italic.ttf */; };
 		EEC06FB2796AB38DD2F6D063 /* DashboardCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3298B6D11AB4D038081715DC /* DashboardCore */; };
@@ -88,10 +90,12 @@
 		B11D136C433B5D7FD6C407D9 /* Home Dashboard.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "Home Dashboard.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		BDBCC482A09982EB05EE52C5 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		C1E1BFF6FCCC998B7C7EC292 /* Starfield.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Starfield.swift; sourceTree = "<group>"; };
+		C30E67A42F18B2067865361F /* SkylightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkylightView.swift; sourceTree = "<group>"; };
 		C4CD028BD1DA5124D982E2E8 /* NightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightView.swift; sourceTree = "<group>"; };
 		C73B1F8A158D7CE5DE173E01 /* DashboardCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = DashboardCore; path = Packages/DashboardCore; sourceTree = SOURCE_ROOT; };
 		CED58FBF03979E34EA7C79D3 /* BigShouldersDisplay-ExtraBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "BigShouldersDisplay-ExtraBold.ttf"; sourceTree = "<group>"; };
 		E57CFC146044F906194B6656 /* LightCycleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LightCycleView.swift; sourceTree = "<group>"; };
+		EAEE458EE1F37F100274CB01 /* SkylightSky.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = SkylightSky.metal; sourceTree = "<group>"; };
 		F1982EDDF2B6A3E033A01C63 /* SkyColour.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyColour.swift; sourceTree = "<group>"; };
 		F2343E09D5ADE1C0F4096554 /* CormorantGaramond-Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "CormorantGaramond-Italic.ttf"; sourceTree = "<group>"; };
 		F31AD003A5C8873570D9A9F2 /* demo-snapshot.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "demo-snapshot.json"; sourceTree = "<group>"; };
@@ -166,6 +170,7 @@
 			children = (
 				472A321210B7C12D4CF15E22 /* MoonDisc.swift */,
 				F1982EDDF2B6A3E033A01C63 /* SkyColour.swift */,
+				EAEE458EE1F37F100274CB01 /* SkylightSky.metal */,
 				6041939B5D7B3127401CA708 /* SplitMix.swift */,
 				C1E1BFF6FCCC998B7C7EC292 /* Starfield.swift */,
 				72F2A46DC8514A7232F59DA3 /* WeatherArt.swift */,
@@ -195,6 +200,7 @@
 				C4CD028BD1DA5124D982E2E8 /* NightView.swift */,
 				4098608C8444AC0C661DD3D1 /* QuoteView.swift */,
 				BDBCC482A09982EB05EE52C5 /* SettingsView.swift */,
+				C30E67A42F18B2067865361F /* SkylightView.swift */,
 				4C2103C0B8C55F989AF037F3 /* Theme.swift */,
 				819153AE226C9E1E05B57C87 /* Parts */,
 			);
@@ -371,6 +377,8 @@
 				4BB3C08A2A618021AF181B82 /* QuoteView.swift in Sources */,
 				BB501FDE97EAB93BA7415424 /* SettingsView.swift in Sources */,
 				16285FD177D64B1D9A35C006 /* SkyColour.swift in Sources */,
+				465B5A043627B49E6D691ED8 /* SkylightSky.metal in Sources */,
+				DBF586DBDC1455FF0DC4F199 /* SkylightView.swift in Sources */,
 				7ABAC51A5C68DEC61FE7DBA5 /* SplitMix.swift in Sources */,
 				F6D82CA18651E239EAE2A7DC /* Starfield.swift in Sources */,
 				234A879AF993DBACD53A1C57 /* Theme.swift in Sources */,

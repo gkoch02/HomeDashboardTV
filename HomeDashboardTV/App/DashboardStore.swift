@@ -12,10 +12,10 @@ import UIKit
 @Observable
 final class DashboardStore {
     /// What the screen shows: the week, the day's agenda plate, the Pi's moonphase theme, the
-    /// next 72 hours on one axis, today on a 24-hour dial, the day's quote, or a night plate.
+    /// next 72 hours on one axis, today on a 24-hour dial, the day's quote, a night plate, or the live sky.
     /// Each case is a `Theme`, drawn in `DashboardScreen.content`.
     enum Layout: String, CaseIterable {
-        case dashboard, agenda, moon, horizon, light, quote, night
+        case dashboard, agenda, moon, horizon, light, quote, night, skylight
 
         var title: String {
             switch self {
@@ -26,6 +26,7 @@ final class DashboardStore {
             case .light: return "Light Cycle"
             case .quote: return "Quote"
             case .night: return "Night"
+            case .skylight: return "Skylight"
             }
         }
 

@@ -70,6 +70,19 @@ without PurpleAir) is left out and the rest re-spaced.
 
 ![The Night layout, from HomeDashboard's dummy data](docs/night.png)
 
+**Skylight** (settings → Layout → Skylight) has no Pi theme behind it; it is drawn for a big
+OLED TV. The top of the screen is the sky outside, live: a Metal shader running at 30 frames a
+second, coloured by the sun's altitude now, with the sun crossing it from sunrise to sunset,
+stars that twinkle after dark and the moon photograph at tonight's phase. The current weather
+moves through it as cloud, rain, snow, fog or lightning, drifting with the real wind. Below two
+ridges the ground is true black, which an OLED draws with its pixels off. Over the sky sit the
+time, today's all-day events and birthdays, and the events still to come today and tomorrow,
+with the weather now on the right. On the ground are the next 24 hours as a line through the
+temperatures coloured by the heat, with sunrise and sunset where they fall, the days ahead with
+their ranges, and the sun and moon times.
+
+![The Skylight layout at dusk, from HomeDashboard's dummy data](docs/skylight.png)
+
 ## What the TV needs
 
 - The Pi's web UI running, with HomeDashboard 6.2 or later (the `/api/dashboard` route):
@@ -83,7 +96,7 @@ Network**, or type its address (`dashboard.local`, `192.168.1.20:8080`). **Demo 
 bundled week with no Pi at all. Click anywhere on the dashboard to open the drawer again;
 Menu goes back a page, then closes it.
 Left and right on the remote step through the layouts (Dashboard, Agenda, Moon, Horizon,
-Light Cycle, Quote, Night), and
+Light Cycle, Quote, Night, Skylight), and
 the one you land on is remembered.
 
 ## Building it yourself

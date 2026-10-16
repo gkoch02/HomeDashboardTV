@@ -19,9 +19,10 @@ extension View {
     }
 
     /// One of a column's sections rising into place: the *index*th starts a beat after the
-    /// one before, all driven by one *progress* from 0 to 1.
-    func rise(_ progress: Double, index: Int) -> some View {
-        modifier(Rise(progress: progress, index: index))
+    /// one before, all driven by one *progress* from 0 to 1. With more than *count* sections
+    /// the beats close up, so the last one still lands at 1.
+    func rise(_ progress: Double, index: Int, of count: Int = 6) -> some View {
+        modifier(Rise(progress: progress, index: index, count: count))
     }
 }
 
@@ -109,13 +110,15 @@ private struct Wipe: ViewModifier, Animatable {
 private struct Rise: ViewModifier, Animatable {
     var progress: Double
     let index: Int
+    let count: Int
     var animatableData: Double {
         get { progress }
         set { progress = newValue }
     }
 
     func body(content: Content) -> some View {
-        let local = min(1, max(0, (progress - Double(index) * 0.13) / 0.35))
+        let beat = min(0.13, 0.65 / Double(max(count - 1, 1)))
+        let local = min(1, max(0, (progress - Double(index) * beat) / 0.35))
         let eased = 1 - pow(1 - local, 3)
         return content
             .opacity(eased)

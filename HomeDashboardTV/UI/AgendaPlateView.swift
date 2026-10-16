@@ -10,9 +10,14 @@ import SwiftUI
 /// weather window is `WeatherArt`, painted at full resolution. Elapsed events fade back (the
 /// Pi perforates them, which on a TV reads as a checkerboard). Type is the Pi's own: Righteous
 /// for the weather and the agenda's chrome, DM Sans for the events.
+///
+/// As the layout appears the weather window prints down from the top, the rule runs down
+/// beside it, and the reading and the agenda's lines rise in after.
 struct AgendaPlateView: Theme {
     let snapshot: Snapshot
     let now: Date
+
+    @State private var build = AgendaBuild.start
 
     static let fullBleed = true
 
@@ -41,21 +46,30 @@ struct AgendaPlateView: Theme {
                 }
                 .frame(width: artWidth + 24, height: artHeight + 24)
                 .clipped()  // before the offset, so the bleed past the top and left survives
+                .wipe(build.art, from: .top, softness: 0.12)
                 .offset(x: -24, y: -24)
                 .overlay(alignment: .topLeading) { alertChip.padding(.leading, 56).padding(.top, 44) }
 
                 WeatherBand(snapshot: snapshot, now: now)
                     .frame(width: artWidth - 56 - 40, height: size.height - artHeight - 28 - 40, alignment: .topLeading)
-                    .offset(x: 56, y: artHeight + 28)
+                    .opacity(build.band)
+                    .offset(x: 56, y: artHeight + 28 + (1 - build.band) * 24)
 
                 ScreenRule()
                     .frame(width: 10, height: size.height + 48)
+                    .wipe(build.rule, from: .top, softness: 0.1)
                     .offset(x: artWidth, y: -24)
 
-                AgendaPane(snapshot: snapshot, now: now)
+                AgendaPane(snapshot: snapshot, now: now, rise: build.agenda)
                     .frame(width: size.width - artWidth - 10 - 64 - 56, height: size.height - 44 - 40)
                     .offset(x: artWidth + 10 + 64, y: 44)
             }
+        }
+        .onBuildIn(reset: { settled in build = settled ? .settled : .start }) {
+            withAnimation(.easeInOut(duration: 1.5).delay(0.05)) { build.art = 1 }
+            withAnimation(.easeInOut(duration: 1.1).delay(0.2)) { build.rule = 1 }
+            withAnimation(.linear(duration: 1.5).delay(0.45)) { build.agenda = 1 }
+            withAnimation(.easeOut(duration: 0.8).delay(1.2)) { build.band = 1 }
         }
     }
 
@@ -80,6 +94,17 @@ struct AgendaPlateView: Theme {
                 .background(Print.red)
         }
     }
+}
+
+/// How far the build-in has got, each part 0 to 1.
+private struct AgendaBuild {
+    var art: Double
+    var rule: Double
+    var band: Double
+    var agenda: Double
+
+    static let start = AgendaBuild(art: 0, rule: 0, band: 0, agenda: 0)
+    static let settled = AgendaBuild(art: 1, rule: 1, band: 1, agenda: 1)
 }
 
 /// The plate's inks and faces. `paper` is the ground and `ink` the type, so the inverted
@@ -199,6 +224,8 @@ private struct WeatherBand: View {
 private struct AgendaPane: View {
     let snapshot: Snapshot
     let now: Date
+    /// The build-in's progress: the header, then each line in turn.
+    let rise: Double
     @Environment(\.timeZone) private var zone
 
     var body: some View {
@@ -226,7 +253,9 @@ private struct AgendaPane: View {
                 Spacer()
                 clock
             }
+            .rise(rise, index: 0, of: rows.count + 2)
             Rectangle().fill(Print.ink).frame(height: 4).padding(.top, 10).padding(.bottom, 26)
+                .rise(rise, index: 0, of: rows.count + 2)
 
             ViewThatFits(in: .vertical) {
                 ForEach((0...rows.count).reversed(), id: \.self) { shown in
@@ -236,10 +265,12 @@ private struct AgendaPane: View {
             Spacer(minLength: 0)
             HStack {
                 Spacer()
+                    .opacity(rise)
                 if let fetched = snapshot.sources.events?.fetchedAt {
                     Text("updated \(fetched.formatted(Date.FormatStyle(date: .omitted, time: .shortened, timeZone: zone)).lowercased())")
                         .font(.custom(Print.text, size: 22).weight(.medium))
                         .foregroundStyle(Print.faint)
+                        .opacity(rise)
                 }
             }
         }
@@ -267,25 +298,31 @@ private struct AgendaPane: View {
 
     @ViewBuilder
     private func list(_ rows: [Row], hidden: Int, next: CalendarEvent?) -> some View {
+        let count = rows.count + 2
         VStack(alignment: .leading, spacing: 22) {
             if rows.isEmpty && hidden == 0 {
                 Text("A clear day.")
                     .font(.custom(Print.text, size: 40).weight(.medium))
                     .foregroundStyle(Print.faint)
+                    .rise(rise, index: 1, of: count)
             }
-            ForEach(rows) { row in
-                switch row {
-                case .birthday(let b):
-                    BirthdayRow(birthday: b)
-                case .event(let e):
-                    EventRow(event: e, state: state(of: e, next: next), zone: zone)
+            ForEach(Array(rows.enumerated()), id: \.element.id) { index, row in
+                Group {
+                    switch row {
+                    case .birthday(let b):
+                        BirthdayRow(birthday: b)
+                    case .event(let e):
+                        EventRow(event: e, state: state(of: e, next: next), zone: zone)
+                    }
                 }
+                .rise(rise, index: 1 + index, of: count)
             }
             if hidden > 0 {
                 Text("+\(hidden) more")
                     .font(.custom(Print.text, size: 28).weight(.bold))
                     .foregroundStyle(Print.ink)
                     .padding(.leading, EventRow.timeWidth + 30)
+                    .rise(rise, index: count - 1, of: count)
             }
         }
     }

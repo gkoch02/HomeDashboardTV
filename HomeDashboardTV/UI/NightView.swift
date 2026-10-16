@@ -86,9 +86,10 @@ struct NightView: Theme {
         switch mark {
         case .moon(let fraction):
             // The row spaces the lit part, not the whole disc, so the gaps read even: the
-            // terminator meets the midline at cos(2πf) of the radius, so the lit part spans
-            // (1 − cos 2πf) of it, on the right while waxing.
-            let lit = (1 - cos(2 * .pi * fraction)) / 2 * height
+            // terminator meets the midline at cos(2πf) of the radius, so a gibbous moon's lit
+            // part spans (1 − cos 2πf) of it, on the right while waxing. A crescent's horns
+            // reach back to the centre line, so it spans at least the half disc.
+            let lit = max((1 - cos(2 * .pi * fraction)) / 2, 0.5) * height
             LitShape(fraction: fraction)
                 .fill(Ink.mark)
                 .frame(width: height, height: height)

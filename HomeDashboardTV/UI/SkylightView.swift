@@ -448,7 +448,7 @@ private struct UpNext: View {
             .map { birthday in
                 let when = birthday.date == today ? "today"
                     : birthday.date == today.adding(days: 1) ? "tomorrow"
-                    : birthday.date.start(in: zone).formatted(Date.FormatStyle(timeZone: zone).weekday(.abbreviated))
+                    : "on " + birthday.date.start(in: zone).formatted(Date.FormatStyle(timeZone: zone).weekday(.abbreviated))
                 return "🎂 \(birthday.name) \(when)"
             }
     }

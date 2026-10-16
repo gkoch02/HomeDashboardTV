@@ -1,5 +1,11 @@
 # Home Dashboard for Apple TV
 
+[![CI](https://github.com/gkoch02/HomeDashboardTV/actions/workflows/ci.yml/badge.svg)](https://github.com/gkoch02/HomeDashboardTV/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/gkoch02/HomeDashboardTV/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/gkoch02/HomeDashboardTV/actions/workflows/github-code-scanning/codeql)
+[![tvOS 17+](https://img.shields.io/badge/tvOS-17%2B-black?logo=apple)](#building-it-yourself)
+[![HomeDashboard 6.2+](https://img.shields.io/badge/HomeDashboard-6.2%2B-2f6fb2)](https://github.com/gkoch02/HomeDashboard)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 The tvOS companion to [HomeDashboard](https://github.com/gkoch02/HomeDashboard), the Raspberry Pi e-ink dashboard.
 The Pi keeps doing the fetching (Google Calendar / ICS / CalDAV, OpenWeatherMap, birthdays)
 on its own timer; this app reads the Pi's cached snapshot from `GET /api/dashboard` and

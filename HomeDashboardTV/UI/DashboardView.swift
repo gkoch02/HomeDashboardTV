@@ -294,20 +294,20 @@ private struct AQIBadge: View {
 // MARK: - Agenda
 
 /// Today's events at reading size. Its height is capped by `DashboardView` so the day cards
-/// keep their room; it shows the richest layout that fits: up to six events with locations,
-/// then without, then fewer events with a count of the rest.
+/// keep their room; it shows the richest layout that fits: every event with locations, then
+/// without, then fewer events with a count of the rest.
 private struct TodayPanel: View {
     let day: AgendaDay
     let zone: TimeZone
     let now: Date
 
-    private static let layouts: [(rows: Int, locations: Bool)] =
-        [(6, true), (6, false)] + (0...5).reversed().map { ($0, false) }
+    private var upcoming: [CalendarEvent] { day.events.filter { $0.isAllDay || $0.end > now } }
 
     var body: some View {
+        let layouts = Self.layouts(events: upcoming.count)
         ViewThatFits(in: .vertical) {
-            ForEach(Self.layouts.indices, id: \.self) { i in
-                content(rows: Self.layouts[i].rows, locations: Self.layouts[i].locations)
+            ForEach(layouts.indices, id: \.self) { i in
+                content(rows: layouts[i].rows, locations: layouts[i].locations)
             }
         }
         .padding(36)
@@ -315,8 +315,16 @@ private struct TodayPanel: View {
         .background(Palette.card, in: RoundedRectangle(cornerRadius: 32, style: .continuous))
     }
 
+    /// All *events* rows, then fewer, never one fewer: "+1 more" takes the line the event
+    /// would have. The fewer stop at eight, more than the panel's budget ever holds, so a
+    /// flooded calendar costs a handful of measurements rather than one per event.
+    private static func layouts(events: Int) -> [(rows: Int, locations: Bool)] {
+        [(events, true), (events, false)]
+            + stride(from: min(events - 2, 8), through: 0, by: -1).map { ($0, false) }
+    }
+
     private func content(rows: Int, locations: Bool) -> some View {
-        let upcoming = day.events.filter { $0.isAllDay || $0.end > now }
+        let upcoming = upcoming
         let finished = day.events.count - upcoming.count
         let hidden = upcoming.count - min(rows, upcoming.count)
         return VStack(alignment: .leading, spacing: 18) {
@@ -420,20 +428,25 @@ private struct UpcomingGrid: View {
 }
 
 /// One upcoming day. The card's height is fixed by the grid; it shows the richest layout that
-/// fits: names and titles wrapping to two lines, then names only (a birthday is rarer than an
-/// event), then neither, then fewer events with a count of the rest.
+/// fits: every event, names and titles wrapping to two lines, then names only (a birthday is
+/// rarer than an event), then neither, then fewer events with a count of the rest.
 private struct DayCard: View {
     let day: AgendaDay
     let zone: TimeZone
 
-    private static let layouts: [(rows: Int, titleLines: Int, nameLines: Int)] = [
-        (4, 2, 2), (4, 1, 2), (4, 1, 1), (3, 1, 1), (2, 1, 1), (1, 1, 1), (0, 1, 1),
-    ]
+    /// All *events* rows, then fewer, never one fewer: "+1 more" takes the line the event
+    /// would have. The fewer stop at eight, more than a card ever holds, so a flooded
+    /// calendar costs a handful of measurements rather than one per event.
+    private static func layouts(events: Int) -> [(rows: Int, titleLines: Int, nameLines: Int)] {
+        [(events, 2, 2), (events, 1, 2), (events, 1, 1)]
+            + stride(from: min(events - 2, 8), through: 0, by: -1).map { ($0, 1, 1) }
+    }
 
     var body: some View {
+        let layouts = Self.layouts(events: day.events.count)
         ViewThatFits(in: .vertical) {
-            ForEach(Self.layouts.indices, id: \.self) { i in
-                let layout = Self.layouts[i]
+            ForEach(layouts.indices, id: \.self) { i in
+                let layout = layouts[i]
                 content(rows: layout.rows, titleLines: layout.titleLines, nameLines: layout.nameLines)
             }
         }

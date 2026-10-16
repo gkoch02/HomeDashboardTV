@@ -81,37 +81,54 @@ struct MoonView: Theme {
                 .frame(width: 520 * s, height: 6 * s)
                 .position(x: 400 * s, y: 308 * s)
 
-            // The data block.
-            centred(y: 326, s: s) { dataLine(lunarLine(moon), s: s) }
-            if let sun = sunWeatherLine {
-                centred(y: 359, s: s) { dataLine(sun, s: s) }
-            }
-            centred(y: sunWeatherLine == nil ? 359 : 394, s: s) {
+            // The data block and the quote, flowing down from the rule as the panel sets them:
+            // one gap, the same between every line, as wide as the room under the rule allows
+            // (4 to 26 pt), so a two-line quote pushes nothing into the line above it.
+            VStack(spacing: 0) {
+                dataLine(lunarLine(moon), s: s)
+                gap(s)
+                if let sun = sunWeatherLine {
+                    dataLine(sun, s: s)
+                    gap(s)
+                }
                 Text(nextPhaseLine(moon))
                     .font(.custom(MoonFace.body, size: 26 * s).weight(.bold))
                     .foregroundStyle(MoonInk.text)
-            }
-
-            // The quote: the panel's own (prefix "moonphase-"), else the dashboard's.
-            if let quote = moon.quote ?? snapshot.quote {
-                VStack(spacing: 6 * s) {
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                // The quote: the panel's own (prefix "moonphase-"), else the dashboard's.
+                if let quote = moon.quote ?? snapshot.quote {
+                    gap(s)
                     Text("“\(quote.text)”")
                         .font(.custom(MoonFace.body, size: 22 * s).weight(.semibold).italic())
                         .foregroundStyle(MoonInk.muted)
                         .multilineTextAlignment(.center)
+                        .lineSpacing(2 * s)
                         .lineLimit(2)
                         .minimumScaleFactor(0.8)
+                        .frame(width: 680 * s)
+                        .fixedSize(horizontal: false, vertical: true)
+                    gap(s)
                     Text("— \(quote.author)")
                         .font(.custom(MoonFace.caps, size: 15 * s).weight(.bold))
                         .foregroundStyle(MoonInk.text)
+                        .lineLimit(1)
                 }
-                .frame(width: 680 * s)
-                .position(x: 400 * s, y: (sunWeatherLine == nil ? 410 : 440) * s)
             }
+            .frame(width: 760 * s, height: (480 - Self.blockTop) * s, alignment: .top)
+            .position(x: 400 * s, y: (480 + Self.blockTop) / 2 * s)
         }
     }
 
     // MARK: Layout helpers
+
+    /// Where the data block starts, just under the dotted rule (y 308).
+    private static let blockTop: CGFloat = 314
+
+    /// The block's even gap: every one grows alike to share the room left under the rule.
+    private func gap(_ s: CGFloat) -> some View {
+        Spacer(minLength: 4 * s).frame(maxHeight: 26 * s)
+    }
 
     private func centred<Content: View>(y: CGFloat, s: CGFloat, @ViewBuilder _ content: () -> Content) -> some View {
         content()
@@ -125,6 +142,8 @@ struct MoonView: Theme {
         Text(text)
             .font(.custom(MoonFace.body, size: 26 * s).weight(.semibold))
             .foregroundStyle(MoonInk.text)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
     }
 
     // MARK: Text, as the panel words it

@@ -40,10 +40,14 @@ struct DashboardScreen: View {
                 }
                 .accessibilityIdentifier("dashboard")
             if store.settingsVisible {
-                // The fade belongs to the panel alone: an animation on the whole screen also
-                // animated whatever the layout behind re-laid out in the same update.
+                // The animations belong to the scrim and the drawer alone: one on the whole
+                // screen also animated whatever the layout behind re-laid out in that update.
+                Color.black.opacity(0.35)
+                    .ignoresSafeArea()
+                    .transition(.opacity.animation(.easeInOut(duration: 0.3)))
                 SettingsView()
-                    .transition(.opacity.animation(.easeInOut(duration: 0.25)))
+                    .transition(.move(edge: .trailing).combined(with: .opacity)
+                        .animation(.spring(response: 0.42, dampingFraction: 0.9)))
             }
         }
         .background(Color(red: 0.05, green: 0.06, blue: 0.09))

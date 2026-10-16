@@ -10,7 +10,7 @@ Apple TV yourself with Xcode ([Building it yourself](#building-it-yourself)).
 
 ![The dashboard on an Apple TV 4K, from HomeDashboard's dummy data](docs/dashboard.png)
 
-**Moon** (settings → Show → Moon) is the Pi's `moonphase_photo` theme, drawn natively: today's
+**Moon** (settings → Layout → Moon) is the Pi's `moonphase_photo` theme, drawn natively: today's
 moon from the photograph, cut by the true terminator with a faint earthshine copy on the dark
 side, three days either side, then moonrise and moonset, sunrise, sunset and the weather, the
 next full or new moon, and the panel's quote, in the panel's own faces. The Pi computes every
@@ -18,7 +18,7 @@ moon value (the `moon` block of `/api/dashboard`); the app only draws it.
 
 ![The Moon layout on an Apple TV, from HomeDashboard's dummy data](docs/moon.png)
 
-**Agenda** (settings → Show → Agenda) is the spiritual successor to the Pi's
+**Agenda** (settings → Layout → Agenda) is the spiritual successor to the Pi's
 `halftone_agenda`, as a dark plate for a big screen: the weather and its reading on the left,
 the day's agenda on the right, in cream type on warm charcoal with the Pi's Inky spot inks,
 ochre and red. The weather window is painted at full resolution: a sky for each kind of
@@ -30,7 +30,7 @@ rolls over to tomorrow.
 
 ![The Agenda layout, from HomeDashboard's dummy data](docs/agenda.png)
 
-**Horizon** (settings → Show → Horizon) is the Pi's `wide_horizon` theme: the next 72 hours
+**Horizon** (settings → Layout → Horizon) is the Pi's `wide_horizon` theme: the next 72 hours
 on one time axis, night hours narrower than waking ones. The sky across the screen is
 coloured by the sun's altitude at every moment, so day, twilight and night follow each other
 left to right, with stars by night, the sun at each noon and the moon photograph at each
@@ -45,7 +45,7 @@ panel's own fallback, an arc between the day's sunrise and sunset.
 
 ![The Horizon layout, from HomeDashboard's dummy data](docs/horizon.png)
 
-**Light Cycle** (settings → Show → Light Cycle) is the Pi's `light_cycle` theme: today as one
+**Light Cycle** (settings → Layout → Light Cycle) is the Pi's `light_cycle` theme: today as one
 24-hour dial, midnight at the top. Its band is the sky through the day, coloured by the sun's
 altitude as Horizon colours its sky, with stars in the darkest stretch and a rule at sunrise
 and sunset. Today's timed events ride inside it as arcs over their hours (red while one runs,
@@ -57,13 +57,13 @@ without it, the weather's sunrise and sunset, and no change for tomorrow.
 
 ![The Light Cycle layout, from HomeDashboard's dummy data](docs/light-cycle.png)
 
-**Quote** (settings → Show → Quote) is the Pi's `qotd` theme: the dashboard's quote of the
+**Quote** (settings → Layout → Quote) is the Pi's `qotd` theme: the dashboard's quote of the
 day set as large as it fits in Playfair Display, between oversized ochre quotation marks,
 over a strip of the weather now, the next three days and the moon.
 
 ![The Quote layout, from HomeDashboard's dummy data](docs/quote.png)
 
-**Night** (settings → Show → Night) is the Pi's `wide_night` plate in its inverse,
+**Night** (settings → Layout → Night) is the Pi's `wide_night` plate in its inverse,
 `wide_night_invert`, for a dark room: the moon's phase, the temperature, the air-quality
 index and the sky, in dim red on black and nothing else. A mark without data (the AQI on a Pi
 without PurpleAir) is left out and the rest re-spaced.
@@ -78,9 +78,10 @@ without PurpleAir) is left out and the rest re-spaced.
 - The web UI's username and password, if one is set (`python -m src.web.auth --set-password`).
   The password is kept in the TV's Keychain.
 
-On first launch the app opens its settings: pick the Pi under **On this network**, or type
-its address (`dashboard.local`, `192.168.1.20:8080`). **Demo data** shows a bundled week
-with no Pi at all. Click anywhere on the dashboard to come back to settings; Menu closes them.
+On first launch the app opens its settings drawer at **Source**: pick the Pi under **On This
+Network**, or type its address (`dashboard.local`, `192.168.1.20:8080`). **Demo data** shows a
+bundled week with no Pi at all. Click anywhere on the dashboard to open the drawer again;
+Menu goes back a page, then closes it.
 Left and right on the remote step through the layouts (Dashboard, Agenda, Moon, Horizon,
 Light Cycle, Quote, Night), and
 the one you land on is remembered.

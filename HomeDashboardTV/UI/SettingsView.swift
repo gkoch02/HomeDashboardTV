@@ -1,156 +1,266 @@
 import DashboardCore
 import SwiftUI
 
-/// Where the dashboard comes from: a Pi found on the network, a typed address, or the bundled
-/// demo week. Plus the web UI's username and password, when it has one.
+/// Settings as a system-style drawer: a material panel at the screen's trailing edge with the
+/// layout and Keep awake as system pickers, and where the dashboard comes from (a Pi found on
+/// the network, a typed address, or the bundled demo week) a page deeper, with the web UI's
+/// login. Menu goes back a page, then closes the drawer once a source is set.
+///
+/// The dashboard stays visible beside it, so a layout picked here shows at once.
 struct SettingsView: View {
     @Environment(DashboardStore.self) private var store
     @State private var browser = PiBrowser()
     @State private var typedAddress = ""
     @State private var resolving: String?
     @State private var addressError: String?
+    @State private var path: [Page] = []
     @FocusState private var focus: Field?
 
-    /// The controls focus can be sent to by name.
-    enum Field: Hashable {
-        case layout(DashboardStore.Layout), awake(Int), pi(String), address, connect, demo, username, password, done
+    /// The drawer's deeper pages. Layout and Keep Awake are pickers drawn here rather than
+    /// SwiftUI's navigation-link `Picker`, whose pushed list came up blank in a drawer narrower
+    /// than the screen.
+    enum Page: Hashable {
+        case layout, keepAwake, source
     }
+
+    /// The rows focus is sent to by name as a page opens.
+    enum Field: Hashable {
+        case layout, keepAwake, source, firstChoice, firstSource
+    }
+
+    static let width: CGFloat = 780
 
     var body: some View {
         @Bindable var store = store
-        ZStack {
-            Color.black.opacity(0.88).ignoresSafeArea()
-            VStack(alignment: .leading, spacing: 28) {
-                Text("Home Dashboard")
-                    .font(.system(size: 48, weight: .bold))
-                Text(status)
-                    .font(.system(size: 26))
-                    .foregroundStyle(.secondary)
-
-                Section("Show") {
-                    HStack(spacing: 24) {
-                        ForEach(DashboardStore.Layout.allCases, id: \.self) { layout in
-                            Button {
-                                store.noteInteraction()
-                                store.layout = layout
-                            } label: {
-                                Label(layout.title, systemImage: store.layout == layout ? "checkmark.circle.fill" : "circle")
-                            }
-                            .focused($focus, equals: .layout(layout))
-                        }
+        NavigationStack(path: $path) {
+            List {
+                Section {
+                    NavigationLink(value: Page.layout) {
+                        LabeledContent("Layout", value: store.layout.title)
                     }
-                }
-
-                Section("Keep awake") {
-                    HStack(spacing: 24) {
-                        ForEach(DashboardStore.keepAwakeChoices, id: \.self) { hours in
-                            Button {
-                                store.keepAwakeHours = hours
-                            } label: {
-                                Label(awakeLabel(hours), systemImage: store.keepAwakeHours == hours ? "checkmark.circle.fill" : "circle")
-                            }
-                            .focused($focus, equals: .awake(hours))
-                        }
+                    .focused($focus, equals: .layout)
+                    NavigationLink(value: Page.keepAwake) {
+                        LabeledContent("Keep Awake", value: awakeLabel(store.keepAwakeHours))
                     }
-                    Text("For that long after a remote press; then the Apple TV's own screensaver and sleep timers apply. Set the screensaver's Start After to Never to go straight to sleep.")
+                    .focused($focus, equals: .keepAwake)
+                } header: {
+                    header
+                } footer: {
+                    Text("Keep Awake holds off the screensaver for that long after a remote press; then the Apple TV's own screensaver and sleep timers apply.")
                         .font(.system(size: 22))
-                        .fixedSize(horizontal: false, vertical: true)
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(.secondary)
                 }
 
-                Section("On this network") {
-                    if browser.found.isEmpty {
-                        Text("Looking for dashboards… (the Pi advertises itself after `make web-enable`)")
-                            .font(.system(size: 24))
-                            .foregroundStyle(.tertiary)
+                Section {
+                    NavigationLink(value: Page.source) {
+                        LabeledContent("Source", value: sourceName)
                     }
-                    ForEach(browser.found) { found in
-                        Button {
-                            Task { await choose(found) }
-                        } label: {
-                            Label(resolving == found.name ? "\(found.name) — connecting…" : found.name,
-                                  systemImage: "dot.radiowaves.left.and.right")
-                        }
-                        .focused($focus, equals: .pi(found.name))
-                    }
+                    .focused($focus, equals: .source)
+                    TextField("Username", text: $store.username)
+                    SecureField("Password", text: $store.password)
+                } header: {
+                    Text("Dashboard")
+                } footer: {
+                    Text("The username and password are the Pi web UI's, if it has one.")
+                        .font(.system(size: 22))
+                        .foregroundStyle(.secondary)
                 }
-
-                Section("Or by address") {
-                    HStack(spacing: 24) {
-                        TextField("dashboard.local:8080", text: $typedAddress)
-                            .textContentType(.URL)
-                            .frame(width: 640)
-                            .focused($focus, equals: .address)
-                        Button("Connect") {
-                            store.noteInteraction()
-                            connectTyped()
-                        }
-                            .focused($focus, equals: .connect)
-                        Button("Demo data") {
-                            store.noteInteraction()
-                            store.connect(.demo)
-                            store.settingsVisible = false
-                        }
-                        .focused($focus, equals: .demo)
-                    }
-                    if let addressError {
-                        Text(addressError).font(.system(size: 22)).foregroundStyle(.red)
-                    }
-                }
-
-                Section("Web UI login (if the Pi has a password)") {
-                    HStack(spacing: 24) {
-                        TextField("Username", text: $store.username)
-                            .frame(width: 360)
-                            .focused($focus, equals: .username)
-                        SecureField("Password", text: $store.password)
-                            .frame(width: 360)
-                            .focused($focus, equals: .password)
-                    }
-                }
-
-                Button("Done") {
-                    store.noteInteraction()
-                    store.settingsVisible = false
-                }
-                    .disabled(store.connection == nil)
-                    .focused($focus, equals: .done)
             }
-            .padding(80)
-            .frame(maxWidth: 1400, alignment: .leading)
-            .focusSection()
+            .navigationDestination(for: Page.self) { page in
+                switch page {
+                case .layout:
+                    choices("Layout", DashboardStore.Layout.allCases, selected: store.layout, title: \.title) {
+                        store.layout = $0
+                    }
+                case .keepAwake:
+                    choices("Keep Awake", DashboardStore.keepAwakeChoices, selected: store.keepAwakeHours,
+                            title: awakeLabel) {
+                        store.keepAwakeHours = $0
+                    }
+                case .source:
+                    sourcePage
+                }
+            }
         }
+        // Inset, so a focused row's lift and highlight stay inside the drawer.
+        .padding(.horizontal, 28)
+        .padding(.vertical, 24)
+        .frame(width: Self.width)
+        .background(.thickMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 40, style: .continuous))
+        .shadow(color: .black.opacity(0.5), radius: 40, x: -10)
+        .padding(.vertical, 40)
+        .padding(.trailing, 40)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
         .onAppear {
             browser.start()
-            // The panel takes focus as it appears; nothing else will hand it over.
-            DispatchQueue.main.async { focus = initialFocus }
             if case let .server(url) = store.connection { typedAddress = url.host().map { "\($0):\(url.port ?? 8080)" } ?? "" }
+            // A first launch has nothing to show yet: straight to choosing a source.
+            if store.connection == nil { path = [.source] }
+            // The drawer takes focus as it appears; nothing else will hand it over.
+            DispatchQueue.main.async { focus = store.connection == nil ? .firstSource : .layout }
         }
-        .onChange(of: browser.found) { _, found in
-            // The first Pi to turn up is the likeliest choice on a first launch.
-            if store.connection == nil, focus == nil || focus == .address, let first = found.first {
-                focus = .pi(first.name)
-            }
-        }
-        // Every remote use in the panel restarts Keep awake, including a press or keystroke
+        // Every remote use in the drawer restarts Keep awake, including a keystroke or a pick
         // that leaves focus where it was.
         .onChange(of: focus) { _, _ in store.noteInteraction() }
+        .onChange(of: path) { _, _ in store.noteInteraction() }
+        .onChange(of: store.layout) { _, _ in store.noteInteraction() }
         .onChange(of: typedAddress) { _, _ in store.noteInteraction() }
         .onChange(of: store.username) { _, _ in store.noteInteraction() }
         .onChange(of: store.password) { _, _ in store.noteInteraction() }
         .onDisappear { browser.stop() }
         .onExitCommand {
+            // Menu goes back a page, focus returning to the row that led there; at the root
+            // it closes the drawer, once there is a source to show.
             store.noteInteraction()
-            if store.connection != nil { store.settingsVisible = false }
+            if let page = path.popLast() {
+                DispatchQueue.main.async { focus = row(for: page) }
+            } else if store.connection != nil {
+                store.settingsVisible = false
+            }
         }
     }
 
-    /// Where focus lands when the panel opens: Done once a source is set, else the first Pi
-    /// found, else the address field.
-    private var initialFocus: Field {
-        if store.connection != nil { return .done }
-        if let first = browser.found.first { return .pi(first.name) }
-        return .address
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Home Dashboard")
+                .font(.system(size: 38, weight: .bold))
+                .foregroundStyle(.primary)
+                .textCase(nil)
+            Text(status)
+                .font(.system(size: 22))
+                .foregroundStyle(.secondary)
+                .textCase(nil)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.bottom, 12)
+    }
+
+    private func row(for page: Page) -> Field {
+        switch page {
+        case .layout: return .layout
+        case .keepAwake: return .keepAwake
+        case .source: return .source
+        }
+    }
+
+    // MARK: Pickers
+
+    /// A system-style picker page: one row per choice, a checkmark on the current one, and a
+    /// pick goes back a page.
+    private func choices<T: Hashable>(_ name: String, _ options: [T], selected: T, title: @escaping (T) -> String,
+                                      pick: @escaping (T) -> Void) -> some View {
+        List {
+            ForEach(Array(options.enumerated()), id: \.offset) { index, option in
+                Button {
+                    pick(option)
+                    if let page = path.popLast() {
+                        DispatchQueue.main.async { focus = row(for: page) }
+                    }
+                } label: {
+                    HStack {
+                        Text(title(option))
+                        Spacer()
+                        if option == selected { Image(systemName: "checkmark") }
+                    }
+                }
+                .focused($focus, equals: option == selected ? .firstChoice : nil)
+                .accessibilityLabel(title(option))
+            }
+        }
+        .navigationTitle(name)
+        .onAppear { DispatchQueue.main.async { focus = .firstChoice } }
+    }
+
+    // MARK: Source
+
+    private var sourcePage: some View {
+        List {
+            Section {
+                if browser.found.isEmpty {
+                    HStack(spacing: 18) {
+                        ProgressView()
+                        Text("Looking for dashboards…")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                ForEach(Array(browser.found.enumerated()), id: \.element.id) { index, found in
+                    Button {
+                        Task { await choose(found) }
+                    } label: {
+                        HStack {
+                            Label(found.name, systemImage: "dot.radiowaves.left.and.right")
+                            Spacer()
+                            if resolving == found.name {
+                                ProgressView()
+                            }
+                        }
+                    }
+                    .focused($focus, equals: index == 0 ? .firstSource : nil)
+                }
+            } header: {
+                Text("On This Network")
+            } footer: {
+                Text("A Pi advertises itself here once `make web-enable` has run on it.")
+                        .font(.system(size: 22))
+                        .foregroundStyle(.secondary)
+            }
+
+            Section {
+                TextField("dashboard.local:8080", text: $typedAddress)
+                    .textContentType(.URL)
+                    // With no Pi found yet, the address is where a first launch starts.
+                    .focused($focus, equals: browser.found.isEmpty ? .firstSource : nil)
+                    .onSubmit(connectTyped)
+                Button("Connect", action: connectTyped)
+                if let addressError {
+                    Text(addressError)
+                        .foregroundStyle(.red)
+                }
+            } header: {
+                Text("By Address")
+            }
+
+            Section {
+                Button {
+                    store.noteInteraction()
+                    store.connect(.demo)
+                    store.settingsVisible = false
+                } label: {
+                    HStack {
+                        Text("Demo data")
+                        Spacer()
+                        if store.connection == .demo { Image(systemName: "checkmark") }
+                    }
+                }
+            } footer: {
+                Text("A built-in week, with no Pi at all.")
+                        .font(.system(size: 22))
+                        .foregroundStyle(.secondary)
+            }
+        }
+        .navigationTitle("Source")
+        .onAppear {
+            DispatchQueue.main.async { focus = .firstSource }
+        }
+        .onChange(of: browser.found) { _, found in
+            // The first Pi to turn up is the likeliest choice on a first launch.
+            if store.connection == nil, !found.isEmpty {
+                // The field already holds `.firstSource`: let go, then hand it to the Pi row.
+                focus = nil
+                DispatchQueue.main.async { focus = .firstSource }
+            }
+        }
+    }
+
+    // MARK: Text
+
+    private var sourceName: String {
+        switch store.connection {
+        case nil: return "None"
+        case .demo: return "Demo data"
+        case .server(let url): return url.host() ?? url.absoluteString
+        }
     }
 
     private func awakeLabel(_ hours: Int) -> String {
@@ -176,6 +286,8 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: Connecting
+
     private func choose(_ found: PiBrowser.Found) async {
         store.noteInteraction()
         resolving = found.name
@@ -190,6 +302,7 @@ struct SettingsView: View {
     }
 
     private func connectTyped() {
+        store.noteInteraction()
         guard let url = DashboardClient.baseURL(forTyped: typedAddress) else {
             addressError = "That doesn't look like an address."
             return
@@ -197,24 +310,5 @@ struct SettingsView: View {
         addressError = nil
         store.connect(.server(url))
         store.settingsVisible = false
-    }
-}
-
-private struct Section<Content: View>: View {
-    let title: String
-    @ViewBuilder let content: Content
-
-    init(_ title: String, @ViewBuilder content: () -> Content) {
-        self.title = title
-        self.content = content()
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text(title.uppercased())
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundStyle(.secondary)
-            content
-        }
     }
 }

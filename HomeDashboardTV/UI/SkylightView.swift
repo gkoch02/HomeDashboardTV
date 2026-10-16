@@ -295,15 +295,10 @@ private struct UpNext: View {
         let events = Skylight.upNext(snapshot, now: now, limit: chips.isEmpty ? 5 : 4)
         VStack(alignment: .leading, spacing: 18) {
             if !chips.isEmpty {
-                HStack(spacing: 12) {
-                    ForEach(Array(chips.prefix(3).enumerated()), id: \.offset) { _, chip in
-                        Text(chip)
-                            .font(.system(size: 24, weight: .semibold))
-                            .lineLimit(1)
-                            .foregroundStyle(Ink.text)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 7)
-                            .background(Ink.text.opacity(0.14), in: Capsule())
+                // As many whole chips as fit the column, never one cut short.
+                ViewThatFits(in: .horizontal) {
+                    ForEach((1...min(chips.count, 3)).reversed(), id: \.self) { count in
+                        chipRow(Array(chips.prefix(count)))
                     }
                 }
             }
@@ -318,6 +313,21 @@ private struct UpNext: View {
         }
     }
 
+    private func chipRow(_ chips: [String]) -> some View {
+        HStack(spacing: 12) {
+            ForEach(Array(chips.enumerated()), id: \.offset) { _, chip in
+                Text(chip)
+                    .font(.system(size: 24, weight: .semibold))
+                    .lineLimit(1)
+                    .fixedSize()
+                    .foregroundStyle(Ink.text)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 7)
+                    .background(Ink.text.opacity(0.14), in: Capsule())
+            }
+        }
+    }
+
     /// Today's birthdays and the next week's, by first name and day.
     private var birthdays: [String] {
         let today = CivilDate(now, in: zone)
@@ -326,7 +336,7 @@ private struct UpNext: View {
             .map { birthday in
                 let when = birthday.date == today ? "today"
                     : birthday.date == today.adding(days: 1) ? "tomorrow"
-                    : birthday.date.start(in: zone).formatted(Date.FormatStyle(timeZone: zone).weekday(.wide))
+                    : birthday.date.start(in: zone).formatted(Date.FormatStyle(timeZone: zone).weekday(.abbreviated))
                 return "🎂 \(birthday.name) \(when)"
             }
     }

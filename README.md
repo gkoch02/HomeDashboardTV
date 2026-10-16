@@ -114,8 +114,8 @@ On first launch the app opens its settings drawer at **Source**: pick the Pi und
 Network**, or type its address (`dashboard.local`, `192.168.1.20:8080`). **Demo data** shows a
 bundled week with no Pi at all. Click anywhere on the dashboard to open the drawer again;
 Menu goes back a page, then closes it.
-Left and right on the remote step through the layouts (Dashboard, Agenda, Moon, Horizon,
-Light Cycle, Quote, Night, Skylight, Fuzzy Clock, Weatherglass), and
+Left and right on the remote step through the layouts (Dashboard, Agenda, Horizon, Skylight,
+Light Cycle, Weatherglass, Fuzzy Clock, Quote, Moon, Night), and
 the one you land on is remembered.
 
 ## Building it yourself

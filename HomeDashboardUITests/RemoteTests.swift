@@ -17,15 +17,16 @@ final class RemoteTests: XCTestCase {
         app.launchArguments = ["-connection", "", "-layout", "dashboard"]
         app.launch()
 
-        let demo = app.buttons["Demo data"]
+        // A row reads its title, then any detail and value: match on the title.
+        let demo = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Demo data'")).firstMatch
         XCTAssertTrue(demo.waitForExistence(timeout: 10))
+        // A Pi's row, or the address field when none has turned up.
         let focused = app.descendants(matching: .any).matching(NSPredicate(format: "hasFocus == true"))
-        XCTAssertTrue(focused.firstMatch.waitForExistence(timeout: 5), "something in the panel has focus")
+        XCTAssertTrue(focused.firstMatch.waitForExistence(timeout: 5), "something in the drawer has focus")
 
-        // Down to the address row (a Pi on the LAN may have taken first focus), then right.
-        for _ in 0..<8 where !demo.hasFocus {
-            let onAddressRow = app.textFields.firstMatch.hasFocus || app.buttons["Connect"].hasFocus
-            remote.press(onAddressRow ? .right : .down)
+        // A first launch opens on the Source page; down its list to Demo data.
+        for _ in 0..<10 where !demo.hasFocus {
+            remote.press(.down)
         }
         XCTAssertTrue(demo.hasFocus, "the remote reaches Demo data")
 
@@ -42,15 +43,22 @@ final class RemoteTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Today"].waitForExistence(timeout: 10))
 
         remote.press(.select)
-        let done = app.buttons["Done"]
-        XCTAssertTrue(done.waitForExistence(timeout: 5), "a click opens settings")
-        XCTAssertTrue(done.hasFocus, "focus lands in the panel")
-
-        remote.press(.menu)
-        XCTAssertTrue(done.waitForNonExistence(timeout: 5), "Menu closes settings")
+        // The row reads "Layout, Dashboard": its title, then the value.
+        let layout = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Layout'")).firstMatch
+        XCTAssertTrue(layout.waitForExistence(timeout: 5), "a click opens settings")
+        XCTAssertTrue(layout.waitForHasFocus(timeout: 5), "focus lands in the drawer")
 
         remote.press(.select)
-        XCTAssertTrue(done.waitForExistence(timeout: 5), "the dashboard has focus again, so a click reopens settings")
+        let night = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Night'")).firstMatch
+        XCTAssertTrue(night.waitForExistence(timeout: 5), "Layout opens the layout list")
+        remote.press(.menu)
+        XCTAssertTrue(layout.waitForHasFocus(timeout: 5), "Menu goes back a page first")
+
+        remote.press(.menu)
+        XCTAssertTrue(layout.waitForNonExistence(timeout: 5), "then Menu closes settings")
+
+        remote.press(.select)
+        XCTAssertTrue(layout.waitForExistence(timeout: 5), "the dashboard has focus again, so a click reopens settings")
     }
 
     /// Left and right step through the layouts, wrapping at either end.
@@ -69,5 +77,13 @@ final class RemoteTests: XCTestCase {
 
         remote.press(.right)
         XCTAssertTrue(today.waitForNonExistence(timeout: 5), "right moves on to Agenda")
+    }
+}
+
+private extension XCUIElement {
+    /// Focus moves after an animation, so wait for it.
+    func waitForHasFocus(timeout: TimeInterval) -> Bool {
+        let expectation = XCTNSPredicateExpectation(predicate: NSPredicate(format: "hasFocus == true"), object: self)
+        return XCTWaiter().wait(for: [expectation], timeout: timeout) == .completed
     }
 }

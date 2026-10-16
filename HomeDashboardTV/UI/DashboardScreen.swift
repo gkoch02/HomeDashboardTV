@@ -12,14 +12,12 @@ import SwiftUI
 struct DashboardScreen: View {
     @Environment(DashboardStore.self) private var store
     @FocusState private var screenFocused: Bool
-    /// The slide between layouts: the layout leaving, which way the press went (-1 left,
-    /// 1 right), and how far along it is, 0 to 1. Only `progress` animates.
-    @State private var leaving: DashboardStore.Layout?
-    @State private var direction: CGFloat = 0
-    @State private var progress: CGFloat = 1
-    /// Counts slides, so one cut short by the next press does not clear the next one's
-    /// leaving layout when its own animation finishes.
-    @State private var slide = 0
+    /// The fade through black between layouts: how much of the layout shows (it falls to 0,
+    /// the layout changes, it rises to 1), and the layout the presses so far lead to.
+    @State private var shown: CGFloat = 1
+    @State private var target: DashboardStore.Layout?
+    /// Counts fades, so one cut short by the next press does not act when it finishes.
+    @State private var fade = 0
 
     var body: some View {
         ZStack {
@@ -52,24 +50,23 @@ struct DashboardScreen: View {
         .onChange(of: store.settingsVisible) { _, _ in claimFocus() }
     }
 
-    /// Steps the layout and slides to it. Everything about the slide is set in this one
-    /// update, so the leaving layout and the arriving one always agree on the direction; a
-    /// press during a slide starts the next from where the screen now stands.
+    /// Steps the layout through black: the screen fades out, the layout changes while it is
+    /// dark, and the new one fades in. Presses during the fade add up, and the screen comes up
+    /// on where they lead.
     private func change(by steps: Int) {
-        var instant = Transaction()
-        instant.disablesAnimations = true
-        withTransaction(instant) {
-            leaving = store.layout
-            direction = CGFloat(steps.signum())
-            progress = 0
-            store.layout = store.layout.advanced(by: steps)
-            slide += 1
-        }
-        let this = slide
-        withAnimation(.easeInOut(duration: LayoutSlide.duration)) {
-            progress = 1
+        let next = (target ?? store.layout).advanced(by: steps)
+        target = next
+        fade += 1
+        let this = fade
+        withAnimation(.easeIn(duration: FadeThroughBlack.half)) {
+            shown = 0
         } completion: {
-            if slide == this { leaving = nil }
+            guard fade == this else { return }
+            var instant = Transaction()
+            instant.disablesAnimations = true
+            withTransaction(instant) { store.layout = next }
+            target = nil
+            withAnimation(.easeOut(duration: FadeThroughBlack.half)) { shown = 1 }
         }
     }
 
@@ -81,18 +78,10 @@ struct DashboardScreen: View {
     private var content: some View {
             TimelineView(.everyMinute) { context in
                 if let snapshot = store.snapshot {
-                    ZStack {
-                        if let leaving, leaving != store.layout {
-                            layout(leaving, snapshot, context.date)
-                                .id(leaving)
-                                .offset(x: -direction * LayoutSlide.travel * progress)
-                                .opacity(1 - progress)
-                        }
-                        layout(store.layout, snapshot, context.date)
-                            .id(store.layout)
-                            .offset(x: direction * LayoutSlide.travel * (1 - progress))
-                            .opacity(leaving == nil ? 1 : progress)
-                    }
+                    layout(store.layout, snapshot, context.date)
+                        .id(store.layout)
+                        .opacity(shown)
+                        .background { Color.black.ignoresSafeArea() }
                 } else if store.connection != nil {
                     Waiting(problem: store.problem)
                 }
@@ -131,15 +120,12 @@ struct DashboardScreen: View {
     }
 }
 
-/// Moving between layouts with the remote: the new one drifts in from the side pressed as
-/// the old one drifts out the other way, both a fraction of the screen, crossfading as they
-/// go. Driven by one animated `progress` on the two layers' offset and opacity alone, not by
-/// SwiftUI transitions: an implicit animation also animated each layout's own insides as
-/// they were laid out, and a removal transition keeps the direction of the frame before.
-private enum LayoutSlide {
-    /// How far a layout travels: enough to read as a move, short of a full push.
-    static let travel: CGFloat = 220
-    static let duration = 0.55
+/// Moving between layouts with the remote: a fade through black. Driven by one animated
+/// opacity on the layout, not by SwiftUI transitions, whose implicit animation also animated
+/// each layout's insides as it was laid out.
+private enum FadeThroughBlack {
+    /// Each half: out to black, then in from it.
+    static let half = 0.28
 }
 
 private struct Waiting: View {

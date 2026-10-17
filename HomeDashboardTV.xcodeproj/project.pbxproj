@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		00B3C70A424BF2CD94123F64 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 708E7FA2EC39FD82617171C5 /* Keychain.swift */; };
+		12DF9F160B353E555C4E28B0 /* WindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2256A097691D68B2477F76EF /* WindowView.swift */; };
 		1426E37D465A29D3AC373CD2 /* WeatherglassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0FD297DE56AF1DD7F7DAFB2 /* WeatherglassView.swift */; };
 		16285FD177D64B1D9A35C006 /* SkyColour.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1982EDDF2B6A3E033A01C63 /* SkyColour.swift */; };
 		18033621437C98349750E47C /* ManufacturingConsent-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5BCEA6F65BFB1AF66825E854 /* ManufacturingConsent-Regular.ttf */; };
@@ -15,6 +16,7 @@
 		1D535A92E7CDDFD49C58C839 /* BigShouldersDisplay-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 76149526166AFF15A3A36459 /* BigShouldersDisplay-Black.ttf */; };
 		234A879AF993DBACD53A1C57 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2103C0B8C55F989AF037F3 /* Theme.swift */; };
 		323A78D9DFE43D04189A8C2C /* HorizonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB6C810B9D81A542EB0FA9F /* HorizonView.swift */; };
+		416BAB7435FF5AA9F705C30F /* WindowPane.metal in Sources */ = {isa = PBXBuildFile; fileRef = 5AB880AAFFAF50381C546114 /* WindowPane.metal */; };
 		419C22D1A074B4220E3F5C25 /* OrreryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 333B7105DB6D07E312E56484 /* OrreryView.swift */; };
 		460AFA6DC7DC369E67096935 /* Cinzel.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 61DD62983158D3984EC63FFB /* Cinzel.ttf */; };
 		465B5A043627B49E6D691ED8 /* SkylightSky.metal in Sources */ = {isa = PBXBuildFile; fileRef = EAEE458EE1F37F100274CB01 /* SkylightSky.metal */; };
@@ -70,6 +72,7 @@
 		1A7D3CB3930F0208F3F6CD8B /* AgendaPlateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgendaPlateView.swift; sourceTree = "<group>"; };
 		1D5C83EE56FEAB64DF4BCEF1 /* RemoteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteTests.swift; sourceTree = "<group>"; };
 		1D6560F916DAE5BD81DA2DBC /* BuildIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildIn.swift; sourceTree = "<group>"; };
+		2256A097691D68B2477F76EF /* WindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowView.swift; sourceTree = "<group>"; };
 		24D3FE4C261142D9F0D912CA /* Righteous-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Righteous-Regular.ttf"; sourceTree = "<group>"; };
 		333B7105DB6D07E312E56484 /* OrreryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrreryView.swift; sourceTree = "<group>"; };
 		33E802CA050DAA1C01659DD7 /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.xcconfig; sourceTree = "<group>"; };
@@ -79,6 +82,7 @@
 		4C2103C0B8C55F989AF037F3 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		53F9A78BB2607C29E062F3B0 /* HomeDashboardUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HomeDashboardUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A14D92835DFD740F4F1432D /* PlayfairDisplay-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "PlayfairDisplay-Bold.ttf"; sourceTree = "<group>"; };
+		5AB880AAFFAF50381C546114 /* WindowPane.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = WindowPane.metal; sourceTree = "<group>"; };
 		5BCEA6F65BFB1AF66825E854 /* ManufacturingConsent-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "ManufacturingConsent-Regular.ttf"; sourceTree = "<group>"; };
 		6041939B5D7B3127401CA708 /* SplitMix.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitMix.swift; sourceTree = "<group>"; };
 		61DD62983158D3984EC63FFB /* Cinzel.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Cinzel.ttf; sourceTree = "<group>"; };
@@ -188,6 +192,7 @@
 				6041939B5D7B3127401CA708 /* SplitMix.swift */,
 				C1E1BFF6FCCC998B7C7EC292 /* Starfield.swift */,
 				72F2A46DC8514A7232F59DA3 /* WeatherArt.swift */,
+				5AB880AAFFAF50381C546114 /* WindowPane.metal */,
 			);
 			path = Parts;
 			sourceTree = "<group>";
@@ -220,6 +225,7 @@
 				C30E67A42F18B2067865361F /* SkylightView.swift */,
 				4C2103C0B8C55F989AF037F3 /* Theme.swift */,
 				D0FD297DE56AF1DD7F7DAFB2 /* WeatherglassView.swift */,
+				2256A097691D68B2477F76EF /* WindowView.swift */,
 				819153AE226C9E1E05B57C87 /* Parts */,
 			);
 			path = UI;
@@ -407,6 +413,8 @@
 				234A879AF993DBACD53A1C57 /* Theme.swift in Sources */,
 				7701A0FDED19BDD2E1A71CC9 /* WeatherArt.swift in Sources */,
 				1426E37D465A29D3AC373CD2 /* WeatherglassView.swift in Sources */,
+				416BAB7435FF5AA9F705C30F /* WindowPane.metal in Sources */,
+				12DF9F160B353E555C4E28B0 /* WindowView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

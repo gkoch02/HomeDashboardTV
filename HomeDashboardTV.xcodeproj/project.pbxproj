@@ -28,6 +28,8 @@
 		54F0157FE87CCD17BBC04712 /* Figtree-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8D623B4B66C03F6E41617CBC /* Figtree-ExtraBold.ttf */; };
 		5870F7893C97C7CB9405BC4D /* Jura-Variable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 47C24A3D1B5321D2D19DA285 /* Jura-Variable.ttf */; };
 		60B9ABEACDE09E876B36F3F1 /* PiBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B3C54094507B36DC31C7C76 /* PiBrowser.swift */; };
+		668934D53CA77B99EFA43552 /* UplinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71287ECAC4ACEC3BE2DB09CF /* UplinkView.swift */; };
+		73B1A71294BDD2E4BA0FC68B /* Michroma-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B97455432CBD74EA8E8AB21C /* Michroma-Regular.ttf */; };
 		7701A0FDED19BDD2E1A71CC9 /* WeatherArt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72F2A46DC8514A7232F59DA3 /* WeatherArt.swift */; };
 		77285EF0F0FD9A8ED107921F /* BigShouldersDisplay-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CED58FBF03979E34EA7C79D3 /* BigShouldersDisplay-ExtraBold.ttf */; };
 		7ABAC51A5C68DEC61FE7DBA5 /* SplitMix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6041939B5D7B3127401CA708 /* SplitMix.swift */; };
@@ -36,6 +38,7 @@
 		8117374DFD07F2DCA93E9A9D /* Oxanium-Variable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7489A5D000CB1D9AFB28D8D2 /* Oxanium-Variable.ttf */; };
 		9344DC299A5326219B6516DC /* LightCycleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E57CFC146044F906194B6656 /* LightCycleView.swift */; };
 		9645C744C0BB544F09B9A0CE /* AgendaPlateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A7D3CB3930F0208F3F6CD8B /* AgendaPlateView.swift */; };
+		9DE130CDBDEFF4158B8BD1E0 /* Saira-Variable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 55D94D86D387DBCDDEAF25C4 /* Saira-Variable.ttf */; };
 		9DED23C742D31A9622FEDF31 /* CyberpunkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F836F52D21F1424312E73132 /* CyberpunkView.swift */; };
 		A56CCAD2FA51F96FCACA8EED /* RemoteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5C83EE56FEAB64DF4BCEF1 /* RemoteTests.swift */; };
 		A702BE2F6D6D411D256D80BE /* MoonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10DA38EC1D96409C50598DB5 /* MoonView.swift */; };
@@ -86,6 +89,7 @@
 		47C24A3D1B5321D2D19DA285 /* Jura-Variable.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Jura-Variable.ttf"; sourceTree = "<group>"; };
 		4C2103C0B8C55F989AF037F3 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		53F9A78BB2607C29E062F3B0 /* HomeDashboardUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HomeDashboardUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		55D94D86D387DBCDDEAF25C4 /* Saira-Variable.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Saira-Variable.ttf"; sourceTree = "<group>"; };
 		596F4764C5072FB1383315F4 /* Rajdhani-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Rajdhani-Medium.ttf"; sourceTree = "<group>"; };
 		5A14D92835DFD740F4F1432D /* PlayfairDisplay-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "PlayfairDisplay-Bold.ttf"; sourceTree = "<group>"; };
 		5AB880AAFFAF50381C546114 /* WindowPane.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = WindowPane.metal; sourceTree = "<group>"; };
@@ -97,6 +101,7 @@
 		656C08F19678AAA727B5755E /* FuzzyClockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FuzzyClockView.swift; sourceTree = "<group>"; };
 		660A98750F7DEDD3E9B93FCE /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		708E7FA2EC39FD82617171C5 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
+		71287ECAC4ACEC3BE2DB09CF /* UplinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UplinkView.swift; sourceTree = "<group>"; };
 		72F2A46DC8514A7232F59DA3 /* WeatherArt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherArt.swift; sourceTree = "<group>"; };
 		746246E776D4B3F02920D6AF /* AuroraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuroraView.swift; sourceTree = "<group>"; };
 		7489A5D000CB1D9AFB28D8D2 /* Oxanium-Variable.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Oxanium-Variable.ttf"; sourceTree = "<group>"; };
@@ -110,6 +115,7 @@
 		A4E3CE2DB7FE94F4CB142505 /* AuroraSky.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = AuroraSky.metal; sourceTree = "<group>"; };
 		A68DDBCA1329C420B50A6188 /* CormorantGaramond.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = CormorantGaramond.ttf; sourceTree = "<group>"; };
 		B11D136C433B5D7FD6C407D9 /* Home Dashboard.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "Home Dashboard.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B97455432CBD74EA8E8AB21C /* Michroma-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Michroma-Regular.ttf"; sourceTree = "<group>"; };
 		BDBCC482A09982EB05EE52C5 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		C1E1BFF6FCCC998B7C7EC292 /* Starfield.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Starfield.swift; sourceTree = "<group>"; };
 		C30E67A42F18B2067865361F /* SkylightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkylightView.swift; sourceTree = "<group>"; };
@@ -174,12 +180,14 @@
 				8D623B4B66C03F6E41617CBC /* Figtree-ExtraBold.ttf */,
 				47C24A3D1B5321D2D19DA285 /* Jura-Variable.ttf */,
 				5BCEA6F65BFB1AF66825E854 /* ManufacturingConsent-Regular.ttf */,
+				B97455432CBD74EA8E8AB21C /* Michroma-Regular.ttf */,
 				7489A5D000CB1D9AFB28D8D2 /* Oxanium-Variable.ttf */,
 				5A14D92835DFD740F4F1432D /* PlayfairDisplay-Bold.ttf */,
 				6258588CD3B78DBF295BCA7D /* Rajdhani-Bold.ttf */,
 				596F4764C5072FB1383315F4 /* Rajdhani-Medium.ttf */,
 				2ABE50ACD8B843A99D8BB62C /* Rajdhani-SemiBold.ttf */,
 				24D3FE4C261142D9F0D912CA /* Righteous-Regular.ttf */,
+				55D94D86D387DBCDDEAF25C4 /* Saira-Variable.ttf */,
 			);
 			path = Fonts;
 			sourceTree = "<group>";
@@ -236,6 +244,7 @@
 				BDBCC482A09982EB05EE52C5 /* SettingsView.swift */,
 				C30E67A42F18B2067865361F /* SkylightView.swift */,
 				4C2103C0B8C55F989AF037F3 /* Theme.swift */,
+				71287ECAC4ACEC3BE2DB09CF /* UplinkView.swift */,
 				D0FD297DE56AF1DD7F7DAFB2 /* WeatherglassView.swift */,
 				2256A097691D68B2477F76EF /* WindowView.swift */,
 				819153AE226C9E1E05B57C87 /* Parts */,
@@ -375,6 +384,7 @@
 				54F0157FE87CCD17BBC04712 /* Figtree-ExtraBold.ttf in Resources */,
 				5870F7893C97C7CB9405BC4D /* Jura-Variable.ttf in Resources */,
 				18033621437C98349750E47C /* ManufacturingConsent-Regular.ttf in Resources */,
+				73B1A71294BDD2E4BA0FC68B /* Michroma-Regular.ttf in Resources */,
 				8117374DFD07F2DCA93E9A9D /* Oxanium-Variable.ttf in Resources */,
 				4CFB5517937BBA9E4159B7BF /* PlayfairDisplay-Bold.ttf in Resources */,
 				D022FE87E73DB8C7AF8A49A8 /* PrivacyInfo.xcprivacy in Resources */,
@@ -382,6 +392,7 @@
 				FBB409C27D2182C99172AF15 /* Rajdhani-Medium.ttf in Resources */,
 				45CC7B2D9A0AEA7DE3A89251 /* Rajdhani-SemiBold.ttf in Resources */,
 				F758B12F3C7CA752CF16F9D0 /* Righteous-Regular.ttf in Resources */,
+				9DE130CDBDEFF4158B8BD1E0 /* Saira-Variable.ttf in Resources */,
 				B4314A66BEB07B6ADB8167FC /* demo-snapshot.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -427,6 +438,7 @@
 				7ABAC51A5C68DEC61FE7DBA5 /* SplitMix.swift in Sources */,
 				F6D82CA18651E239EAE2A7DC /* Starfield.swift in Sources */,
 				234A879AF993DBACD53A1C57 /* Theme.swift in Sources */,
+				668934D53CA77B99EFA43552 /* UplinkView.swift in Sources */,
 				7701A0FDED19BDD2E1A71CC9 /* WeatherArt.swift in Sources */,
 				1426E37D465A29D3AC373CD2 /* WeatherglassView.swift in Sources */,
 				416BAB7435FF5AA9F705C30F /* WindowPane.metal in Sources */,

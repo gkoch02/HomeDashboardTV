@@ -109,6 +109,7 @@ struct DashboardScreen: View {
                     case .orrery: frame(OrreryView.self, snapshot, now)
                     case .window: frame(WindowView.self, snapshot, now)
                     case .cyberpunk: frame(CyberpunkView.self, snapshot, now)
+                    case .uplink: frame(UplinkView.self, snapshot, now)
                     }
     }
 

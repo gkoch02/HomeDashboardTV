@@ -43,6 +43,9 @@
 		<string>PlayfairDisplay-Bold.ttf</string>
 		<string>Jura-Variable.ttf</string>
 		<string>Oxanium-Variable.ttf</string>
+		<string>Rajdhani-Medium.ttf</string>
+		<string>Rajdhani-SemiBold.ttf</string>
+		<string>Rajdhani-Bold.ttf</string>
 	</array>
 	<key>UILaunchScreen</key>
 	<dict>

@@ -15,6 +15,7 @@
 		1D535A92E7CDDFD49C58C839 /* BigShouldersDisplay-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 76149526166AFF15A3A36459 /* BigShouldersDisplay-Black.ttf */; };
 		234A879AF993DBACD53A1C57 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2103C0B8C55F989AF037F3 /* Theme.swift */; };
 		323A78D9DFE43D04189A8C2C /* HorizonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB6C810B9D81A542EB0FA9F /* HorizonView.swift */; };
+		45CC7B2D9A0AEA7DE3A89251 /* Rajdhani-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2ABE50ACD8B843A99D8BB62C /* Rajdhani-SemiBold.ttf */; };
 		460AFA6DC7DC369E67096935 /* Cinzel.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 61DD62983158D3984EC63FFB /* Cinzel.ttf */; };
 		465B5A043627B49E6D691ED8 /* SkylightSky.metal in Sources */ = {isa = PBXBuildFile; fileRef = EAEE458EE1F37F100274CB01 /* SkylightSky.metal */; };
 		4743623BB70CE9459A0B24DD /* CormorantGaramond.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A68DDBCA1329C420B50A6188 /* CormorantGaramond.ttf */; };
@@ -32,6 +33,7 @@
 		8117374DFD07F2DCA93E9A9D /* Oxanium-Variable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7489A5D000CB1D9AFB28D8D2 /* Oxanium-Variable.ttf */; };
 		9344DC299A5326219B6516DC /* LightCycleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E57CFC146044F906194B6656 /* LightCycleView.swift */; };
 		9645C744C0BB544F09B9A0CE /* AgendaPlateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A7D3CB3930F0208F3F6CD8B /* AgendaPlateView.swift */; };
+		9DED23C742D31A9622FEDF31 /* CyberpunkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F836F52D21F1424312E73132 /* CyberpunkView.swift */; };
 		A56CCAD2FA51F96FCACA8EED /* RemoteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5C83EE56FEAB64DF4BCEF1 /* RemoteTests.swift */; };
 		A702BE2F6D6D411D256D80BE /* MoonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10DA38EC1D96409C50598DB5 /* MoonView.swift */; };
 		AF192DD826C00E051CE81A5E /* AuroraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 746246E776D4B3F02920D6AF /* AuroraView.swift */; };
@@ -40,6 +42,7 @@
 		C07A7F25F4E3DD42B9DAF047 /* AuroraSky.metal in Sources */ = {isa = PBXBuildFile; fileRef = A4E3CE2DB7FE94F4CB142505 /* AuroraSky.metal */; };
 		C16BCCB4AEE8231608362608 /* BuildIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D6560F916DAE5BD81DA2DBC /* BuildIn.swift */; };
 		C5E2D782A5D8AF6532B9A6FA /* MoonDisc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 472A321210B7C12D4CF15E22 /* MoonDisc.swift */; };
+		CA50D3C14F2FCFC864D00375 /* Rajdhani-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6258588CD3B78DBF295BCA7D /* Rajdhani-Bold.ttf */; };
 		D022FE87E73DB8C7AF8A49A8 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 9740313FCCA386C7F996F6FA /* PrivacyInfo.xcprivacy */; };
 		DBF586DBDC1455FF0DC4F199 /* SkylightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C30E67A42F18B2067865361F /* SkylightView.swift */; };
 		E43884FB389F97097336E1B8 /* FuzzyClockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 656C08F19678AAA727B5755E /* FuzzyClockView.swift */; };
@@ -50,6 +53,7 @@
 		F52B09283F9DD6AD0C077B82 /* NightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4CD028BD1DA5124D982E2E8 /* NightView.swift */; };
 		F6D82CA18651E239EAE2A7DC /* Starfield.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E1BFF6FCCC998B7C7EC292 /* Starfield.swift */; };
 		F758B12F3C7CA752CF16F9D0 /* Righteous-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 24D3FE4C261142D9F0D912CA /* Righteous-Regular.ttf */; };
+		FBB409C27D2182C99172AF15 /* Rajdhani-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 596F4764C5072FB1383315F4 /* Rajdhani-Medium.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,16 +74,19 @@
 		1D5C83EE56FEAB64DF4BCEF1 /* RemoteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteTests.swift; sourceTree = "<group>"; };
 		1D6560F916DAE5BD81DA2DBC /* BuildIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildIn.swift; sourceTree = "<group>"; };
 		24D3FE4C261142D9F0D912CA /* Righteous-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Righteous-Regular.ttf"; sourceTree = "<group>"; };
+		2ABE50ACD8B843A99D8BB62C /* Rajdhani-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Rajdhani-SemiBold.ttf"; sourceTree = "<group>"; };
 		33E802CA050DAA1C01659DD7 /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.xcconfig; sourceTree = "<group>"; };
 		4098608C8444AC0C661DD3D1 /* QuoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteView.swift; sourceTree = "<group>"; };
 		472A321210B7C12D4CF15E22 /* MoonDisc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoonDisc.swift; sourceTree = "<group>"; };
 		47C24A3D1B5321D2D19DA285 /* Jura-Variable.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Jura-Variable.ttf"; sourceTree = "<group>"; };
 		4C2103C0B8C55F989AF037F3 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		53F9A78BB2607C29E062F3B0 /* HomeDashboardUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HomeDashboardUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		596F4764C5072FB1383315F4 /* Rajdhani-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Rajdhani-Medium.ttf"; sourceTree = "<group>"; };
 		5A14D92835DFD740F4F1432D /* PlayfairDisplay-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "PlayfairDisplay-Bold.ttf"; sourceTree = "<group>"; };
 		5BCEA6F65BFB1AF66825E854 /* ManufacturingConsent-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "ManufacturingConsent-Regular.ttf"; sourceTree = "<group>"; };
 		6041939B5D7B3127401CA708 /* SplitMix.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitMix.swift; sourceTree = "<group>"; };
 		61DD62983158D3984EC63FFB /* Cinzel.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Cinzel.ttf; sourceTree = "<group>"; };
+		6258588CD3B78DBF295BCA7D /* Rajdhani-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Rajdhani-Bold.ttf"; sourceTree = "<group>"; };
 		63DD5EE230242228C007145D /* HomeDashboardApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeDashboardApp.swift; sourceTree = "<group>"; };
 		656C08F19678AAA727B5755E /* FuzzyClockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FuzzyClockView.swift; sourceTree = "<group>"; };
 		660A98750F7DEDD3E9B93FCE /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
@@ -109,6 +116,7 @@
 		F1982EDDF2B6A3E033A01C63 /* SkyColour.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyColour.swift; sourceTree = "<group>"; };
 		F2343E09D5ADE1C0F4096554 /* CormorantGaramond-Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "CormorantGaramond-Italic.ttf"; sourceTree = "<group>"; };
 		F31AD003A5C8873570D9A9F2 /* demo-snapshot.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "demo-snapshot.json"; sourceTree = "<group>"; };
+		F836F52D21F1424312E73132 /* CyberpunkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyberpunkView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -162,6 +170,9 @@
 				5BCEA6F65BFB1AF66825E854 /* ManufacturingConsent-Regular.ttf */,
 				7489A5D000CB1D9AFB28D8D2 /* Oxanium-Variable.ttf */,
 				5A14D92835DFD740F4F1432D /* PlayfairDisplay-Bold.ttf */,
+				6258588CD3B78DBF295BCA7D /* Rajdhani-Bold.ttf */,
+				596F4764C5072FB1383315F4 /* Rajdhani-Medium.ttf */,
+				2ABE50ACD8B843A99D8BB62C /* Rajdhani-SemiBold.ttf */,
 				24D3FE4C261142D9F0D912CA /* Righteous-Regular.ttf */,
 			);
 			path = Fonts;
@@ -205,6 +216,7 @@
 			children = (
 				1A7D3CB3930F0208F3F6CD8B /* AgendaPlateView.swift */,
 				746246E776D4B3F02920D6AF /* AuroraView.swift */,
+				F836F52D21F1424312E73132 /* CyberpunkView.swift */,
 				A4CAFF9985B9F380C5555D3D /* DashboardScreen.swift */,
 				660A98750F7DEDD3E9B93FCE /* DashboardView.swift */,
 				656C08F19678AAA727B5755E /* FuzzyClockView.swift */,
@@ -357,6 +369,9 @@
 				8117374DFD07F2DCA93E9A9D /* Oxanium-Variable.ttf in Resources */,
 				4CFB5517937BBA9E4159B7BF /* PlayfairDisplay-Bold.ttf in Resources */,
 				D022FE87E73DB8C7AF8A49A8 /* PrivacyInfo.xcprivacy in Resources */,
+				CA50D3C14F2FCFC864D00375 /* Rajdhani-Bold.ttf in Resources */,
+				FBB409C27D2182C99172AF15 /* Rajdhani-Medium.ttf in Resources */,
+				45CC7B2D9A0AEA7DE3A89251 /* Rajdhani-SemiBold.ttf in Resources */,
 				F758B12F3C7CA752CF16F9D0 /* Righteous-Regular.ttf in Resources */,
 				B4314A66BEB07B6ADB8167FC /* demo-snapshot.json in Resources */,
 			);
@@ -381,6 +396,7 @@
 				C07A7F25F4E3DD42B9DAF047 /* AuroraSky.metal in Sources */,
 				AF192DD826C00E051CE81A5E /* AuroraView.swift in Sources */,
 				C16BCCB4AEE8231608362608 /* BuildIn.swift in Sources */,
+				9DED23C742D31A9622FEDF31 /* CyberpunkView.swift in Sources */,
 				7E6CE2079A42A622309DEC52 /* DashboardScreen.swift in Sources */,
 				48BB3B40E6E914FDBE11153A /* DashboardStore.swift in Sources */,
 				7E84F655354C4B325DAE7DF9 /* DashboardView.swift in Sources */,

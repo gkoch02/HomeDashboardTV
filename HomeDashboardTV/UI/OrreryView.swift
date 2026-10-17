@@ -251,10 +251,6 @@ private struct Gears: View {
                     .frame(width: radius * 0.13, height: radius * 0.13)
                     .rotationEffect(.degrees(-beat * 360 / 16 + 360 / 32))
                     .offset(x: radius * 0.2 * CGFloat(cos(.pi * 1.25)), y: -radius * 0.2 * CGFloat(sin(.pi * 1.25)))
-                Gear(teeth: 12)
-                    .frame(width: radius * 0.1, height: radius * 0.1)
-                    .rotationEffect(.degrees(-beat * 360 / 12))
-                    .offset(x: radius * 0.185 * CGFloat(cos(Double.pi / 3)), y: -radius * 0.185 * CGFloat(sin(Double.pi / 3)))
             }
         }
     }
@@ -304,7 +300,7 @@ private struct Gear: View, Equatable {
                 Gradient(colors: [Color(red: 1, green: 0.55, blue: 0.6), Color(red: 0.6, green: 0.04, blue: 0.12)]),
                 center: CGPoint(x: c.x - r * 0.02, y: c.y - r * 0.02), startRadius: 0, endRadius: r * 0.09))
         }
-        .opacity(0.8)
+        .opacity(0.6)
     }
 }
 
@@ -375,22 +371,22 @@ private struct Mechanism: View, Animatable {
             glow.fill(circle(c, r * 0.08), with: .color(Color(red: 1.0, green: 0.78, blue: 0.4).opacity(0.7)))
             // Straight rays between wavy flames, as on an old engraving's sun.
             var rays = Path()
-            for k in 0..<16 {
-                let a = Double(k) * 22.5
-                rays.move(to: at(c, r * 0.07, a - 4))
+            for k in 0..<12 {
+                let a = Double(k) * 30 + 15
+                rays.move(to: at(c, r * 0.07, a - 5))
                 if k % 2 == 0 {
-                    rays.addLine(to: at(c, r * 0.19, a))
+                    rays.addLine(to: at(c, r * 0.15, a))
                 } else {
-                    rays.addQuadCurve(to: at(c, r * 0.12, a + 3), control: at(c, r * 0.095, a - 6))
-                    rays.addQuadCurve(to: at(c, r * 0.165, a - 1), control: at(c, r * 0.145, a + 7))
-                    rays.addQuadCurve(to: at(c, r * 0.07, a + 4), control: at(c, r * 0.11, a + 5))
+                    rays.addQuadCurve(to: at(c, r * 0.105, a + 3), control: at(c, r * 0.088, a - 6))
+                    rays.addQuadCurve(to: at(c, r * 0.13, a - 1), control: at(c, r * 0.122, a + 6))
+                    rays.addQuadCurve(to: at(c, r * 0.07, a + 5), control: at(c, r * 0.1, a + 5))
                 }
-                rays.addLine(to: at(c, r * 0.07, a + 4))
+                rays.addLine(to: at(c, r * 0.07, a + 5))
             }
-            // Over the glow and out past the wheel's teeth, edged dark so they hold against the brass.
-            context.stroke(rays, with: .color(.black.opacity(0.75)), lineWidth: 2.5)
+            // Over the glow and edged dark, so they hold against the wheel's brass.
+            context.stroke(rays, with: .color(.black.opacity(0.7)), lineWidth: 2)
             context.fill(rays, with: .radialGradient(Gradient(colors: [Color(red: 1, green: 0.95, blue: 0.75), Color(red: 1, green: 0.76, blue: 0.35)]),
-                                                     center: c, startRadius: r * 0.07, endRadius: r * 0.19))
+                                                     center: c, startRadius: r * 0.07, endRadius: r * 0.15))
             context.fill(circle(c, r * 0.072), with: .radialGradient(
                 Gradient(colors: [Color(red: 1, green: 0.98, blue: 0.88), Color(red: 1, green: 0.8, blue: 0.4),
                                   Color(red: 0.85, green: 0.55, blue: 0.2)]),
@@ -468,9 +464,9 @@ private struct Mechanism: View, Animatable {
         stub.move(to: c)
         stub.addLine(to: tail)
         context.stroke(stub, with: .color(Ink.deepBrass), style: StrokeStyle(lineWidth: width * 0.8, lineCap: .round))
-        context.fill(circle(tail, max(width * 1.6, r * 0.012)), with: .radialGradient(
+        context.fill(circle(tail, max(width * 1.2, r * 0.008)), with: .radialGradient(
             Gradient(colors: [Color(red: 0.98, green: 0.88, blue: 0.58), Ink.deepBrass]),
-            center: tail, startRadius: 0, endRadius: max(width * 1.6, r * 0.012)))
+            center: tail, startRadius: 0, endRadius: max(width * 1.2, r * 0.008)))
 
         // A bead a third of the way out, and a pierced lozenge beyond it on the longer arms.
         context.fill(circle(at(c, length * 0.33, angle), width * 1.3), with: shade)

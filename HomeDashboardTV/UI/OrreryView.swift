@@ -39,7 +39,9 @@ struct OrreryView: Theme {
         }
         .onBuildIn(reset: { settled in build = settled ? .settled : .start }) {
             withAnimation(.easeOut(duration: 0.9)) { build.plate = 1 }
-            withAnimation(.spring(response: 2.4, dampingFraction: 0.82).delay(0.4)) { build.swing = 1 }
+            // Long and gentle, never past the mark: a spring's overshoot carried the planets past
+            // their places and back.
+            withAnimation(.timingCurve(0.25, 0.1, 0.15, 1, duration: 2.8).delay(0.4)) { build.swing = 1 }
             withAnimation(.linear(duration: 1.4).delay(0.9)) { build.text = 1 }
         }
     }

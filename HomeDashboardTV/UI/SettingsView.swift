@@ -11,7 +11,8 @@ import SwiftUI
 ///
 /// No `List` or `NavigationStack`: their scroll and navigation views clipped the focused
 /// row's lifted pill at both ends on the TV, which the simulator never showed. Plain rows in
-/// a padded stack leave the lift room inside the panel.
+/// a padded stack leave the lift room inside the panel; the Layout list, too long for the
+/// panel, scrolls in a `ScrollView` with its clip swapped for a mask, as IdleHoursTV's is.
 struct SettingsView: View {
     @Environment(DashboardStore.self) private var store
     @State private var browser = PiBrowser()
@@ -110,14 +111,24 @@ struct SettingsView: View {
     private var layoutPage: some View {
         Group {
             title("Layout")
-            ForEach(DashboardStore.Layout.allCases, id: \.self) { layout in
-                row(id: "layout-\(layout.rawValue)", title: layout.title, value: tick(store.layout == layout)) {
-                    store.layout = layout
-                    page = .root
-                }
-            }
-            Spacer(minLength: 0)
             footnote("Menu goes back.")
+            // More layouts than fit the panel's height: the list scrolls, as IdleHoursTV's
+            // theme list does.
+            ScrollView {
+                VStack(spacing: 8) {
+                    ForEach(DashboardStore.Layout.allCases, id: \.self) { layout in
+                        row(id: "layout-\(layout.rawValue)", title: layout.title, value: tick(store.layout == layout)) {
+                            store.layout = layout
+                            page = .root
+                        }
+                    }
+                }
+                // Room for the focused row to grow at the top, and for the last row to
+                // scroll clear of the bottom fade.
+                .padding(.top, 16)
+                .padding(.bottom, ScrollFade.bottom + 16)
+            }
+            .scrollRunsToBottom()
         }
     }
 
@@ -299,4 +310,35 @@ struct SettingsView: View {
         store.connect(.server(url))
         store.settingsVisible = false
     }
+}
+
+private extension View {
+    /// A long list runs on past the panel's bottom margin to the screen's edge and fades
+    /// out there, as in IdleHoursTV and the system Settings app, rather than stopping at a
+    /// hard line with a row cut in half.
+    func scrollRunsToBottom() -> some View {
+        self
+            // The scroll view's own clip cut the rounded ends off the rows, the focused one
+            // most, since tvOS scales it up. The mask clips top and bottom instead, and
+            // reaches well past the sides so it never touches the ends.
+            .scrollClipDisabled()
+            .mask {
+                VStack(spacing: 0) {
+                    LinearGradient(colors: [.clear, .black], startPoint: .top, endPoint: .bottom).frame(height: ScrollFade.top)
+                    Color.black
+                    LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom).frame(height: ScrollFade.bottom)
+                }
+                .padding(.horizontal, -80)
+            }
+            // After the mask, so the mask spans the extended viewport into the panel's
+            // bottom margin; before it, the last row could not clear the fade.
+            .padding(.bottom, -60)
+    }
+}
+
+/// Heights of the list fades. The list's bottom content inset is derived from `bottom` so
+/// the last row always scrolls fully clear of it.
+private enum ScrollFade {
+    static let top: CGFloat = 16
+    static let bottom: CGFloat = 160
 }

@@ -41,6 +41,12 @@ beside the sun times, the weather and the agenda.
 
 ![The Weatherglass layout, from HomeDashboard's dummy data](docs/weatherglass.png)
 
+**Orrery**, drawn for the TV: a brass orrery with Mercury, Venus, the earth and Mars where they
+are today and the moon at its phase, a 24-hour ring round the earth with the day's events on it,
+and an almanac of the sun, the moon and the season beside it.
+
+![The Orrery layout, from HomeDashboard's dummy data](docs/orrery.png)
+
 **Fuzzy Clock**, the Pi's `fuzzyclock`: the time in words to the nearest five minutes, over
 the date and a weather strip.
 
@@ -80,7 +86,7 @@ Network**, or type its address (`dashboard.local`, `192.168.1.20:8080`). **Demo 
 bundled week with no Pi at all. Click anywhere on the dashboard to open the drawer again;
 Menu goes back a page, then closes it.
 Left and right on the remote step through the layouts (Dashboard, Agenda, Horizon, Skylight,
-Light Cycle, Weatherglass, Fuzzy Clock, Quote, Moon, Aurora, Night), and
+Light Cycle, Weatherglass, Orrery, Fuzzy Clock, Quote, Moon, Aurora, Night), and
 the one you land on is remembered.
 
 ## Building it yourself

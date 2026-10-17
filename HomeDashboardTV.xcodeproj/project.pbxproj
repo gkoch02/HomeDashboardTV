@@ -15,6 +15,7 @@
 		1D535A92E7CDDFD49C58C839 /* BigShouldersDisplay-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 76149526166AFF15A3A36459 /* BigShouldersDisplay-Black.ttf */; };
 		234A879AF993DBACD53A1C57 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2103C0B8C55F989AF037F3 /* Theme.swift */; };
 		323A78D9DFE43D04189A8C2C /* HorizonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB6C810B9D81A542EB0FA9F /* HorizonView.swift */; };
+		419C22D1A074B4220E3F5C25 /* OrreryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 333B7105DB6D07E312E56484 /* OrreryView.swift */; };
 		460AFA6DC7DC369E67096935 /* Cinzel.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 61DD62983158D3984EC63FFB /* Cinzel.ttf */; };
 		465B5A043627B49E6D691ED8 /* SkylightSky.metal in Sources */ = {isa = PBXBuildFile; fileRef = EAEE458EE1F37F100274CB01 /* SkylightSky.metal */; };
 		4743623BB70CE9459A0B24DD /* CormorantGaramond.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A68DDBCA1329C420B50A6188 /* CormorantGaramond.ttf */; };
@@ -70,6 +71,7 @@
 		1D5C83EE56FEAB64DF4BCEF1 /* RemoteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteTests.swift; sourceTree = "<group>"; };
 		1D6560F916DAE5BD81DA2DBC /* BuildIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildIn.swift; sourceTree = "<group>"; };
 		24D3FE4C261142D9F0D912CA /* Righteous-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Righteous-Regular.ttf"; sourceTree = "<group>"; };
+		333B7105DB6D07E312E56484 /* OrreryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrreryView.swift; sourceTree = "<group>"; };
 		33E802CA050DAA1C01659DD7 /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.xcconfig; sourceTree = "<group>"; };
 		4098608C8444AC0C661DD3D1 /* QuoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteView.swift; sourceTree = "<group>"; };
 		472A321210B7C12D4CF15E22 /* MoonDisc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoonDisc.swift; sourceTree = "<group>"; };
@@ -212,6 +214,7 @@
 				E57CFC146044F906194B6656 /* LightCycleView.swift */,
 				10DA38EC1D96409C50598DB5 /* MoonView.swift */,
 				C4CD028BD1DA5124D982E2E8 /* NightView.swift */,
+				333B7105DB6D07E312E56484 /* OrreryView.swift */,
 				4098608C8444AC0C661DD3D1 /* QuoteView.swift */,
 				BDBCC482A09982EB05EE52C5 /* SettingsView.swift */,
 				C30E67A42F18B2067865361F /* SkylightView.swift */,
@@ -392,6 +395,7 @@
 				C5E2D782A5D8AF6532B9A6FA /* MoonDisc.swift in Sources */,
 				A702BE2F6D6D411D256D80BE /* MoonView.swift in Sources */,
 				F52B09283F9DD6AD0C077B82 /* NightView.swift in Sources */,
+				419C22D1A074B4220E3F5C25 /* OrreryView.swift in Sources */,
 				60B9ABEACDE09E876B36F3F1 /* PiBrowser.swift in Sources */,
 				4BB3C08A2A618021AF181B82 /* QuoteView.swift in Sources */,
 				BB501FDE97EAB93BA7415424 /* SettingsView.swift in Sources */,

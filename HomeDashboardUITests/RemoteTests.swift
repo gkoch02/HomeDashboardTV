@@ -61,6 +61,29 @@ final class RemoteTests: XCTestCase {
         XCTAssertTrue(layout.waitForExistence(timeout: 5), "the dashboard has focus again, so a click reopens settings")
     }
 
+    /// The layout list is longer than the panel is tall: the remote must reach its last row,
+    /// and the list must scroll to bring it on screen.
+    func testLayoutListScrollsToItsLastRow() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-demo", "YES", "-layout", "dashboard"]
+        app.launch()
+        XCTAssertTrue(app.staticTexts["Today"].waitForExistence(timeout: 10))
+
+        remote.press(.select)
+        let layout = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Layout'")).firstMatch
+        XCTAssertTrue(layout.waitForHasFocus(timeout: 5))
+        remote.press(.select)
+
+        let night = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Night'")).firstMatch
+        XCTAssertTrue(night.waitForExistence(timeout: 5))
+        for _ in 0..<30 where !night.hasFocus {
+            remote.press(.down)
+        }
+        XCTAssertTrue(night.waitForHasFocus(timeout: 5), "the remote reaches the last layout")
+        XCTAssertTrue(night.isHittable, "and the list scrolled it on screen")
+        XCTAssertLessThanOrEqual(night.frame.maxY, app.frame.maxY, "inside the screen's bottom edge")
+    }
+
     /// Left and right step through the layouts, wrapping at either end.
     func testLeftAndRightCycleLayouts() {
         let app = XCUIApplication()

@@ -2,20 +2,21 @@ import CoreText
 import DashboardCore
 import SwiftUI
 
-/// A layout drawn for the TV rather than ported from the Pi: the street outside, through a
-/// pane of glass, with the day set over it.
+/// A layout drawn for the TV rather than ported from the Pi: a garden at the edge of woods,
+/// through a pane of glass, with the day set over it.
 ///
-/// The pane is a Metal shader running at 30 frames a second (`WindowPane.metal`): the street
-/// out of focus at the hour (blue by day, lamplit at dusk, windows lit at night), with the
-/// weather on the glass. Rain leaves beads and sends drops running down, leaning with the wind,
-/// and each bead and drop shows the street sharp and upside down; frost creeps in from the
-/// edges below freezing, snow catches as flakes, fog and damp air mist it. Out in the street,
-/// big soft lamps stand for what's next, one each, in the colours of the dots beside the list.
+/// The pane is a Metal shader running at 30 frames a second (`WindowPane.metal`): the garden
+/// out of focus at the hour, under trees that sway with the wind, with fairy lights strung
+/// across it, stars over it on a clear night and fireflies on a warm summer one. The weather
+/// is on the glass: rain leaves beads and sends drops running down, leaning with the wind, and
+/// each bead and drop shows the garden sharp and upside down; frost creeps in from the edges
+/// below freezing, snow catches as flakes, fog and damp air mist it. Lanterns hanging in the
+/// trees stand for what's next, one each, in the colours of the dots beside the list.
 ///
 /// Over the glass: the date, the time and the weather at the top left; what's next at the
 /// bottom right.
 ///
-/// As the layout appears the street lights come up out of the dark, and the text rises in.
+/// As the layout appears the garden's lights come up out of the dark, and the text rises in.
 struct WindowView: Theme {
     let snapshot: Snapshot
     let now: Date
@@ -35,7 +36,7 @@ struct WindowView: Theme {
         }
         .padding(.horizontal, 30)
         .padding(.vertical, 16)
-        // After the street has begun to light (WindowBackdrop's own build-in).
+        // After the garden has begun to light (WindowBackdrop's own build-in).
         .onBuildIn(reset: { settled in build = settled ? .settled : .start }) {
             withAnimation(.easeOut(duration: 0.9).delay(1.0)) { build.clock = 1 }
             withAnimation(.linear(duration: 1.2).delay(1.3)) { build.list = 1 }
@@ -69,7 +70,7 @@ private enum Ink {
     static let faint = Color(red: 0.73, green: 0.68, blue: 0.6)
     static let ochre = Color(red: 0.9, green: 0.72, blue: 0.36)
 
-    /// The street's lamps, warm and each a little different, and the dots that match them.
+    /// The lanterns, warm and each a little different, and the dots that match them.
     static let lamps: [RGB] = [
         RGB(1.0, 0.73, 0.38),
         RGB(1.0, 0.81, 0.51),
@@ -94,7 +95,7 @@ private enum Face {
     }
 }
 
-/// The text's shadow, so it holds over the bright parts of the street.
+/// The text's shadow, so it holds over the bright parts of the garden.
 private extension View {
     func lifted() -> some View { shadow(color: .black.opacity(0.7), radius: 14, y: 2) }
 }
@@ -124,12 +125,12 @@ private struct WindowBackdrop: View {
                     .fill(.black)
                     .colorEffect(ShaderLibrary.windowPane(
                         .float2(size), .float(time),
-                        .color(palette.zenith.color), .color(palette.horizon.color), .color(palette.building.color),
-                        .color(palette.windows.color), .color(palette.lamps.color),
-                        .float4(Float(palette.night), Float(palette.lit), glass.storm ? 1 : 0,
+                        .color(palette.zenith.color), .color(palette.horizon.color),
+                        .color(palette.foliage.color), .color(palette.lights.color),
+                        .float4(Float(palette.night), Float(glass.cover), glass.storm ? 1 : 0,
                                 Float(lights.level(at: context.date))),
                         .float4(Float(glass.wet), Float(glass.drift), Float(glass.frost), Float(glass.mist)),
-                        .float4(Float(glass.snow), Float(count), 0, 0),
+                        .float4(Float(glass.snow), Float(count), Float(glass.fireflies), 0),
                         .color(Ink.lamps[0].color), .color(Ink.lamps[1].color),
                         .color(Ink.lamps[2].color), .color(Ink.lamps[3].color),
                         .float4(0, 0, Float(drift.width), Float(drift.height))
@@ -144,7 +145,7 @@ private struct WindowBackdrop: View {
 }
 
 /// The pane's build-in, timed by its own timeline (its shader's inputs do not animate): the
-/// street comes up out of the dark.
+/// garden comes up out of the dark.
 private enum Lights: Equatable {
     case off, coming(Date), on
 
@@ -159,32 +160,29 @@ private enum Lights: Equatable {
     }
 }
 
-/// The street's colours for the hour and the weather.
+/// The garden's colours for the hour and the weather.
 private struct Palette {
     var zenith: RGB
     var horizon: RGB
-    var building: RGB
-    var windows: RGB
-    var lamps: RGB
+    var foliage: RGB
+    var lights: RGB
     /// 0 by day to 1 at night.
     var night: Double
-    /// The share of windows lit.
-    var lit: Double
 
     init(glass: WindowPane.Glass) {
         let alt = glass.altitude
         let day = smooth(-8, 8, alt)
+        let golden = exp(-pow((alt - 3) / 8, 2))
         night = 1 - day
-        // Cloud and rain grey the sky; a town's glow keeps the night sky off black.
+        // Cloud and rain grey the sky and the leaves; the night sky keeps a little blue.
         let dull = min(1, 0.3 + 0.7 * glass.cover)
         let sky = RGB(SkyColour.rgb(alt)).greyed(dull * 0.75)
-        let town = RGB(0.1, 0.085, 0.1).scaled(night)
-        horizon = sky.plus(town)
-        zenith = sky.scaled(0.72).plus(town.scaled(0.4))
-        building = RGB(0.05, 0.055, 0.075).mix(horizon.greyed(0.4).scaled(0.58), day)
-        windows = RGB(1.0, 0.78, 0.48)
-        lamps = RGB(1.0, 0.9, 0.75)
-        lit = 0.04 + 0.3 * night
+        let dusk = RGB(0.04, 0.05, 0.09).scaled(night)
+        horizon = sky.plus(dusk)
+        zenith = sky.scaled(0.72).plus(dusk.scaled(0.6))
+        let green = RGB(0.2, 0.33, 0.15).mix(RGB(0.32, 0.3, 0.14), golden * 0.6).greyed(dull * 0.35)
+        foliage = RGB(0.018, 0.026, 0.03).mix(green, day)
+        lights = RGB(1.0, 0.72, 0.4)
     }
 }
 
@@ -294,7 +292,7 @@ private struct WeatherLine: View {
     }
 }
 
-/// What's next, each line with the dot of its lamp in the street: the next three events, then
+/// What's next, each line with the dot of its lantern in the garden: the next three events, then
 /// under a rule the next birthday within the week.
 private struct UpNext: View {
     let snapshot: Snapshot
@@ -305,7 +303,7 @@ private struct UpNext: View {
     var body: some View {
         let zone = snapshot.timeZone
         let lamps = WindowPane.lamps(snapshot, now: now)
-        VStack(alignment: .leading, spacing: 22) {
+        VStack(alignment: .leading, spacing: 18) {
             Text("UP NEXT")
                 .font(.custom(Face.text, size: 24).weight(.medium))
                 .tracking(24 * 0.2)
@@ -332,27 +330,33 @@ private struct UpNext: View {
                     .rise(rise, index: lamps.events.count + 2)
             }
         }
-        .frame(width: 620, alignment: .leading)
+        .frame(width: 720, alignment: .leading)
         .lifted()
     }
 
+    /// When, small, over what: the title has the column's whole width and may take two lines,
+    /// as a real calendar's titles need.
     private func row(lamp: Int, when: String, what: String, live: Bool) -> some View {
-        HStack(alignment: .center, spacing: 22) {
-            let tint = Ink.lamps[min(lamp, Ink.lamps.count - 1)].color
+        let tint = Ink.lamps[min(lamp, Ink.lamps.count - 1)].color
+        return HStack(alignment: .top, spacing: 22) {
             Circle()
                 .fill(tint)
-                .frame(width: 18, height: 18)
+                .frame(width: 16, height: 16)
                 .shadow(color: tint, radius: 10)
-            Text(when)
-                .font(.custom(Face.text, size: 26))
-                .monospacedDigit()
-                .foregroundStyle(live ? Ink.ochre : Ink.soft)
-                .lineLimit(1)
-                .fixedSize()
-            Text(what)
-                .font(.custom(Face.display, size: 44).weight(.medium))
-                .foregroundStyle(Ink.cream)
-                .lineLimit(1)
+                .padding(.top, 8)
+            VStack(alignment: .leading, spacing: 0) {
+                Text(when)
+                    .font(.custom(Face.text, size: 24))
+                    .monospacedDigit()
+                    .foregroundStyle(live ? Ink.ochre : Ink.soft)
+                    .lineLimit(1)
+                Text(what)
+                    .font(.custom(Face.display, size: 42).weight(.medium))
+                    .foregroundStyle(Ink.cream)
+                    .lineLimit(2)
+                    .lineSpacing(-6)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
     }
 

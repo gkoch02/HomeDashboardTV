@@ -31,11 +31,11 @@ moon above, the day's events over it, and the next 24 hours on a true-black grou
 
 ![The Skylight layout at dusk, from HomeDashboard's dummy data](docs/skylight.png)
 
-**Window**, drawn for the TV: the street outside through a pane of glass, at the hour and in the
-weather. Rain beads and runs down the glass, frost creeps in below freezing, and the big lamps out
-in the street are what's next, one each.
+**Window**, drawn for the TV: a garden at the edge of woods through a pane of glass, at the hour
+and in the weather. Rain beads and runs down the glass, frost creeps in below freezing, and the
+lanterns in the trees are what's next, one each.
 
-![The Window layout on a wet night, from HomeDashboard's dummy data with rain on the glass](docs/window.png)
+![The Window layout on a wet day, from HomeDashboard's dummy data with rain on the glass](docs/window.png)
 
 **Light Cycle**, the Pi's `light_cycle`: today as a 24-hour dial with the day's events as arcs,
 beside the sun times, the weather and the agenda.

@@ -1,7 +1,7 @@
 import Foundation
 
-/// The Window layout's model: the weather as it shows on a pane of glass, and what the lamps
-/// in the street beyond it stand for. Window has no Pi theme behind it; it is drawn for the TV.
+/// The Window layout's model: the weather as it shows on a pane of glass, and what the
+/// lanterns in the garden beyond it stand for. Window has no Pi theme behind it; it is drawn for the TV.
 public enum WindowPane {
     /// The pane and the view through it at one moment.
     public struct Glass: Sendable, Equatable {
@@ -10,7 +10,7 @@ public enum WindowPane {
         /// How much of the sky cloud covers, 0 to 1.
         public var cover: Double
         /// How wet the pane is, 0 to 1: how many beads sit on it and how many drops run down.
-        /// A dry day still leaves a few beads.
+        /// A dry day leaves only a stray bead or two.
         public var wet: Double
         /// Snow caught on the pane, 0 to 1.
         public var snow: Double
@@ -21,6 +21,8 @@ public enum WindowPane {
         /// The wind's push on the running drops: negative leans them left, at most 1 either way.
         public var drift: Double
         public var storm: Bool
+        /// Fireflies over the lawn, 0 to 1: a warm, dry summer night.
+        public var fireflies: Double
     }
 
     public static func glass(_ snapshot: Snapshot, now: Date) -> Glass {
@@ -35,14 +37,24 @@ public enum WindowPane {
             frost: celsius.map(frost(celsius:)) ?? 0,
             mist: mist(humidity: weather?.humidity, fog: sky.precip == .fog),
             drift: sky.drift,
-            storm: sky.precip == .storm
+            storm: sky.precip == .storm,
+            fireflies: fireflies(celsius: celsius, dry: sky.precip == .none, altitude: sky.altitude,
+                                 month: CivilDate(now, in: snapshot.timeZone).month)
         )
     }
 
-    /// Rain wets the pane from a third for a drizzle to all of it for a downpour; dry, a few
-    /// beads are left from the last shower.
+    /// From May to September, on a dry night once the sun is well down, as it warms from
+    /// 14 °C to 18 °C.
+    static func fireflies(celsius: Double?, dry: Bool, altitude: Double, month: Int) -> Double {
+        guard let celsius, dry, altitude < -6, (5...9).contains(month) else { return 0 }
+        let t = min(max((celsius - 14) / 4, 0), 1)
+        return t * t * (3 - 2 * t)
+    }
+
+    /// Rain wets the pane from a third for a drizzle to all of it for a downpour; dry, it is
+    /// all but clear.
     static func wetness(raining: Bool, intensity: Double) -> Double {
-        raining ? 0.35 + 0.65 * min(max(intensity, 0), 1) : 0.06
+        raining ? 0.35 + 0.65 * min(max(intensity, 0), 1) : 0.02
     }
 
     /// None above 1 °C, all of it by −5 °C.
@@ -57,7 +69,7 @@ public enum WindowPane {
         return min(max((Double(humidity ?? 0) - 85) / 15, 0), 1) * 0.3
     }
 
-    /// What the street's big lamps stand for, one each: the next three events still to
+    /// What the garden's lanterns stand for, one each: the next three events still to
     /// finish, today and tomorrow, then the next birthday within the week.
     public static func lamps(_ snapshot: Snapshot, now: Date) -> (events: [CalendarEvent], birthday: Birthday?) {
         let today = CivilDate(now, in: snapshot.timeZone)

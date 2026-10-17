@@ -2,10 +2,10 @@
 #include <SwiftUI/SwiftUI_Metal.h>
 using namespace metal;
 
-// The Window layout's pane, one pixel at a time: a street at the hour and in the weather,
-// seen out of focus through glass, with beads of water sitting on the glass and drops running
-// down it. Each bead and drop is a small lens: it shows the street sharp and upside down, as a
-// real one does. Frost creeps in from the edges below freezing and mist fogs the glass. The
+// The Window layout's pane, one pixel at a time: a garden at the edge of woods, at the hour
+// and in the weather, seen out of focus through glass, with beads of water sitting on the
+// glass and drops running down it. Each bead and drop is a small lens: it shows the garden
+// sharp and upside down, as a real one does. Frost creeps in from the edges below freezing and mist fogs the glass. The
 // colours are worked out in Swift (`WindowView`, from `WindowPane` in DashboardCore); this
 // only composes them. Positions are in points, as SwiftUI lays out.
 
@@ -36,14 +36,16 @@ float fbm(float2 p) {
     return value;
 }
 
-/// The street's inks and light, for one moment.
-struct Street {
+/// The garden's inks and light, for one moment.
+struct Scene {
     float2 size;
     float ground;
-    float3 zenith, horizon, building, windows, lamps;
+    float3 zenith, horizon, foliage, lights;
     float night;
-    float lit;
+    float cover;
+    float sway;
     float flash;
+    float fireflies;
     float time;
     int lampCount;
     float3 lamp[4];
@@ -59,89 +61,143 @@ float bokeh(float d, float r, float blur) {
     return mix(point * 1.4, disc * (0.5 + 0.4 * rim) * 0.6, saturate(blur / 12.0));
 }
 
-/// One row of buildings over *col*: blocks of random height in cells *cellW* wide, with lit
-/// windows, which out of focus merge to each block's glow.
-float3 buildings(float3 col, float2 p, float blur, thread const Street &s,
-                 float cellW, float minH, float maxH, float shade, float seed) {
-    float b = max(blur, 0.75);
-    float ci = floor(p.x / cellW);
-    float best = 0.0, cell = ci, top = 0.0;
-    // A neighbour's soft edge can spill into this cell: the strongest of the three wins.
-    for (int j = -1; j <= 1; j++) {
-        float c = ci + float(j);
-        float inset = cellW * (0.04 + 0.12 * hash(float2(c, seed + 1.0)));
-        float x0 = c * cellW + inset, x1 = (c + 1.0) * cellW - inset;
-        float t = s.ground - (minH + (maxH - minH) * hash(float2(c, seed)));
-        float m = smoothstep(-b, b, p.x - x0) * smoothstep(-b, b, x1 - p.x) * smoothstep(-b, b, p.y - t);
-        if (m > best) { best = m; cell = c; top = t; }
+/// One-dimensional fractal noise along *x*, 0 to about 1: a treeline's or a hedge's top.
+float ridge(float x, float seed) {
+    float value = 0.0;
+    float amplitude = 0.5;
+    for (int i = 0; i < 4; i++) {
+        float i0 = floor(x);
+        float f = fract(x);
+        float u = f * f * (3.0 - 2.0 * f);
+        value += amplitude * mix(hash(float2(i0, seed)), hash(float2(i0 + 1.0, seed)), u);
+        x *= 2.1;
+        amplitude *= 0.5;
     }
-    if (best <= 0.0) { return col; }
-    float lit = s.lit * (0.4 + 1.2 * hash(float2(cell, seed + 2.0)));
-    float3 glow = s.windows * lit * 0.35;
-    if (blur < 8.0) {
-        float2 g = float2(p.x / 26.0, (p.y - top) / 30.0);
-        float2 id = floor(g);
-        float2 f = fract(g);
-        float on = step(hash(id + float2(cell * 7.0, seed)), lit);
-        float pane = step(0.25, f.x) * step(f.x, 0.75) * step(0.2, f.y) * step(f.y, 0.75) * step(0.8, g.y);
-        float3 sharp = s.windows * on * pane * (0.6 + 0.4 * hash(id + 3.3));
-        glow = mix(sharp, glow, saturate(blur / 8.0));
-    }
-    return mix(col, s.building * shade + glow, best);
+    return value;
 }
 
-/// The street lights and car lights along the road, and their streaks on the wet surface.
-float3 streetLights(float2 p, float blur, thread const Street &s) {
-    float3 sum = float3(0.0);
-    float cell = 120.0;
-    float ci = floor(p.x / cell);
-    for (int j = -1; j <= 1; j++) {
-        float c = ci + float(j);
-        float2 at = float2((c + 0.15 + 0.7 * hash(float2(c, 41.0))) * cell,
-                           s.ground + 10.0 + 130.0 * hash(float2(c, 42.0)));
-        if (hash(float2(c, 40.0)) > 0.65) { continue; }
-        float3 tint = hash(float2(c, 43.0)) < 0.3 ? float3(1.0, 0.3, 0.24) : s.lamps;
-        float bright = (0.25 + 0.5 * hash(float2(c, 44.0))) * (0.25 + 0.75 * s.night);
-        float r = mix(3.0, 10.0 + 20.0 * hash(float2(c, 45.0)), saturate(blur / 12.0));
-        sum += tint * bright * bokeh(length(p - at), r, blur);
-        if (p.y > at.y) {
-            float dx = (p.x - at.x) / (r * 0.6 + 2.0);
-            sum += tint * bright * 0.12 * exp(-dx * dx) * exp(-(p.y - at.y) / 140.0);
-        }
-    }
-    return sum;
+/// How much tree canopy covers *p*, 0 to 1: leafy masses thick at both sides, framing the sky
+/// in the middle, swaying with the wind. In focus, the leaves' own texture shows.
+float canopy(float2 p, float blur, thread const Scene &s) {
+    float2 u = p / s.size;
+    float sway = s.sway * 6.0 * sin(s.time * 6.2831853 * 23.0 / 3600.0 + p.y * 0.004);
+    float n = fbm((p + float2(sway, 0.0)) / 140.0);
+    if (blur < 8.0) { n += 0.1 * (noise(p / 7.0) - 0.5); }
+    float side = abs(u.x - 0.5) * 2.0;
+    float bias = 0.34 * side * side - 0.08 - 0.5 * smoothstep(0.35, 0.62, u.y) - 0.15 * smoothstep(0.3, 0.0, u.y) * (1.0 - side);
+    float edge = 0.015 + blur * 0.005;
+    return smoothstep(0.5 - edge, 0.5 + edge, n + bias);
 }
 
 /// The view through the glass at *p*, as a lens focused *blur* points short of it.
-float3 street(float2 p, float blur, thread const Street &s) {
+float3 scene(float2 p, float blur, thread const Scene &s) {
+    float b = max(blur * 0.5, 0.75);
+    float2 u = p / s.size;
     float ty = saturate(p.y / s.ground);
     float3 col = mix(s.zenith, s.horizon, pow(ty, 1.4));
     col += float3(0.75, 0.8, 1.0) * s.flash * 0.45 * (1.0 - 0.5 * ty);
 
-    col = buildings(col, p, blur, s, 150.0, s.size.y * 0.24, s.size.y * 0.48, 1.25, 7.0);
-    col = buildings(col, p, blur, s, 220.0, s.size.y * 0.3, s.size.y * 0.66, 0.75, 19.0);
-
-    // The road, wet and dark.
-    float road = smoothstep(-max(blur, 0.75), max(blur, 0.75), p.y - s.ground);
-    if (road > 0.0) {
-        float depth = saturate((p.y - s.ground) / (s.size.y - s.ground));
-        col = mix(col, mix(s.building * 0.9, s.building * 0.45, depth), road);
+    // Stars, on a clear night, where the sky shows.
+    float stars = s.night * (1.0 - s.cover);
+    if (stars > 0.05) {
+        float2 cell = floor(p / 9.0);
+        float h = hash(cell + 71.0);
+        if (h > 0.993) {
+            float2 c = (cell + 0.2 + 0.6 * float2(hash(cell + 3.1), hash(cell + 7.7))) * 9.0;
+            float rate = 6.2831853 * (400.0 + floor(1150.0 * fract(h * 13.0))) / 3600.0;
+            float twinkle = 0.7 + 0.3 * sin(s.time * rate + h * 80.0);
+            col += float3(0.9, 0.93, 1.0) * exp(-length(p - c) * length(p - c) / max(1.0, blur * 0.6)) * twinkle * stars * 0.55;
+        }
     }
-    col += streetLights(p, blur, s);
 
-    // The lamps that stand for what's next: big and soft out of focus, pulsing slowly.
-    const float2 places[4] = { float2(0.585, 0.52), float2(0.705, 0.43), float2(0.80, 0.54), float2(0.49, 0.40) };
+    // The far treeline, hazed by the air: crowns in clumps along its top, darker and clearer
+    // toward its foot.
+    float far = s.size.y * (0.47 + 0.05 * ridge(p.x / 260.0, 5.0) + 0.035 * ridge(p.x / 60.0, 6.0));
+    float clumps = 0.75 + 0.5 * fbm(p / float2(70.0, 50.0));
+    float3 haze = mix(s.foliage * clumps, s.horizon, mix(0.6, 0.3, saturate((p.y - far) / (s.size.y * 0.2))));
+    col = mix(col, haze, smoothstep(-b, b, p.y - far));
+
+    // Trunks under the trees at either side, none in the open middle, each tapering and
+    // lost in the canopy above.
+    float cellW = 240.0;
+    float ci = floor(p.x / cellW);
+    for (int j = -1; j <= 1; j++) {
+        float c = ci + float(j);
+        float x = (c + 0.2 + 0.6 * hash(float2(c, 62.0))) * cellW;
+        if (hash(float2(c, 61.0)) > 0.8 || abs(x / s.size.x - 0.5) < 0.24) { continue; }
+        float width = (22.0 + 26.0 * hash(float2(c, 63.0))) * mix(0.6, 1.0, ty);
+        float lean = (hash(float2(c, 64.0)) - 0.5) * 0.08 * (s.ground - p.y);
+        float trunk = smoothstep(-b, b, width * 0.5 - abs(p.x - x - lean)) * smoothstep(0.0, s.size.y * 0.12, p.y - s.size.y * 0.18);
+        col = mix(col, s.foliage * 0.55 + float3(0.02, 0.012, 0.0), trunk);
+    }
+
+    // The canopy, dappled where the light falls through by day.
+    float leaves = canopy(p, blur, s);
+    float dapple = 0.75 + 0.5 * noise(p / 46.0);
+    col = mix(col, s.foliage * mix(1.0, dapple, 1.0 - s.night), leaves);
+
+    // The hedge, with flowers in it by day, then the lawn.
+    float hedge = s.size.y * (0.71 + 0.03 * ridge(p.x / 110.0, 9.0));
+    float inHedge = smoothstep(-b, b, p.y - hedge);
+    if (inHedge > 0.0) {
+        float3 green = s.foliage * (0.8 + 0.3 * noise(p / 30.0));
+        float2 cell = floor(p / 34.0);
+        if (hash(cell + 81.0) < 0.22 && p.y < s.ground) {
+            float2 c = (cell + 0.25 + 0.5 * float2(hash(cell + 2.2), hash(cell + 5.5))) * 34.0;
+            float h = hash(cell + 9.0);
+            float3 petal = h < 0.33 ? float3(0.95, 0.55, 0.7) : h < 0.66 ? float3(0.96, 0.94, 0.88) : float3(0.98, 0.82, 0.35);
+            float r = mix(3.0, 9.0, saturate(blur / 12.0));
+            green = mix(green, petal * (0.25 + 0.75 * (1.0 - s.night)), bokeh(length(p - c), r, blur) * 0.9);
+        }
+        col = mix(col, green, inHedge);
+    }
+    float lawn = smoothstep(-b, b, p.y - s.ground);
+    if (lawn > 0.0) {
+        float depth = saturate((p.y - s.ground) / (s.size.y - s.ground));
+        col = mix(col, s.foliage * mix(1.15, 0.55, depth), lawn);
+    }
+
+    // Fairy lights strung across the garden, sagging between posts.
+    float span = 420.0;
+    float spacing = 60.0;
+    float ki = floor(p.x / spacing);
+    for (int j = -1; j <= 1; j++) {
+        float k = ki + float(j);
+        float x = (k + 0.5) * spacing;
+        float t = fract(x / span) * 2.0 - 1.0;
+        float y = s.size.y * 0.6 + 46.0 * (1.0 - t * t) + 8.0 * hash(float2(k, 91.0));
+        float r = mix(2.5, 8.0 + 9.0 * hash(float2(k, 92.0)), saturate(blur / 12.0));
+        float glow = (0.35 + 1.1 * s.night) * (0.55 + 0.45 * hash(float2(k, 93.0)));
+        col += s.lights * glow * bokeh(length(p - float2(x, y)), r, blur);
+    }
+
+    // Fireflies on a warm summer night, drifting low over the lawn.
+    if (s.fireflies > 0.0) {
+        for (int i = 0; i < 14; i++) {
+            float fi = float(i);
+            float rx = 6.2831853 * float(5 + i % 4) / 3600.0, ry = 6.2831853 * float(7 + i % 5) / 3600.0;
+            float2 c = float2(s.size.x * (0.1 + 0.8 * hash(float2(fi, 3.0)) + 0.06 * sin(s.time * rx * 3.0 + fi)),
+                              s.size.y * (0.6 + 0.25 * hash(float2(fi, 4.0)) + 0.04 * sin(s.time * ry * 3.0 + fi * 2.0)));
+            float blink = smoothstep(0.6, 1.0, sin(s.time * 6.2831853 * float(900 + 37 * i) / 3600.0 + fi * 5.0));
+            float r = mix(2.0, 7.0, saturate(blur / 12.0));
+            col += float3(0.75, 1.0, 0.4) * blink * s.fireflies * bokeh(length(p - c), r, blur) * 0.8;
+        }
+    }
+
+    // The lanterns that stand for what's next, hanging in the trees: big and soft out of focus,
+    // pulsing slowly.
+    const float2 places[4] = { float2(0.56, 0.37), float2(0.68, 0.27), float2(0.79, 0.38), float2(0.46, 0.29) };
     const float sizes[4] = { 0.09, 0.07, 0.058, 0.075 };
     for (int i = 0; i < s.lampCount; i++) {
         float2 at = places[i] * s.size;
         float rate = 6.2831853 * float(41 + 7 * i) / 3600.0;
         float r = mix(5.0, s.size.y * sizes[i], saturate(blur / 12.0)) * (1.0 + 0.03 * sin(s.time * rate + float(i) * 2.0));
-        col += s.lamp[i] * (0.42 + 0.08 * sin(s.time * rate * 1.3 + float(i))) * bokeh(length(p - at), r, blur);
+        col += s.lamp[i] * (0.4 + 0.3 * s.night + 0.06 * sin(s.time * rate * 1.3 + float(i))) * bokeh(length(p - at), r, blur);
     }
     return col;
 }
 
-/// A lens on the glass: its *offset* to where it looks in the street, how much of the pixel it
+/// A lens on the glass: its *offset* to where it looks in the garden, how much of the pixel it
 /// covers, and whether a running drop has wiped this spot clear.
 struct Lens {
     float2 offset;
@@ -226,17 +282,18 @@ Lens runners(float2 p, float colW, float wet, float drift, float time, float hei
 /// - size: the view, in points.
 /// - time: seconds, wrapping hourly: everything that moves turns a whole number of times an
 ///   hour, so the wrap is seamless.
-/// - zenith, horizon: the sky beyond the glass, at the top and at the street.
-/// - building: the buildings' ink; windows, lamps: the light in their windows and the street's.
-/// - light: night (x, 0 to 1), the share of windows lit (y), the storm (z, 0 or 1: lightning),
-///   and how far the build-in has brought the scene up (w).
+/// - zenith, horizon: the sky beyond the glass, at the top and at the treeline.
+/// - foliage: the trees', hedge's and lawn's green; lights: the fairy lights' glow.
+/// - light: night (x, 0 to 1), cloud cover (y), the storm (z, 0 or 1: lightning), and how far
+///   the build-in has brought the scene up (w).
 /// - glass: how wet the pane is (x), the wind's lean (y), frost (z) and mist (w), each 0 to 1.
-/// - extra: snow on the glass (x), and how many of the lamps stand for something (y, 0 to 4).
-/// - lamp0…lamp3: those lamps' colours, as the text's dots have them.
-/// - motion: the burn-in drift (z, w) the street moves with, so its edges never hold one place.
+/// - extra: snow on the glass (x), how many of the lanterns stand for something (y, 0 to 4),
+///   and fireflies (z, 0 to 1).
+/// - lamp0…lamp3: those lanterns' colours, as the text's dots have them.
+/// - motion: the burn-in drift (z, w) the garden moves with, so its edges never hold one place.
 [[ stitchable ]] half4 windowPane(float2 pos, half4 current,
                                   float2 size, float time,
-                                  half4 zenith, half4 horizon, half4 building, half4 windows, half4 lamps,
+                                  half4 zenith, half4 horizon, half4 foliage, half4 lights,
                                   float4 light, float4 glass, float4 extra,
                                   half4 lamp0, half4 lamp1, half4 lamp2, half4 lamp3,
                                   float4 motion) {
@@ -253,17 +310,18 @@ Lens runners(float2 p, float colW, float wet, float drift, float time, float hei
         }
     }
 
-    Street s;
+    Scene s;
     s.size = size;
     s.ground = size.y * 0.8;
     s.zenith = float3(zenith.rgb);
     s.horizon = float3(horizon.rgb);
-    s.building = float3(building.rgb);
-    s.windows = float3(windows.rgb);
-    s.lamps = float3(lamps.rgb);
+    s.foliage = float3(foliage.rgb);
+    s.lights = float3(lights.rgb);
     s.night = light.x;
-    s.lit = light.y;
+    s.cover = light.y;
+    s.sway = glass.y;
     s.flash = flash;
+    s.fireflies = extra.z;
     s.time = time;
     s.lampCount = int(clamp(extra.y, 0.0, 4.0));
     s.lamp[0] = float3(lamp0.rgb);
@@ -284,7 +342,7 @@ Lens runners(float2 p, float colW, float wet, float drift, float time, float hei
     float isBead = 0.0;
     if (lens.mask <= 0.0) {
         float density = max(wet, snow * 0.6);
-        Lens bead = beads(pos, 16.0, density * 0.6 + 0.04, time, 1.0);
+        Lens bead = beads(pos, 16.0, density * 0.6, time, 1.0);
         Lens fine = beads(pos, 7.0, density * density * 0.5, time, 29.0);
         if (fine.mask > bead.mask) { bead = fine; }
         bead.mask *= 1.0 - trail;
@@ -293,9 +351,9 @@ Lens runners(float2 p, float colW, float wet, float drift, float time, float hei
     }
 
     // Through clear glass, out of focus; sharper where a drop has just wiped it.
-    float3 col = street(view, mix(26.0, 12.0, trail), s);
+    float3 col = scene(view, mix(16.0, 12.0, trail), s);
     if (lens.mask > 0.0) {
-        float3 seen = mix(street(view + lens.offset, 2.5, s), col * 1.15, 0.35);
+        float3 seen = mix(scene(view + lens.offset, 2.5, s), col * 1.15, 0.35);
         // Snow catches on the glass as white flakes, not lenses.
         seen = mix(seen, float3(0.88, 0.9, 0.94) * (0.35 + 0.6 * (1.0 - s.night)), snow * isBead * 0.85);
         float edge = smoothstep(0.55, 1.0, length(lens.normal));

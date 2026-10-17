@@ -323,16 +323,17 @@ private struct Mechanism: View, Animatable {
             venus = Orrery.longitude(.venus, at: now)
             earth = Orrery.longitude(.earth, at: now)
             mars = Orrery.longitude(.mars, at: now)
-            let midnight = CivilDate(now, in: zone).start(in: zone)
-            let hours = now.timeIntervalSince(midnight) / 3600
-            hour = hours
-            // The Pi gives the moon's age for today; it ages a day a day.
-            elongation = snapshot.moon?.today.map {
-                Orrery.elongation(ageDays: $0.ageDays + (hours - 12) / 24)
-            }
+            let today = CivilDate(now, in: zone)
+            hour = Orrery.clockHours(now, from: today, in: zone)
+            elongation = snapshot.moon?.today.map { Orrery.elongation(ageDays: Orrery.moonAge($0, at: now)) }
+            // On the face from now to 24 hours on, so an arc never wraps past the hand. In the
+            // hour the clocks go back twice, an event can end at an earlier clock time than now:
+            // it is then an empty arc, never a backwards range.
+            let start = hour
             events = Almanac.ring(snapshot, now: now).map {
-                max($0.start.timeIntervalSince(midnight), now.timeIntervalSince(midnight)) / 3600
-                    ... min($0.end.timeIntervalSince(midnight), now.timeIntervalSince(midnight) + 86_400) / 3600
+                let from = max(Orrery.clockHours($0.start, from: today, in: zone), start)
+                let to = max(from, min(Orrery.clockHours($0.end, from: today, in: zone), start + 24))
+                return from...to
             }
         }
     }

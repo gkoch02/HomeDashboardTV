@@ -69,6 +69,26 @@ final class OrreryTests: XCTestCase {
         XCTAssertEqual(Orrery.elongation(ageDays: Orrery.synodicMonth / 4), 90, accuracy: 0.001)
     }
 
+    /// On the day the clocks go forward, 3:30 is three and a half hours round the face, though
+    /// only two and a half have passed since midnight.
+    func testTheClockFaceFollowsTheWallClock() {
+        let newYork = TimeZone(identifier: "America/New_York")!
+        let day = CivilDate(year: 2027, month: 3, day: 14)
+        XCTAssertEqual(Orrery.clockHours(date("2027-03-14T03:30:00-04:00"), from: day, in: newYork), 3.5, accuracy: 0.001)
+        XCTAssertEqual(Orrery.clockHours(date("2027-03-15T09:30:00-04:00"), from: day, in: newYork), 33.5, accuracy: 0.001)
+        XCTAssertEqual(Orrery.clockHours(date("2026-11-01T23:00:00-05:00"), from: CivilDate(year: 2026, month: 11, day: 1), in: newYork),
+                       23, accuracy: 0.001, "the day the clocks go back")
+    }
+
+    /// The Pi samples the moon's age at noon UTC, which is 8 a.m. in New York in summer.
+    func testTheMoonAgesFromNoonUTC() throws {
+        let moon = try XCTUnwrap(try snapshot().moon?.today)
+        XCTAssertEqual(Orrery.moonAge(moon, at: moon.date.start(in: TimeZone(identifier: "UTC")!).addingTimeInterval(12 * 3600)),
+                       moon.ageDays, accuracy: 0.0001)
+        XCTAssertEqual(Orrery.moonAge(moon, at: date("\(String(format: "%04d-%02d-%02d", moon.date.year, moon.date.month, moon.date.day))T12:00:00-04:00")),
+                       moon.ageDays + 4.0 / 24, accuracy: 0.0001)
+    }
+
     /// Mid-October in New York the days are shortening by about two minutes a day.
     func testTheDaylightShortensInOctober() throws {
         let light = try XCTUnwrap(Orrery.daylight(try snapshot(), now: date("2026-10-14T12:00:00-04:00")))

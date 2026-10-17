@@ -42,6 +42,24 @@ public enum Orrery {
 
     public static let synodicMonth = 29.530589
 
+    /// The moon's age at *now*: the Pi samples it at noon UTC on *day*'s date, and the moon
+    /// ages a day a day.
+    public static func moonAge(_ day: MoonDay, at now: Date) -> Double {
+        let noon = day.date.start(in: TimeZone(identifier: "UTC")!).addingTimeInterval(12 * 3600)
+        return day.ageDays + now.timeIntervalSince(noon) / 86_400
+    }
+
+    /// Where *date* falls on a 24-hour clock face that starts at *day*'s midnight, by the wall
+    /// clock in *zone*: 9:30 tomorrow is 33.5. From the clock's own hour and minute, not the
+    /// time elapsed since midnight, which is an hour out on the days the clocks change.
+    public static func clockHours(_ date: Date, from day: CivilDate, in zone: TimeZone) -> Double {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = zone
+        let c = cal.dateComponents([.hour, .minute, .second], from: date)
+        let offset = days(from: day.start(in: zone), to: date, in: zone)
+        return Double(offset * 24 + (c.hour ?? 0)) + Double(c.minute ?? 0) / 60 + Double(c.second ?? 0) / 3600
+    }
+
     /// The equinoxes and solstices.
     public enum Turning: CaseIterable, Sendable {
         case marchEquinox, juneSolstice, septemberEquinox, decemberSolstice

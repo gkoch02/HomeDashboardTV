@@ -2,21 +2,22 @@ import CoreText
 import DashboardCore
 import SwiftUI
 
-/// A layout drawn for the TV rather than ported from the Pi: a garden at the edge of woods,
-/// through a pane of glass, with the day set over it.
+/// A layout drawn for the TV rather than ported from the Pi: a pane of glass with the weather
+/// on it, and nothing but light beyond, with the day set over it.
 ///
-/// The pane is a Metal shader running at 30 frames a second (`WindowPane.metal`): the garden
-/// out of focus at the hour, under trees that sway with the wind, with fairy lights strung
-/// across it, stars over it on a clear night and fireflies on a warm summer one. The weather
-/// is on the glass: rain leaves beads and sends drops running down, leaning with the wind, and
-/// each bead and drop shows the garden sharp and upside down; frost creeps in from the edges
-/// below freezing, snow catches as flakes, fog and damp air mist it. Lanterns hanging in the
-/// trees stand for what's next, one each, in the colours of the dots beside the list.
+/// The pane is a Metal shader running at 30 frames a second (`WindowPane.metal`). Beyond the
+/// glass, far out of focus, is colour for the hour and the weather, washes of glow drifting
+/// slowly across it and a scatter of lights swaying with the wind; it never pretends to be a
+/// place. On the glass: rain leaves beads and sends drops running down, leaning with the wind,
+/// and each bead and drop brings the lights behind it into focus as points, upside down; frost
+/// creeps in from the edges below freezing, snow catches as flakes, fog and damp air mist it.
+/// The biggest, warmest lights are lanterns that stand for what's next, one each, in the
+/// colours of the dots beside the list.
 ///
 /// Over the glass: the date, the time and the weather at the top left; what's next at the
 /// bottom right.
 ///
-/// As the layout appears the garden's lights come up out of the dark, and the text rises in.
+/// As the layout appears the lights come up out of the dark, and the text rises in.
 struct WindowView: Theme {
     let snapshot: Snapshot
     let now: Date
@@ -36,7 +37,7 @@ struct WindowView: Theme {
         }
         .padding(.horizontal, 30)
         .padding(.vertical, 16)
-        // After the garden has begun to light (WindowBackdrop's own build-in).
+        // After the lights have begun to come up (WindowBackdrop's own build-in).
         .onBuildIn(reset: { settled in build = settled ? .settled : .start }) {
             withAnimation(.easeOut(duration: 0.9).delay(1.0)) { build.clock = 1 }
             withAnimation(.linear(duration: 1.2).delay(1.3)) { build.list = 1 }
@@ -95,7 +96,7 @@ private enum Face {
     }
 }
 
-/// The text's shadow, so it holds over the bright parts of the garden.
+/// The text's shadow, so it holds over the bright lights behind it.
 private extension View {
     func lifted() -> some View { shadow(color: .black.opacity(0.7), radius: 14, y: 2) }
 }
@@ -125,12 +126,11 @@ private struct WindowBackdrop: View {
                     .fill(.black)
                     .colorEffect(ShaderLibrary.windowPane(
                         .float2(size), .float(time),
-                        .color(palette.zenith.color), .color(palette.horizon.color),
-                        .color(palette.foliage.color), .color(palette.lights.color),
-                        .float4(Float(palette.night), Float(glass.cover), glass.storm ? 1 : 0,
-                                Float(lights.level(at: context.date))),
+                        .color(palette.zenith.color), .color(palette.horizon.color), .color(palette.ground.color),
+                        .color(palette.glow.color), .color(palette.lights.color),
+                        .float4(Float(palette.night), 0, glass.storm ? 1 : 0, Float(lights.level(at: context.date))),
                         .float4(Float(glass.wet), Float(glass.drift), Float(glass.frost), Float(glass.mist)),
-                        .float4(Float(glass.snow), Float(count), Float(glass.fireflies), 0),
+                        .float4(Float(glass.snow), Float(count), 0, 0),
                         .color(Ink.lamps[0].color), .color(Ink.lamps[1].color),
                         .color(Ink.lamps[2].color), .color(Ink.lamps[3].color),
                         .float4(0, 0, Float(drift.width), Float(drift.height))
@@ -145,7 +145,7 @@ private struct WindowBackdrop: View {
 }
 
 /// The pane's build-in, timed by its own timeline (its shader's inputs do not animate): the
-/// garden comes up out of the dark.
+/// light comes up out of the dark.
 private enum Lights: Equatable {
     case off, coming(Date), on
 
@@ -160,11 +160,12 @@ private enum Lights: Equatable {
     }
 }
 
-/// The garden's colours for the hour and the weather.
+/// The light's colours for the hour and the weather.
 private struct Palette {
     var zenith: RGB
     var horizon: RGB
-    var foliage: RGB
+    var ground: RGB
+    var glow: RGB
     var lights: RGB
     /// 0 by day to 1 at night.
     var night: Double
@@ -174,14 +175,16 @@ private struct Palette {
         let day = smooth(-8, 8, alt)
         let golden = exp(-pow((alt - 3) / 8, 2))
         night = 1 - day
-        // Cloud and rain grey the sky and the leaves; the night sky keeps a little blue.
+        // Cloud and rain grey it all; the night keeps a little deep blue.
         let dull = min(1, 0.3 + 0.7 * glass.cover)
-        let sky = RGB(SkyColour.rgb(alt)).greyed(dull * 0.75)
-        let dusk = RGB(0.04, 0.05, 0.09).scaled(night)
-        horizon = sky.plus(dusk)
-        zenith = sky.scaled(0.72).plus(dusk.scaled(0.6))
-        let green = RGB(0.2, 0.33, 0.15).mix(RGB(0.32, 0.3, 0.14), golden * 0.6).greyed(dull * 0.35)
-        foliage = RGB(0.018, 0.026, 0.03).mix(green, day)
+        let sky = RGB(SkyColour.rgb(alt)).greyed(dull * 0.6)
+        let dusk = RGB(0.035, 0.04, 0.085).scaled(night)
+        zenith = sky.scaled(0.6).plus(dusk.scaled(0.6))
+        horizon = sky.scaled(0.95).plus(dusk)
+        ground = RGB(0.015, 0.016, 0.03).mix(sky.greyed(0.5).scaled(0.42), day)
+        // The glow: deep violet at night, pale by day, warm round sunrise and sunset.
+        let byDay = RGB(1.0, 0.95, 0.86).greyed(dull * 0.4).scaled(0.5)
+        glow = RGB(0.22, 0.17, 0.42).mix(byDay, day).mix(RGB(1.0, 0.55, 0.3).scaled(0.7), golden * 0.8)
         lights = RGB(1.0, 0.72, 0.4)
     }
 }
@@ -292,7 +295,7 @@ private struct WeatherLine: View {
     }
 }
 
-/// What's next, each line with the dot of its lantern in the garden: the next three events, then
+/// What's next, each line with the dot of its lantern behind the glass: the next three events, then
 /// under a rule the next birthday within the week.
 private struct UpNext: View {
     let snapshot: Snapshot

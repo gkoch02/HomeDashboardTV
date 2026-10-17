@@ -43,16 +43,6 @@ final class WindowPaneTests: XCTestCase {
         XCTAssertEqual(WindowPane.mist(humidity: nil, fog: false), 0)
     }
 
-    func testFirefliesComeOutOnWarmDrySummerNights() {
-        XCTAssertEqual(WindowPane.fireflies(celsius: 22, dry: true, altitude: -15, month: 7), 1)
-        XCTAssertEqual(WindowPane.fireflies(celsius: 16, dry: true, altitude: -15, month: 7), 0.5, accuracy: 0.001)
-        XCTAssertEqual(WindowPane.fireflies(celsius: 22, dry: true, altitude: -15, month: 10), 0, "not in October")
-        XCTAssertEqual(WindowPane.fireflies(celsius: 22, dry: false, altitude: -15, month: 7), 0, "not in the rain")
-        XCTAssertEqual(WindowPane.fireflies(celsius: 22, dry: true, altitude: 10, month: 7), 0, "not by day")
-        XCTAssertEqual(WindowPane.fireflies(celsius: 10, dry: true, altitude: -15, month: 7), 0, "not on a cold night")
-        XCTAssertEqual(WindowPane.fireflies(celsius: nil, dry: true, altitude: -15, month: 7), 0)
-    }
-
     func testTheLampsAreTheNextEventsAndTheWeeksBirthday() throws {
         let lamps = WindowPane.lamps(try snapshot(), now: date("2026-10-15T15:20:00-04:00"))
         XCTAssertEqual(lamps.events.map(\.summary), ["Coffee with Sam", "Bug Triage", "Sprint Retro"])

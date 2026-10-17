@@ -1,7 +1,7 @@
 import Foundation
 
 /// The Window layout's model: the weather as it shows on a pane of glass, and what the
-/// lanterns in the garden beyond it stand for. Window has no Pi theme behind it; it is drawn for the TV.
+/// lanterns beyond it stand for. Window has no Pi theme behind it; it is drawn for the TV.
 public enum WindowPane {
     /// The pane and the view through it at one moment.
     public struct Glass: Sendable, Equatable {
@@ -21,8 +21,6 @@ public enum WindowPane {
         /// The wind's push on the running drops: negative leans them left, at most 1 either way.
         public var drift: Double
         public var storm: Bool
-        /// Fireflies over the lawn, 0 to 1: a warm, dry summer night.
-        public var fireflies: Double
     }
 
     public static func glass(_ snapshot: Snapshot, now: Date) -> Glass {
@@ -37,18 +35,8 @@ public enum WindowPane {
             frost: celsius.map(frost(celsius:)) ?? 0,
             mist: mist(humidity: weather?.humidity, fog: sky.precip == .fog),
             drift: sky.drift,
-            storm: sky.precip == .storm,
-            fireflies: fireflies(celsius: celsius, dry: sky.precip == .none, altitude: sky.altitude,
-                                 month: CivilDate(now, in: snapshot.timeZone).month)
+            storm: sky.precip == .storm
         )
-    }
-
-    /// From May to September, on a dry night once the sun is well down, as it warms from
-    /// 14 °C to 18 °C.
-    static func fireflies(celsius: Double?, dry: Bool, altitude: Double, month: Int) -> Double {
-        guard let celsius, dry, altitude < -6, (5...9).contains(month) else { return 0 }
-        let t = min(max((celsius - 14) / 4, 0), 1)
-        return t * t * (3 - 2 * t)
     }
 
     /// Rain wets the pane from a third for a drizzle to all of it for a downpour; dry, it is
@@ -69,7 +57,7 @@ public enum WindowPane {
         return min(max((Double(humidity ?? 0) - 85) / 15, 0), 1) * 0.3
     }
 
-    /// What the garden's lanterns stand for, one each: the next three events still to
+    /// What the lanterns beyond the glass stand for, one each: the next three events still to
     /// finish, today and tomorrow, then the next birthday within the week.
     public static func lamps(_ snapshot: Snapshot, now: Date) -> (events: [CalendarEvent], birthday: Birthday?) {
         let today = CivilDate(now, in: snapshot.timeZone)

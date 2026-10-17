@@ -71,7 +71,8 @@ float3 scene(float2 p, float blur, thread const Scene &s) {
     for (int i = 0; i < 3; i++) {
         float fi = float(i);
         float a = s.time * 6.2831853 * float(2 + i) / 3600.0;
-        float2 c = float2(0.5 + 0.32 * sin(a + fi * 2.1), 0.42 + 0.16 * sin(a * 1.5 + fi * 1.3)) * s.size;
+        float b = s.time * 6.2831853 * float(3 + 2 * i) / 3600.0;
+        float2 c = float2(0.5 + 0.32 * sin(a + fi * 2.1), 0.42 + 0.16 * sin(b + fi * 1.3)) * s.size;
         float r = s.size.y * (0.32 + 0.08 * fi);
         float2 d = (p - c) / r;
         col += s.glow * (0.22 - 0.05 * fi) * exp(-dot(d, d) * 1.6);
@@ -102,8 +103,9 @@ float3 scene(float2 p, float blur, thread const Scene &s) {
     for (int i = 0; i < s.lampCount; i++) {
         float2 at = places[i] * s.size;
         float rate = 6.2831853 * float(41 + 7 * i) / 3600.0;
+        float flicker = 6.2831853 * float(53 + 9 * i) / 3600.0;
         float r = mix(5.0, s.size.y * sizes[i], saturate(blur / 12.0)) * (1.0 + 0.03 * sin(s.time * rate + float(i) * 2.0));
-        col += s.lamp[i] * (0.4 + 0.3 * s.night + 0.06 * sin(s.time * rate * 1.3 + float(i))) * bokeh(length(p - at), r, blur);
+        col += s.lamp[i] * (0.4 + 0.3 * s.night + 0.06 * sin(s.time * flicker + float(i))) * bokeh(length(p - at), r, blur);
     }
     return col;
 }

@@ -61,6 +61,10 @@ targets:
           - PlayfairDisplay-Bold.ttf
           - Jura-Variable.ttf
           - Oxanium-Variable.ttf
+          # Cyberpunk's: the face closest to Cyberpunk 2077's interface (as IdleHoursTV's).
+          - Rajdhani-Medium.ttf
+          - Rajdhani-SemiBold.ttf
+          - Rajdhani-Bold.ttf
         # The Pi is found over Bonjour and read over plain HTTP on the LAN.
         NSLocalNetworkUsageDescription: Home Dashboard finds your dashboard's Raspberry Pi on your network and reads its calendar and weather from it.
         NSBonjourServices:

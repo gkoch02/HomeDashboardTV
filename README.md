@@ -16,6 +16,12 @@ Apple TV yourself with Xcode ([Building it yourself](#building-it-yourself)).
 
 ![The dashboard on an Apple TV 4K, from HomeDashboard's dummy data](docs/dashboard.png)
 
+**Cyberpunk**, after IdleHoursTV's Cyberpunk 2077 theme: everything at once as the game's
+Journal, with the calendar as active jobs, birthdays as contacts, the weather as a scan with
+a 24-hour signal trace, the forecast, the quote as an encrypted shard and the moon.
+
+![The Cyberpunk layout, from HomeDashboard's dummy data](docs/cyberpunk.png)
+
 **Agenda**, after the Pi's `halftone_agenda`: a painted weather window on the left, the
 day's agenda on the right, in cream on charcoal with ochre and red.
 
@@ -91,8 +97,8 @@ On first launch the app opens its settings drawer at **Source**: pick the Pi und
 Network**, or type its address (`dashboard.local`, `192.168.1.20:8080`). **Demo data** shows a
 bundled week with no Pi at all. Click anywhere on the dashboard to open the drawer again;
 Menu goes back a page, then closes it.
-Left and right on the remote step through the layouts (Dashboard, Agenda, Horizon, Skylight,
-Window, Light Cycle, Weatherglass, Orrery, Fuzzy Clock, Quote, Moon, Aurora, Night), and
+Left and right on the remote step through the layouts (Dashboard, Cyberpunk, Agenda, Horizon,
+Skylight, Window, Light Cycle, Weatherglass, Orrery, Fuzzy Clock, Quote, Moon, Aurora, Night), and
 the one you land on is remembered.
 
 ## Building it yourself

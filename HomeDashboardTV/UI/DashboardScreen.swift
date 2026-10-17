@@ -105,6 +105,7 @@ struct DashboardScreen: View {
                     case .skylight: frame(SkylightView.self, snapshot, now)
                     case .fuzzy: frame(FuzzyClockView.self, snapshot, now)
                     case .weatherglass: frame(WeatherglassView.self, snapshot, now)
+                    case .aurora: frame(AuroraView.self, snapshot, now)
                     }
     }
 

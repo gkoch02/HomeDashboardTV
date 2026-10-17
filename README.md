@@ -55,6 +55,11 @@ side, rise and set times, the weather and the quote.
 
 ![The Moon layout on an Apple TV, from HomeDashboard's dummy data](docs/moon.png)
 
+**Aurora**, drawn for an OLED TV: live curtains of light over a lake on true black, coloured
+by the air (green in good air, amber, then red) and stirred by the wind, with the day along the bottom.
+
+![The Aurora layout, from HomeDashboard's dummy data](docs/aurora.png)
+
 **Night**, the Pi's `wide_night_invert`: the moon's phase, temperature, air quality and sky
 in dim red on black.
 
@@ -75,7 +80,7 @@ Network**, or type its address (`dashboard.local`, `192.168.1.20:8080`). **Demo 
 bundled week with no Pi at all. Click anywhere on the dashboard to open the drawer again;
 Menu goes back a page, then closes it.
 Left and right on the remote step through the layouts (Dashboard, Agenda, Horizon, Skylight,
-Light Cycle, Weatherglass, Fuzzy Clock, Quote, Moon, Night), and
+Light Cycle, Weatherglass, Fuzzy Clock, Quote, Moon, Aurora, Night), and
 the one you land on is remembered.
 
 ## Building it yourself

@@ -13,14 +13,14 @@ import UIKit
 final class DashboardStore {
     /// What the screen shows: the week, the day's agenda plate, the next 72 hours on one axis,
     /// the live sky, today on a 24-hour dial, a deck of weather instruments, the time in words,
-    /// the day's quote, the Pi's moonphase theme, or a night plate.
+    /// the day's quote, the Pi's moonphase theme, an aurora coloured by the air, or a night plate.
     /// Each case is a `Theme`, drawn in `DashboardScreen.content`.
     ///
     /// The order is the settings list's and the remote's left and right: the busiest first,
     /// down to the calmest, with Night, the after-dark plate, last. Saved by raw value, so
     /// reordering keeps a saved choice.
     enum Layout: String, CaseIterable {
-        case dashboard, agenda, horizon, skylight, light, weatherglass, fuzzy, quote, moon, night
+        case dashboard, agenda, horizon, skylight, light, weatherglass, fuzzy, quote, moon, aurora, night
 
         var title: String {
             switch self {
@@ -34,6 +34,7 @@ final class DashboardStore {
             case .skylight: return "Skylight"
             case .fuzzy: return "Fuzzy Clock"
             case .weatherglass: return "Weatherglass"
+            case .aurora: return "Aurora"
             }
         }
 

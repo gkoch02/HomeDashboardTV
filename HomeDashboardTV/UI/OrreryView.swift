@@ -370,26 +370,27 @@ private struct Mechanism: View, Animatable {
             arm(context, centre: c, angle: earthAngle, length: r * Orbit.earth, width: r * 0.011, r: r)
 
             // The sun: rays, then a glowing disc.
+            var glow = context
+            glow.addFilter(.blur(radius: r * 0.04))
+            glow.fill(circle(c, r * 0.08), with: .color(Color(red: 1.0, green: 0.78, blue: 0.4).opacity(0.7)))
             // Straight rays between wavy flames, as on an old engraving's sun.
             var rays = Path()
             for k in 0..<16 {
                 let a = Double(k) * 22.5
                 rays.move(to: at(c, r * 0.07, a - 4))
                 if k % 2 == 0 {
-                    rays.addLine(to: at(c, r * 0.122, a))
+                    rays.addLine(to: at(c, r * 0.19, a))
                 } else {
-                    rays.addQuadCurve(to: at(c, r * 0.098, a + 3), control: at(c, r * 0.085, a - 7))
-                    rays.addQuadCurve(to: at(c, r * 0.112, a - 2), control: at(c, r * 0.106, a + 8))
-                    rays.addQuadCurve(to: at(c, r * 0.07, a + 4), control: at(c, r * 0.09, a + 6))
+                    rays.addQuadCurve(to: at(c, r * 0.12, a + 3), control: at(c, r * 0.095, a - 6))
+                    rays.addQuadCurve(to: at(c, r * 0.165, a - 1), control: at(c, r * 0.145, a + 7))
+                    rays.addQuadCurve(to: at(c, r * 0.07, a + 4), control: at(c, r * 0.11, a + 5))
                 }
                 rays.addLine(to: at(c, r * 0.07, a + 4))
             }
-            context.fill(rays, with: .linearGradient(Gradient(colors: [Color(red: 0.98, green: 0.86, blue: 0.5), Ink.deepBrass]),
-                                                     startPoint: CGPoint(x: c.x - r * 0.12, y: c.y - r * 0.12),
-                                                     endPoint: CGPoint(x: c.x + r * 0.12, y: c.y + r * 0.12)))
-            var glow = context
-            glow.addFilter(.blur(radius: r * 0.04))
-            glow.fill(circle(c, r * 0.08), with: .color(Color(red: 1.0, green: 0.78, blue: 0.4).opacity(0.7)))
+            // Over the glow and out past the wheel's teeth, edged dark so they hold against the brass.
+            context.stroke(rays, with: .color(.black.opacity(0.75)), lineWidth: 2.5)
+            context.fill(rays, with: .radialGradient(Gradient(colors: [Color(red: 1, green: 0.95, blue: 0.75), Color(red: 1, green: 0.76, blue: 0.35)]),
+                                                     center: c, startRadius: r * 0.07, endRadius: r * 0.19))
             context.fill(circle(c, r * 0.072), with: .radialGradient(
                 Gradient(colors: [Color(red: 1, green: 0.98, blue: 0.88), Color(red: 1, green: 0.8, blue: 0.4),
                                   Color(red: 0.85, green: 0.55, blue: 0.2)]),

@@ -199,6 +199,32 @@ private struct Plate: View, Equatable {
                     .foregroundStyle(Ink.faint), at: .zero)
             }
 
+            // A guilloché rosette engraved in the enamel: circles through the centre, turned a
+            // little each, their overlaps making the pattern.
+            var rosette = Path()
+            for k in 0..<72 {
+                rosette.addPath(circle(at(c, r * 0.41, Double(k) * 5), r * 0.41))
+            }
+            context.stroke(rosette, with: .color(Ink.ivory.opacity(0.05)), lineWidth: 0.8)
+
+            // The bezel's milled edge, and four slotted screws holding it.
+            var milling = Path()
+            for k in 0..<360 {
+                milling.move(to: at(c, r * 0.999, Double(k)))
+                milling.addLine(to: at(c, r * 0.986, Double(k)))
+            }
+            context.stroke(milling, with: .color(.black.opacity(0.35)), lineWidth: 1)
+            for a in [45.0, 135, 225, 315] {
+                let p = at(c, r - bezel / 2, a)
+                context.fill(circle(p, r * 0.012), with: .radialGradient(
+                    Gradient(colors: [Color(red: 0.98, green: 0.9, blue: 0.62), Ink.deepBrass]),
+                    center: CGPoint(x: p.x - r * 0.004, y: p.y - r * 0.004), startRadius: 0, endRadius: r * 0.014))
+                var slot = Path()
+                slot.move(to: at(p, r * 0.009, a + 30))
+                slot.addLine(to: at(p, r * 0.009, a + 210))
+                context.stroke(slot, with: .color(.black.opacity(0.7)), lineWidth: r * 0.003)
+            }
+
             // The orbits, engraved; the earth's a little brighter.
             for (orbit, alpha) in [(Orbit.mercury, 0.22), (Orbit.venus, 0.22), (Orbit.earth, 0.4), (Orbit.mars, 0.22)] {
                 context.stroke(circle(c, r * orbit), with: .color(Ink.ivory.opacity(alpha)), lineWidth: 1)
@@ -225,6 +251,10 @@ private struct Gears: View {
                     .frame(width: radius * 0.13, height: radius * 0.13)
                     .rotationEffect(.degrees(-beat * 360 / 16 + 360 / 32))
                     .offset(x: radius * 0.2 * CGFloat(cos(.pi * 1.25)), y: -radius * 0.2 * CGFloat(sin(.pi * 1.25)))
+                Gear(teeth: 12)
+                    .frame(width: radius * 0.1, height: radius * 0.1)
+                    .rotationEffect(.degrees(-beat * 360 / 12))
+                    .offset(x: radius * 0.185 * CGFloat(cos(Double.pi / 3)), y: -radius * 0.185 * CGFloat(sin(Double.pi / 3)))
             }
         }
     }
@@ -236,7 +266,7 @@ private struct Gears: View {
     }
 }
 
-/// A brass wheel: toothed rim, five spokes and a hub.
+/// A brass wheel, as in a watch: toothed rim, five curved spokes, and a jewel at the pivot.
 private struct Gear: View, Equatable {
     let teeth: Int
 
@@ -261,13 +291,18 @@ private struct Gear: View, Equatable {
                 let a = Double(k) * 72
                 var spoke = Path()
                 spoke.move(to: at(c, r * 0.14, a))
-                spoke.addLine(to: at(c, r * 0.74, a))
-                context.stroke(spoke, with: .color(Ink.deepBrass), lineWidth: r * 0.09)
+                spoke.addQuadCurve(to: at(c, r * 0.74, a + 24), control: at(c, r * 0.5, a - 8))
+                context.stroke(spoke, with: .color(Ink.deepBrass), style: StrokeStyle(lineWidth: r * 0.08, lineCap: .round))
             }
             let shade = GraphicsContext.Shading.linearGradient(
                 Gradient(colors: [Ink.brass, Ink.deepBrass]), startPoint: .zero, endPoint: CGPoint(x: size.width, y: size.height))
             context.fill(rim, with: shade, style: FillStyle(eoFill: true))
+            context.stroke(circle(c, r * 0.72), with: .color(Ink.brass.opacity(0.6)), lineWidth: 1)
             context.fill(circle(c, r * 0.18), with: shade)
+            // The jewel: a ruby bearing with a glint.
+            context.fill(circle(c, r * 0.08), with: .radialGradient(
+                Gradient(colors: [Color(red: 1, green: 0.55, blue: 0.6), Color(red: 0.6, green: 0.04, blue: 0.12)]),
+                center: CGPoint(x: c.x - r * 0.02, y: c.y - r * 0.02), startRadius: 0, endRadius: r * 0.09))
         }
         .opacity(0.8)
     }
@@ -330,19 +365,28 @@ private struct Mechanism: View, Animatable {
 
             // The arms, from the hub out to each planet.
             for p in planets {
-                arm(context, from: c, to: at(c, r * p.orbit, p.angle), width: r * p.arm)
+                arm(context, centre: c, angle: p.angle, length: r * p.orbit, width: r * p.arm, r: r)
             }
-            arm(context, from: c, to: e, width: r * 0.011)
+            arm(context, centre: c, angle: earthAngle, length: r * Orbit.earth, width: r * 0.011, r: r)
 
             // The sun: rays, then a glowing disc.
+            // Straight rays between wavy flames, as on an old engraving's sun.
             var rays = Path()
             for k in 0..<16 {
                 let a = Double(k) * 22.5
                 rays.move(to: at(c, r * 0.07, a - 4))
-                rays.addLine(to: at(c, r * (k % 2 == 0 ? 0.118 : 0.1), a))
+                if k % 2 == 0 {
+                    rays.addLine(to: at(c, r * 0.122, a))
+                } else {
+                    rays.addQuadCurve(to: at(c, r * 0.098, a + 3), control: at(c, r * 0.085, a - 7))
+                    rays.addQuadCurve(to: at(c, r * 0.112, a - 2), control: at(c, r * 0.106, a + 8))
+                    rays.addQuadCurve(to: at(c, r * 0.07, a + 4), control: at(c, r * 0.09, a + 6))
+                }
                 rays.addLine(to: at(c, r * 0.07, a + 4))
             }
-            context.fill(rays, with: .color(Ink.brass))
+            context.fill(rays, with: .linearGradient(Gradient(colors: [Color(red: 0.98, green: 0.86, blue: 0.5), Ink.deepBrass]),
+                                                     startPoint: CGPoint(x: c.x - r * 0.12, y: c.y - r * 0.12),
+                                                     endPoint: CGPoint(x: c.x + r * 0.12, y: c.y + r * 0.12)))
             var glow = context
             glow.addFilter(.blur(radius: r * 0.04))
             glow.fill(circle(c, r * 0.08), with: .color(Color(red: 1.0, green: 0.78, blue: 0.4).opacity(0.7)))
@@ -352,7 +396,9 @@ private struct Mechanism: View, Animatable {
                 center: c, startRadius: 0, endRadius: r * 0.072))
 
             for p in planets {
-                sphere(context, at: at(c, r * p.orbit, p.angle), radius: r * p.size, colour: p.colour, sun: c)
+                let spot = at(c, r * p.orbit, p.angle)
+                context.stroke(circle(spot, r * p.size * 1.45), with: .color(Ink.brass.opacity(0.85)), lineWidth: 1.5)
+                sphere(context, at: spot, radius: r * p.size, colour: p.colour, sun: c)
             }
 
             // Round the earth: the moon's orbit, the day ring with its events and its hand.
@@ -360,6 +406,7 @@ private struct Mechanism: View, Animatable {
             context.stroke(circle(e, r * Orbit.moon), with: .color(Ink.ivory.opacity(0.28)),
                            style: StrokeStyle(lineWidth: 1, dash: [3, 5]))
             context.stroke(circle(e, r * Orbit.day), with: .color(Ink.brass.opacity(0.8)), lineWidth: 2)
+            context.stroke(circle(e, r * (Orbit.day + 0.02)), with: .color(Ink.brass.opacity(0.55)), lineWidth: 1)
             func onRing(_ hour: Double) -> Double { toSun + (hour - 12) / 24 * 360 }
             var hours = Path()
             for h in 0..<24 {
@@ -377,6 +424,7 @@ private struct Mechanism: View, Animatable {
             }
             // Noon faces the sun.
             context.fill(circle(at(e, r * (Orbit.day + 0.034), toSun), r * 0.008), with: .color(Color(red: 1, green: 0.8, blue: 0.4)))
+            context.stroke(circle(e, r * 0.042 * 1.3), with: .color(Ink.brass.opacity(0.85)), lineWidth: 1.5)
             sphere(context, at: e, radius: r * 0.042, colour: Color(red: 0.32, green: 0.56, blue: 0.82), sun: c)
             var hand = Path()
             let handAngle = onRing(state.hour) - (1 - swing) * 240
@@ -392,13 +440,52 @@ private struct Mechanism: View, Animatable {
         }
     }
 
-    /// A brass arm, shaded along its length, with a pivot at its end.
-    private func arm(_ context: GraphicsContext, from a: CGPoint, to b: CGPoint, width: CGFloat) {
-        var path = Path()
-        path.move(to: a)
-        path.addLine(to: b)
-        context.stroke(path, with: .linearGradient(Gradient(colors: [Ink.brass, Ink.deepBrass]), startPoint: a, endPoint: b),
-                       style: StrokeStyle(lineWidth: width, lineCap: .round))
+    /// A brass arm from the hub, tapering to its planet, with a bead and a pierced lozenge
+    /// along it and a counterweight on the hub's far side.
+    private func arm(_ context: GraphicsContext, centre c: CGPoint, angle: Double, length: CGFloat, width: CGFloat, r: CGFloat) {
+        let tip = at(c, length, angle)
+        // Out past the sun's rays, so it shows.
+        let tail = at(c, r * 0.155, angle + 180)
+        func side(_ distance: CGFloat, _ half: CGFloat) -> (CGPoint, CGPoint) {
+            let p = at(c, distance, angle)
+            return (at(p, half, angle + 90), at(p, half, angle - 90))
+        }
+        let (rootL, rootR) = side(0, width * 0.9)
+        let (tipL, tipR) = side(length, width * 0.4)
+        var body = Path()
+        body.move(to: rootL)
+        body.addLine(to: tipL)
+        body.addLine(to: tipR)
+        body.addLine(to: rootR)
+        body.closeSubpath()
+        let shade = GraphicsContext.Shading.linearGradient(Gradient(colors: [Color(red: 0.98, green: 0.86, blue: 0.5), Ink.deepBrass]),
+                                                           startPoint: c, endPoint: tip)
+        context.fill(body, with: shade)
+
+        // The counterweight, on a short stub behind the hub.
+        var stub = Path()
+        stub.move(to: c)
+        stub.addLine(to: tail)
+        context.stroke(stub, with: .color(Ink.deepBrass), style: StrokeStyle(lineWidth: width * 0.8, lineCap: .round))
+        context.fill(circle(tail, max(width * 1.6, r * 0.012)), with: .radialGradient(
+            Gradient(colors: [Color(red: 0.98, green: 0.88, blue: 0.58), Ink.deepBrass]),
+            center: tail, startRadius: 0, endRadius: max(width * 1.6, r * 0.012)))
+
+        // A bead a third of the way out, and a pierced lozenge beyond it on the longer arms.
+        context.fill(circle(at(c, length * 0.33, angle), width * 1.3), with: shade)
+        if length > r * 0.25 {
+            let mid = at(c, length * 0.62, angle)
+            let along = length * 0.07
+            var lozenge = Path()
+            lozenge.move(to: at(mid, along, angle))
+            lozenge.addLine(to: at(mid, width * 1.6, angle + 90))
+            lozenge.addLine(to: at(mid, along, angle + 180))
+            lozenge.addLine(to: at(mid, width * 1.6, angle - 90))
+            lozenge.closeSubpath()
+            // Pierced: the plate's black shows through, inside a brass frame.
+            context.fill(lozenge, with: .color(.black))
+            context.stroke(lozenge, with: shade, lineWidth: max(1.5, width * 0.5))
+        }
     }
 
     /// A ball lit from the sun: bright on its sunward side, falling to near black away from it.

@@ -46,6 +46,8 @@
 		<string>Rajdhani-Medium.ttf</string>
 		<string>Rajdhani-SemiBold.ttf</string>
 		<string>Rajdhani-Bold.ttf</string>
+		<string>Michroma-Regular.ttf</string>
+		<string>Saira-Variable.ttf</string>
 	</array>
 	<key>UILaunchScreen</key>
 	<dict>

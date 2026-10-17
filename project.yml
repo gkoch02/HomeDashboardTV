@@ -65,6 +65,10 @@ targets:
           - Rajdhani-Medium.ttf
           - Rajdhani-SemiBold.ttf
           - Rajdhani-Bold.ttf
+          # Uplink's: Deus Ex's wide face and the Codex's Saira (through its width axis), as
+          # IdleHoursTV's.
+          - Michroma-Regular.ttf
+          - Saira-Variable.ttf
         # The Pi is found over Bonjour and read over plain HTTP on the LAN.
         NSLocalNetworkUsageDescription: Home Dashboard finds your dashboard's Raspberry Pi on your network and reads its calendar and weather from it.
         NSBonjourServices:

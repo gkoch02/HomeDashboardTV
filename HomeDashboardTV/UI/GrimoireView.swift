@@ -436,7 +436,7 @@ private struct Header: View {
     var body: some View {
         let zone = snapshot.timeZone
         let clock = ClockTime.parts(now, in: zone)
-        let year = Calendar(identifier: .gregorian).component(.year, from: now)
+        let year = Self.year(now, in: zone)
         HStack(alignment: .bottom, spacing: 0) {
             VStack(alignment: .leading, spacing: 0) {
                 HStack(alignment: .firstTextBaseline, spacing: 14) {
@@ -459,6 +459,13 @@ private struct Header: View {
                 Caps("Anno \(roman(year))", size: 20, colour: Ink.goldDim, tracking: 0.16)
             }
         }
+    }
+
+    /// The year in the dashboard's zone, as the clock and the date beside it are.
+    private static func year(_ now: Date, in zone: TimeZone) -> Int {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = zone
+        return cal.component(.year, from: now)
     }
 
     /// The year in Roman numerals, as the frontispiece has it.
@@ -810,7 +817,10 @@ private struct Runes: View {
             out.append(Rune(label: "Sun's Wrath", value: "\(Int(uv.rounded())) \(Weatherglass.uvCategory(uv).capitalized)",
                             fraction: uv / 11, colour: uv >= 6 ? Ink.ember : Ink.gold))
         }
-        let rain = Skylight.ribbon(weather, now: now).first?.precipChance
+        // The nearest hourly slot's chance; without one (an older cache keeps no hourly grid),
+        // today's from the daily forecast. The ribbon's "now" point would read 0% either way.
+        let slot = weather.hourly.min { abs($0.time.timeIntervalSince(now)) < abs($1.time.timeIntervalSince(now)) }
+        let rain = slot?.precipChance
             ?? Skylight.outlook(weather, now: now, zone: zone, count: 1).first?.precipChance
         if let rain {
             out.append(Rune(label: "Chance of Rain", value: "\(Int((rain * 100).rounded()))%", fraction: rain, colour: Ink.rain))

@@ -901,7 +901,10 @@ private struct Conditions: View {
             out.append(Readout(label: "UV INDEX", value: "\(Int(uv.rounded())) \(Weatherglass.uvCategory(uv))",
                                fraction: uv / 11, colour: uv >= 6 ? Ink.yellow : Ink.red))
         }
-        let rain = Skylight.ribbon(weather, now: now).first?.precipChance
+        // The nearest hourly slot's chance; without one (an older cache keeps no hourly grid),
+        // today's from the daily forecast. The ribbon's "now" point would read 0% either way.
+        let slot = weather.hourly.min { abs($0.time.timeIntervalSince(now)) < abs($1.time.timeIntervalSince(now)) }
+        let rain = slot?.precipChance
             ?? Skylight.outlook(weather, now: now, zone: zone, count: 1).first?.precipChance
         if let rain {
             out.append(Readout(label: "PRECIP", value: "\(Int((rain * 100).rounded()))%", fraction: rain, colour: Ink.cyan))

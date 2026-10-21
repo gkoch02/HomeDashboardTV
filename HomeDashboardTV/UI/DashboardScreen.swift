@@ -110,6 +110,7 @@ struct DashboardScreen: View {
                     case .window: frame(WindowView.self, snapshot, now)
                     case .cyberpunk: frame(CyberpunkView.self, snapshot, now)
                     case .uplink: frame(UplinkView.self, snapshot, now)
+                    case .grimoire: frame(GrimoireView.self, snapshot, now)
                     }
     }
 

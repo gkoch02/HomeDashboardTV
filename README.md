@@ -28,6 +28,14 @@ between the agenda as Deus Ex's tiles and the weather as a Codex entry.
 
 ![The Uplink layout, from HomeDashboard's dummy data](docs/uplink.png)
 
+**Grimoire**, an adventurer's tome after the quest logs of Warcraft and the tabletop: the
+calendar as quests (the one under way crossed with swords, the next marked with the gold
+exclamation), birthdays as feast days, the weather as the augury with the sky painted as an
+illuminated miniature, the moon, the quote as the words of the sage, the air as the dragon's
+breath, and a candle for each source that gutters as its data ages. Set in Goodmountain.
+
+![The Grimoire layout, from HomeDashboard's dummy data](docs/grimoire.png)
+
 **Agenda**, after the Pi's `halftone_agenda`: a painted weather window on the left, the
 day's agenda on the right, in cream on charcoal with ochre and red.
 
@@ -103,8 +111,8 @@ On first launch the app opens its settings drawer at **Source**: pick the Pi und
 Network**, or type its address (`dashboard.local`, `192.168.1.20:8080`). **Demo data** shows a
 bundled week with no Pi at all. Click anywhere on the dashboard to open the drawer again;
 Menu goes back a page, then closes it.
-Left and right on the remote step through the layouts (Dashboard, Cyberpunk, Uplink, Agenda,
-Horizon, Skylight, Window, Light Cycle, Weatherglass, Orrery, Fuzzy Clock, Quote, Moon, Aurora,
+Left and right on the remote step through the layouts (Dashboard, Cyberpunk, Uplink, Grimoire,
+Agenda, Horizon, Skylight, Window, Light Cycle, Weatherglass, Orrery, Fuzzy Clock, Quote, Moon, Aurora,
 Night), and
 the one you land on is remembered.
 
@@ -162,7 +170,9 @@ settings. The committed project is complete, so XcodeGen is only needed to chang
   composition `WeatherScene` in `DashboardCore`; `docs/agenda-scenes.png` shows six of them),
   the moon disc, a starfield.
 - `HomeDashboardTV/Resources/Fonts`: Cinzel, Cormorant Garamond, Manufacturing Consent,
-  Righteous, DM Sans, Big Shoulders Display and Figtree from HomeDashboard's `fonts/` (SIL OFL; each licence beside its font). The moon
+  Righteous, DM Sans, Big Shoulders Display and Figtree from HomeDashboard's `fonts/` (SIL OFL; each licence beside its font), and
+  Goodmountain by Hermann S Designs for the Grimoire layout (its own licence beside it: free to
+  use and share, not to modify or sell). The moon
   photograph (`MoonPhoto`) is the author's own full moon: the full-resolution original of
   the Pi's `assets/moon_full.png`, cropped to the disc at its native 1288 px with the
   disc's levels stretched, enough for the hero moon at 4K without upscaling.

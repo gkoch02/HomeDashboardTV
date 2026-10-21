@@ -22,9 +22,11 @@
 		460AFA6DC7DC369E67096935 /* Cinzel.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 61DD62983158D3984EC63FFB /* Cinzel.ttf */; };
 		465B5A043627B49E6D691ED8 /* SkylightSky.metal in Sources */ = {isa = PBXBuildFile; fileRef = EAEE458EE1F37F100274CB01 /* SkylightSky.metal */; };
 		4743623BB70CE9459A0B24DD /* CormorantGaramond.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A68DDBCA1329C420B50A6188 /* CormorantGaramond.ttf */; };
+		47B5FE44A09AEF0AA9B9D4E5 /* Goodmountain-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2F751680BA84ACA609A49B68 /* Goodmountain-Regular.otf */; };
 		48BB3B40E6E914FDBE11153A /* DashboardStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8986DA2F23A6044A8D92D3B4 /* DashboardStore.swift */; };
 		4BB3C08A2A618021AF181B82 /* QuoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4098608C8444AC0C661DD3D1 /* QuoteView.swift */; };
 		4CFB5517937BBA9E4159B7BF /* PlayfairDisplay-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5A14D92835DFD740F4F1432D /* PlayfairDisplay-Bold.ttf */; };
+		5411EFF0CE28E3D06B5DE4F4 /* GrimoireView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42DAF9DA804F0B04C8DDE091 /* GrimoireView.swift */; };
 		54F0157FE87CCD17BBC04712 /* Figtree-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8D623B4B66C03F6E41617CBC /* Figtree-ExtraBold.ttf */; };
 		5870F7893C97C7CB9405BC4D /* Jura-Variable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 47C24A3D1B5321D2D19DA285 /* Jura-Variable.ttf */; };
 		60B9ABEACDE09E876B36F3F1 /* PiBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B3C54094507B36DC31C7C76 /* PiBrowser.swift */; };
@@ -82,9 +84,11 @@
 		2256A097691D68B2477F76EF /* WindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowView.swift; sourceTree = "<group>"; };
 		24D3FE4C261142D9F0D912CA /* Righteous-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Righteous-Regular.ttf"; sourceTree = "<group>"; };
 		2ABE50ACD8B843A99D8BB62C /* Rajdhani-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Rajdhani-SemiBold.ttf"; sourceTree = "<group>"; };
+		2F751680BA84ACA609A49B68 /* Goodmountain-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Goodmountain-Regular.otf"; sourceTree = "<group>"; };
 		333B7105DB6D07E312E56484 /* OrreryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrreryView.swift; sourceTree = "<group>"; };
 		33E802CA050DAA1C01659DD7 /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.xcconfig; sourceTree = "<group>"; };
 		4098608C8444AC0C661DD3D1 /* QuoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteView.swift; sourceTree = "<group>"; };
+		42DAF9DA804F0B04C8DDE091 /* GrimoireView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrimoireView.swift; sourceTree = "<group>"; };
 		472A321210B7C12D4CF15E22 /* MoonDisc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoonDisc.swift; sourceTree = "<group>"; };
 		47C24A3D1B5321D2D19DA285 /* Jura-Variable.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Jura-Variable.ttf"; sourceTree = "<group>"; };
 		4C2103C0B8C55F989AF037F3 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
@@ -178,6 +182,7 @@
 				A68DDBCA1329C420B50A6188 /* CormorantGaramond.ttf */,
 				7F7B2857FB7AFDA686A83D0B /* DMSans.ttf */,
 				8D623B4B66C03F6E41617CBC /* Figtree-ExtraBold.ttf */,
+				2F751680BA84ACA609A49B68 /* Goodmountain-Regular.otf */,
 				47C24A3D1B5321D2D19DA285 /* Jura-Variable.ttf */,
 				5BCEA6F65BFB1AF66825E854 /* ManufacturingConsent-Regular.ttf */,
 				B97455432CBD74EA8E8AB21C /* Michroma-Regular.ttf */,
@@ -235,6 +240,7 @@
 				A4CAFF9985B9F380C5555D3D /* DashboardScreen.swift */,
 				660A98750F7DEDD3E9B93FCE /* DashboardView.swift */,
 				656C08F19678AAA727B5755E /* FuzzyClockView.swift */,
+				42DAF9DA804F0B04C8DDE091 /* GrimoireView.swift */,
 				7FB6C810B9D81A542EB0FA9F /* HorizonView.swift */,
 				E57CFC146044F906194B6656 /* LightCycleView.swift */,
 				10DA38EC1D96409C50598DB5 /* MoonView.swift */,
@@ -382,6 +388,7 @@
 				4743623BB70CE9459A0B24DD /* CormorantGaramond.ttf in Resources */,
 				1848039F6E75D7821BB4AFEB /* DMSans.ttf in Resources */,
 				54F0157FE87CCD17BBC04712 /* Figtree-ExtraBold.ttf in Resources */,
+				47B5FE44A09AEF0AA9B9D4E5 /* Goodmountain-Regular.otf in Resources */,
 				5870F7893C97C7CB9405BC4D /* Jura-Variable.ttf in Resources */,
 				18033621437C98349750E47C /* ManufacturingConsent-Regular.ttf in Resources */,
 				73B1A71294BDD2E4BA0FC68B /* Michroma-Regular.ttf in Resources */,
@@ -421,6 +428,7 @@
 				48BB3B40E6E914FDBE11153A /* DashboardStore.swift in Sources */,
 				7E84F655354C4B325DAE7DF9 /* DashboardView.swift in Sources */,
 				E43884FB389F97097336E1B8 /* FuzzyClockView.swift in Sources */,
+				5411EFF0CE28E3D06B5DE4F4 /* GrimoireView.swift in Sources */,
 				F307849DC1335E469A4963A0 /* HomeDashboardApp.swift in Sources */,
 				323A78D9DFE43D04189A8C2C /* HorizonView.swift in Sources */,
 				00B3C70A424BF2CD94123F64 /* Keychain.swift in Sources */,

@@ -22,7 +22,7 @@ final class DashboardStore {
     /// down to the calmest, with Night, the after-dark plate, last. Saved by raw value, so
     /// reordering keeps a saved choice.
     enum Layout: String, CaseIterable {
-        case dashboard, cyberpunk, uplink, agenda, horizon, skylight, window, light, weatherglass, orrery, fuzzy, quote, moon, aurora, night
+        case dashboard, cyberpunk, uplink, grimoire, agenda, horizon, skylight, window, light, weatherglass, orrery, fuzzy, quote, moon, aurora, night
 
         var title: String {
             switch self {
@@ -41,6 +41,7 @@ final class DashboardStore {
             case .window: return "Window"
             case .cyberpunk: return "Cyberpunk"
             case .uplink: return "Uplink"
+            case .grimoire: return "Grimoire"
             }
         }
 

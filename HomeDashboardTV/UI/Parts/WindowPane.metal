@@ -1,5 +1,4 @@
-#include <metal_stdlib>
-#include <SwiftUI/SwiftUI_Metal.h>
+#include "SkyPass.h"
 using namespace metal;
 
 // The Window layout's pane, one pixel at a time: light and colour at the hour and in the
@@ -7,7 +6,9 @@ using namespace metal;
 // drops running down it. Each bead and drop is a small lens: it brings the lights behind it
 // into focus as points, upside down, as a real one does. Frost creeps in from the edges below freezing and mist fogs the glass. The
 // colours are worked out in Swift (`WindowView`, from `WindowPane` in DashboardCore); this
-// only composes them. Positions are in points, as SwiftUI lays out.
+// only composes them. Positions are in points, as SwiftUI lays out. Drawn by `SkyLayer` into
+// a 16-bit extended-range layer: with headroom, the lights beyond the glass, the lanterns,
+// the drops' glints and the lightning go brighter than white.
 
 namespace pane {
 
@@ -44,6 +45,8 @@ struct Scene {
     float drift;
     float flash;
     float time;
+    /// The headroom above white, 0 (none) to `Sky.peak` - 1: the lights' extra brightness.
+    float boost;
     int lampCount;
     float3 lamp[4];
 };
@@ -65,7 +68,7 @@ float3 scene(float2 p, float blur, thread const Scene &s) {
     float2 u = p / s.size;
     float3 col = u.y < 0.55 ? mix(s.zenith, s.horizon, smoothstep(0.0, 0.55, u.y))
                             : mix(s.horizon, s.ground, smoothstep(0.55, 1.0, u.y));
-    col += float3(0.75, 0.8, 1.0) * s.flash * 0.45 * (1.0 - 0.5 * u.y);
+    col += float3(0.75, 0.8, 1.0) * s.flash * 0.45 * (1.0 - 0.5 * u.y) * (1.0 + s.boost);
 
     // Washes of glow, each wandering on its own slow loop, a whole number of times an hour.
     for (int i = 0; i < 3; i++) {
@@ -92,7 +95,8 @@ float3 scene(float2 p, float blur, thread const Scene &s) {
             float3 tint = hash(c + 8.1) < 0.7 ? s.lights : float3(0.72, 0.82, 1.0);
             float r = mix(2.5, 12.0 + 26.0 * hash(c + 4.4), saturate(blur / 12.0));
             float rate = 6.2831853 * float(30 + int(h * 90.0)) / 3600.0;
-            float bright = (0.25 + 0.55 * s.night) * (0.35 + 0.65 * hash(c + 6.6)) * (0.75 + 0.25 * sin(s.time * rate + h * 50.0));
+            float bright = (0.25 + 0.55 * s.night) * (0.35 + 0.65 * hash(c + 6.6)) * (0.75 + 0.25 * sin(s.time * rate + h * 50.0))
+                * (1.0 + 0.7 * s.boost);
             col += tint * bright * bokeh(length(p - at), r, blur);
         }
     }
@@ -105,7 +109,8 @@ float3 scene(float2 p, float blur, thread const Scene &s) {
         float rate = 6.2831853 * float(41 + 7 * i) / 3600.0;
         float flicker = 6.2831853 * float(53 + 9 * i) / 3600.0;
         float r = mix(5.0, s.size.y * sizes[i], saturate(blur / 12.0)) * (1.0 + 0.03 * sin(s.time * rate + float(i) * 2.0));
-        col += s.lamp[i] * (0.4 + 0.3 * s.night + 0.06 * sin(s.time * flicker + float(i))) * bokeh(length(p - at), r, blur);
+        col += s.lamp[i] * (0.4 + 0.3 * s.night + 0.06 * sin(s.time * flicker + float(i))) * (1.0 + 0.5 * s.boost)
+            * bokeh(length(p - at), r, blur);
     }
     return col;
 }
@@ -192,25 +197,46 @@ Lens runners(float2 p, float colW, float wet, float drift, float time, float hei
 
 }  // namespace pane
 
-/// - size: the view, in points.
-/// - time: seconds, wrapping hourly: everything that moves turns a whole number of times an
-///   hour, so the wrap is seamless.
+/// - frame: the view's size in points, the layer's scale, and the time in seconds, wrapping
+///   hourly: everything that moves turns a whole number of times an hour, so the wrap is
+///   seamless.
 /// - zenith, horizon, ground: the colour beyond the glass, at the top, across the middle and
 ///   at the bottom.
 /// - glow: the drifting washes of light; lights: the scattered lights.
-/// - light: night (x, 0 to 1), the storm (z, 0 or 1: lightning), and how far the build-in has
+/// - light: night (x, 0 to 1), the headroom (y, 1 to `Sky.peak`: how bright the lights may go,
+///   as a multiple of white), the storm (z, 0 or 1: lightning), and how far the build-in has
 ///   brought the scene up (w).
 /// - glass: how wet the pane is (x), the wind's lean (y), frost (z) and mist (w), each 0 to 1.
 /// - extra: snow on the glass (x), and how many of the lanterns stand for something (y, 0 to 4).
 /// - lamp0…lamp3: those lanterns' colours, as the text's dots have them.
 /// - motion: the burn-in drift (z, w) the lights move with, so they never hold one place.
-[[ stitchable ]] half4 windowPane(float2 pos, half4 current,
-                                  float2 size, float time,
-                                  half4 zenith, half4 horizon, half4 ground, half4 glow, half4 lights,
-                                  float4 light, float4 glass, float4 extra,
-                                  half4 lamp0, half4 lamp1, half4 lamp2, half4 lamp3,
-                                  float4 motion) {
+struct WindowUniforms {
+    float4 frame;
+    float4 zenith;
+    float4 horizon;
+    float4 ground;
+    float4 glow;
+    float4 lights;
+    float4 light;
+    float4 glass;
+    float4 extra;
+    float4 lamp0;
+    float4 lamp1;
+    float4 lamp2;
+    float4 lamp3;
+    float4 motion;
+};
+
+fragment half4 windowPane(SkyVertex in [[stage_in]], constant WindowUniforms &sky [[buffer(0)]]) {
     using namespace pane;
+
+    float2 pos = skyPoint(in.position, sky.frame);
+    float2 size = sky.frame.xy;
+    float time = sky.frame.w;
+    float4 zenith = sky.zenith, horizon = sky.horizon, ground = sky.ground, glow = sky.glow, lights = sky.lights;
+    float4 light = sky.light, glass = sky.glass, extra = sky.extra;
+    float4 lamp0 = sky.lamp0, lamp1 = sky.lamp1, lamp2 = sky.lamp2, lamp3 = sky.lamp3;
+    float4 motion = sky.motion;
 
     // Lightning: in a storm, a flash in about half of each six seconds, with an after-flicker.
     float flash = 0.0;
@@ -234,6 +260,7 @@ Lens runners(float2 p, float colW, float wet, float drift, float time, float hei
     s.drift = glass.y;
     s.flash = flash;
     s.time = time;
+    s.boost = light.y - 1.0;
     s.lampCount = int(clamp(extra.y, 0.0, 4.0));
     s.lamp[0] = float3(lamp0.rgb);
     s.lamp[1] = float3(lamp1.rgb);
@@ -272,7 +299,7 @@ Lens runners(float2 p, float colW, float wet, float drift, float time, float hei
         // Its lower rim catches the light behind, as a drop's does.
         seen += (col * 1.4 + 0.04) * edge * smoothstep(0.0, 0.7, lens.normal.y);
         float2 toGlint = lens.normal - float2(-0.35, -0.45);
-        seen += float3(1.0) * 0.4 * exp(-dot(toGlint, toGlint) * 18.0);
+        seen += float3(1.0) * 0.4 * (1.0 + s.boost) * exp(-dot(toGlint, toGlint) * 18.0);
         col = mix(col, seen, lens.mask);
     }
 
@@ -301,5 +328,5 @@ Lens runners(float2 p, float colW, float wet, float drift, float time, float hei
     col *= light.w;
     // A step of dither breaks up banding in the long dark gradients.
     col += (hash(pos * 1.37) - 0.5) / 255.0 * light.w;
-    return half4(half3(saturate(col)), 1.0h);
+    return half4(half3(max(col, 0.0)), 1.0h);
 }

@@ -4,7 +4,8 @@ import SwiftUI
 /// A layout drawn for an OLED TV rather than ported from the Pi: an aurora over a lake, on
 /// true black, with the day set small along the bottom.
 ///
-/// The sky is a Metal shader running at 30 frames a second (`AuroraSky.metal`): three curtains
+/// The sky is a Metal shader running at 30 frames a second (`AuroraSky.metal`, drawn by
+/// `SkyLayer`, so on an HDR output the brightest folds pass white): three curtains
 /// of light swaying over a line of hills, reflected in the water below, with stars behind.
 /// The air sets their colour (`Aurora.curtain`): green with violet tops in good air, warming
 /// through amber to red as the AQI climbs, so a bad-air day reads from across the room. The
@@ -95,6 +96,7 @@ private struct AuroraSky: View {
     let now: Date
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(DashboardStore.self) private var store
     @State private var clock = AuroraClock()
     @State private var glow = Glow.dark
 
@@ -104,26 +106,24 @@ private struct AuroraSky: View {
         let edge = Color(hue: curtain.edge / 360, saturation: 0.88, brightness: 0.95)
         let fringe = Color(hue: curtain.fringe / 360, saturation: 0.8, brightness: 0.8)
         let drift = BurnIn.drift(at: now)
-        GeometryReader { geometry in
-            let size = geometry.size
-            TimelineView(.animation(minimumInterval: 1.0 / 30, paused: reduceMotion)) { context in
-                let motion = clock.advance(to: context.date, unrest: unrest)
-                Rectangle()
-                    .fill(.black)
-                    .colorEffect(ShaderLibrary.auroraSky(
-                        .float2(size),
-                        .float(motion.phase), .float(motion.time), .float(motion.unrest),
-                        .color(edge), .color(fringe),
-                        .float4(Float(glow.light(at: context.date)), 0, 0, 0),
-                        .float4(0, 0, Float(drift.width), Float(drift.height))
-                    ))
-            }
+        SkyLayer(fragment: "auroraSky", paused: reduceMotion, highlights: store.highlights) { frame in
+            let motion = clock.advance(to: frame.date, unrest: unrest)
+            return AuroraUniforms(
+                frame: frame.header(time: motion.time),
+                wave: SIMD4(motion.phase, motion.unrest, Float(glow.light(at: frame.date)), frame.headroom),
+                edge: Sky.rgb(edge), fringe: Sky.rgb(fringe),
+                motion: SIMD4(0, 0, Float(drift.width), Float(drift.height)))
         }
         .background(Color.black)
         .onBuildIn(reset: { settled in glow = settled ? .shown : .dark }) {
             glow = .rising(.now)
         }
     }
+}
+
+/// `AuroraSky.metal`'s inputs, field for field.
+private struct AuroraUniforms {
+    var frame, wave, edge, fringe, motion: SIMD4<Float>
 }
 
 /// The sky's build-in, timed by the sky's own timeline (its shader's inputs do not animate):

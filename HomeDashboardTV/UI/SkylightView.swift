@@ -4,7 +4,8 @@ import SwiftUI
 /// A layout drawn for the TV rather than ported from the Pi: the sky outside, live, over a
 /// black ground, with the day set in the dark around it.
 ///
-/// The sky is a Metal shader running at 30 frames a second (`SkylightSky.metal`): coloured by
+/// The sky is a Metal shader running at 30 frames a second (`SkylightSky.metal`, drawn by
+/// `SkyLayer`, so on an HDR output the sun, the stars and the lightning pass white): coloured by
 /// the sun's altitude now, with the sun where it is between sunrise and sunset, stars that
 /// twinkle after dark, and the current weather as moving cloud, rain, snow, fog or lightning,
 /// drifting with the real wind. The moon rides it at tonight's phase. Below two ridges the
@@ -141,6 +142,7 @@ private struct SkyBackdrop: View {
     let now: Date
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(DashboardStore.self) private var store
     @State private var clock = SkyClock()
     @State private var dawn = Dawn.dark
     @State private var moonRise = 0.0
@@ -155,28 +157,23 @@ private struct SkyBackdrop: View {
             let sun = sunPlace(sky, size: size, ground: ground)
             let drift = BurnIn.drift(at: now)
             ZStack(alignment: .topLeading) {
-                TimelineView(.animation(minimumInterval: 1.0 / 30, paused: reduceMotion)) { context in
-                    let motion = clock.advance(to: context.date, drift: sky.drift)
-                    let light = dawn.light(at: context.date)
-                    let rise = dawn.rise(at: context.date)
+                SkyLayer(fragment: "skylightSky", paused: reduceMotion, highlights: store.highlights) { frame in
+                    let motion = clock.advance(to: frame.date, drift: sky.drift)
+                    let rise = dawn.rise(at: frame.date)
                     let risen = (centre: CGPoint(x: sun.centre.x, y: sun.centre.y + (1 - rise) * Dawn.climb),
                                  shown: sun.shown * rise)
-                    Rectangle()
-                        .fill(.black)
-                        .colorEffect(ShaderLibrary.skylightSky(
-                            .float2(size),
-                            .float(motion.time), vector(motion.clouds), vector(motion.rain), vector(motion.snow),
-                            .color(palette.zenith), .color(palette.horizon), .color(palette.glow),
-                            .float4(Float(risen.centre.x), Float(risen.centre.y), Float(sun.radius), Float(risen.shown)),
-                            .float4(Float(palette.glowStrength), Float(palette.twilight), Float(palette.stars),
-                                    sky.precip == .storm ? 1 : 0),
-                            .float4(Float(sky.cover), sky.precip == .rain || sky.precip == .storm ? Float(sky.intensity) : 0,
-                                    sky.precip == .snow ? Float(sky.intensity) : 0, sky.precip == .fog ? 0.55 : 0),
-                            .color(palette.cloudLit), .color(palette.cloudShade),
-                            .float(Float(ground)),
-                            .float4(Float(sky.drift), 0, Float(drift.width), Float(drift.height))
-                        ))
-                        .overlay { Color.black.opacity(1 - light) }
+                    return SkylightUniforms(
+                        frame: frame.header(time: motion.time),
+                        clouds: motion.clouds, rain: motion.rain, snow: motion.snow,
+                        zenith: Sky.rgb(palette.zenith), horizon: Sky.rgb(palette.horizon), glow: Sky.rgb(palette.glow),
+                        sun: SIMD4(Float(risen.centre.x), Float(risen.centre.y), Float(sun.radius), Float(risen.shown)),
+                        light: SIMD4(Float(palette.glowStrength), Float(palette.twilight), Float(palette.stars),
+                                     sky.precip == .storm ? 1 : 0),
+                        weather: SIMD4(Float(sky.cover), sky.precip == .rain || sky.precip == .storm ? Float(sky.intensity) : 0,
+                                       sky.precip == .snow ? Float(sky.intensity) : 0, sky.precip == .fog ? 0.55 : 0),
+                        cloudLit: Sky.rgb(palette.cloudLit), cloudShade: Sky.rgb(palette.cloudShade),
+                        ground: SIMD4(Float(ground), frame.headroom, Float(dawn.light(at: frame.date)), 0),
+                        motion: SIMD4(Float(sky.drift), 0, Float(drift.width), Float(drift.height)))
                 }
                 if let moon, !sky.hidesBodies {
                     // The moon is drawn here, not in the timeline, so it rises by animation.
@@ -272,7 +269,14 @@ private final class SkyClock {
     }
 }
 
-private func vector(_ v: SIMD4<Float>) -> Shader.Argument { .float4(v.x, v.y, v.z, v.w) }
+/// `SkylightSky.metal`'s inputs, field for field.
+private struct SkylightUniforms {
+    var frame, clouds, rain, snow: SIMD4<Float>
+    var zenith, horizon, glow: SIMD4<Float>
+    var sun, light, weather: SIMD4<Float>
+    var cloudLit, cloudShade: SIMD4<Float>
+    var ground, motion: SIMD4<Float>
+}
 
 /// Where the sun and moon cross the sky: the open middle between the agenda and the weather,
 /// so neither ever sits behind text. Rise is on the left, set on the right. The agenda column

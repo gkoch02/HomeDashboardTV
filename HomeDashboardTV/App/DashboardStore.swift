@@ -91,6 +91,30 @@ final class DashboardStore {
 
     static let keepAwakeChoices = [0, 1, 2, 4, 8]
 
+    /// Whether the live skies (Skylight, Aurora, Window) may draw their brightest things
+    /// brighter than the text's white, which only an HDR output shows (`SkyLayer`).
+    enum Highlights: String, CaseIterable {
+        /// On once the screen reports extended range, which it does in an HDR Format.
+        case automatic
+        /// Always on: for an HDR Format the screen never reported. In an SDR Format the
+        /// highlights clip to white.
+        case hdr
+        /// Never: everything stays within white.
+        case sdr
+
+        var title: String {
+            switch self {
+            case .automatic: return "Automatic"
+            case .hdr: return "HDR"
+            case .sdr: return "SDR"
+            }
+        }
+    }
+
+    var highlights: Highlights {
+        didSet { defaults.set(highlights.rawValue, forKey: Keys.highlights) }
+    }
+
     var username: String {
         didSet { defaults.set(username, forKey: Keys.username) }
     }
@@ -112,6 +136,7 @@ final class DashboardStore {
         static let username = "username"
         static let layout = "layout"
         static let keepAwakeHours = "keepAwakeHours"
+        static let highlights = "highlights"
         static let pressureHistory = "pressureHistory"
         static let pressureSource = "pressureSource"
     }
@@ -122,6 +147,7 @@ final class DashboardStore {
         layout = defaults.string(forKey: Keys.layout).flatMap(Layout.init(saved:)) ?? .dashboard
         password = Keychain.password ?? ""
         keepAwakeHours = defaults.integer(forKey: Keys.keepAwakeHours)
+        highlights = defaults.string(forKey: Keys.highlights).flatMap(Highlights.init(rawValue:)) ?? .automatic
         pressureHistory = PressureHistory()
         // `-demo YES` and `-server <url>` set the source for a run (screenshots, the simulator).
         if defaults.bool(forKey: "demo") {

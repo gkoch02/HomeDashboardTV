@@ -108,10 +108,10 @@ private enum Ink {
     static let cream = Color(red: 0.95, green: 0.93, blue: 0.88)
     static let faint = cream.opacity(0.55)
     static let rule = cream.opacity(0.22)
-    static let red = Color(red: 0.93, green: 0.36, blue: 0.30)
-    static let yellow = Color(red: 0.98, green: 0.80, blue: 0.33)
-    static let rain = Color(red: 0.45, green: 0.66, blue: 0.98)
-    static let curve = Color(red: 0.99, green: 0.45, blue: 0.36)
+    static let red = Color.p3(0.93, 0.36, 0.30)
+    static let yellow = Color.p3(0.98, 0.80, 0.33)
+    static let rain = Color.p3(0.45, 0.66, 0.98)
+    static let curve = Color.p3(0.99, 0.45, 0.36)
 }
 
 private enum Face {
@@ -274,7 +274,8 @@ private struct SkyArt: View, Equatable {
             }
         }
         guard let provider = CGDataProvider(data: Data(px) as CFData),
-              let space = CGColorSpace(name: CGColorSpace.sRGB) else { return nil }
+              // The sky's numbers, declared in Display P3 as the layouts' hero inks are (`WideColour.swift`).
+              let space = CGColorSpace(name: CGColorSpace.displayP3) else { return nil }
         return CGImage(width: w, height: h, bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: w * 4,
                        space: space, bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.noneSkipLast.rawValue),
                        provider: provider, decode: nil, shouldInterpolate: true, intent: .defaultIntent)
@@ -326,12 +327,12 @@ private struct SkyArt: View, Equatable {
         let r = box.width / 2
         context.fill(
             Path(ellipseIn: box.insetBy(dx: -r * 2.6, dy: -r * 2.6)),
-            with: .radialGradient(Gradient(colors: [Color(red: 1, green: 0.85, blue: 0.55).opacity(0.45), .clear]),
+            with: .radialGradient(Gradient(colors: [Color.p3(1, 0.85, 0.55).opacity(0.45), .clear]),
                                   center: c, startRadius: r * 0.9, endRadius: r * 3.6)
         )
         context.fill(Path(ellipseIn: box), with: .radialGradient(
-            Gradient(colors: [Color(red: 1, green: 0.98, blue: 0.88), Color(red: 1, green: 0.86, blue: 0.50),
-                              Color(red: 0.97, green: 0.66, blue: 0.24)]),
+            Gradient(colors: [Color.p3(1, 0.98, 0.88), Color.p3(1, 0.86, 0.50),
+                              Color.p3(0.97, 0.66, 0.24)]),
             center: CGPoint(x: c.x - r * 0.25, y: c.y - r * 0.25), startRadius: 0, endRadius: r * 1.2
         ))
     }
@@ -439,7 +440,7 @@ private struct SkyArt: View, Equatable {
         var glow = context
         glow.addFilter(.blur(radius: 10))
         glow.fill(path, with: .color(Ink.yellow.opacity(0.8)))
-        context.fill(path, with: .color(Color(red: 1, green: 0.93, blue: 0.62)))
+        context.fill(path, with: .color(Color.p3(1, 0.93, 0.62)))
     }
 
     /// Mist as soft dashed bands across the slot, after the Pi's dashed rules.

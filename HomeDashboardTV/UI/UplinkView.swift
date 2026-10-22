@@ -206,14 +206,14 @@ private func decrypted(_ text: String, t: Double, at: Double) -> String {
 
 private enum Ink {
     // Deus Ex's gold.
-    static let gold = rgb(0xDE, 0xB0, 0x47)
-    static let goldHot = rgb(0xF6, 0xD2, 0x72)
+    static let gold = p3(0xDE, 0xB0, 0x47)
+    static let goldHot = p3(0xF6, 0xD2, 0x72)
     // The Codex's hologram.
     static let deep = rgb(0x02, 0x07, 0x0E)
     static let navy = rgb(0x05, 0x12, 0x20)
     static let panel = rgb(0x06, 0x16, 0x26)
-    static let blue = rgb(0x7F, 0xC4, 0xF0)
-    static let blueHot = rgb(0xDD, 0xF4, 0xFF)
+    static let blue = p3(0x7F, 0xC4, 0xF0)
+    static let blueHot = p3(0xDD, 0xF4, 0xFF)
     static let white = rgb(0xE4, 0xEE, 0xF5)
     static let muted = rgb(0x6E, 0x8D, 0xA6)
     static let dim = rgb(0x34, 0x50, 0x6A)
@@ -222,10 +222,15 @@ private enum Ink {
     static let slabBottom = rgb(0x4C, 0x51, 0x55)
     static let well = rgb(0x04, 0x08, 0x0D)
     // Cyberpunk's red, for what is urgent.
-    static let red = rgb(0xFF, 0x5E, 0x55)
+    static let red = p3(0xFF, 0x5E, 0x55)
 
     static func rgb(_ r: Int, _ g: Int, _ b: Int) -> Color {
         Color(red: Double(r) / 255, green: Double(g) / 255, blue: Double(b) / 255)
+    }
+
+    /// A hero ink, in Display P3 (`WideColour.swift`).
+    static func p3(_ r: Int, _ g: Int, _ b: Int) -> Color {
+        Color.p3(Double(r) / 255, Double(g) / 255, Double(b) / 255)
     }
 
     /// The air: the hologram's blue while good, gold in moderate, red beyond.

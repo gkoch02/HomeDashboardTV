@@ -64,22 +64,22 @@ private enum Ink {
     static let soft = ivory.opacity(0.72)
     static let faint = ivory.opacity(0.5)
     static let engraving = ivory.opacity(0.3)
-    static let brass = Color(red: 0.86, green: 0.70, blue: 0.38)
-    static let deepBrass = Color(red: 0.55, green: 0.40, blue: 0.16)
+    static let brass = Color.p3(0.86, 0.70, 0.38)
+    static let deepBrass = Color.p3(0.55, 0.40, 0.16)
 
     /// The enamels the events are picked out in, on the ring and beside the almanac's lines.
     static let events: [Color] = [
-        Color(red: 0.88, green: 0.36, blue: 0.27),
-        Color(red: 0.95, green: 0.72, blue: 0.30),
-        Color(red: 0.36, green: 0.70, blue: 0.68),
-        Color(red: 0.62, green: 0.45, blue: 0.82),
+        Color.p3(0.88, 0.36, 0.27),
+        Color.p3(0.95, 0.72, 0.30),
+        Color.p3(0.36, 0.70, 0.68),
+        Color.p3(0.62, 0.45, 0.82),
     ]
 
     /// Polished brass round a bezel: light catching the top left and the lower right.
     static let brassRing = Gradient(colors: [
-        Color(red: 0.98, green: 0.88, blue: 0.58), Color(red: 0.62, green: 0.45, blue: 0.18),
-        Color(red: 0.90, green: 0.74, blue: 0.40), Color(red: 0.55, green: 0.40, blue: 0.16),
-        Color(red: 0.98, green: 0.88, blue: 0.58),
+        Color.p3(0.98, 0.88, 0.58), Color.p3(0.62, 0.45, 0.18),
+        Color.p3(0.90, 0.74, 0.40), Color.p3(0.55, 0.40, 0.16),
+        Color.p3(0.98, 0.88, 0.58),
     ])
 }
 
@@ -297,7 +297,7 @@ private struct Gear: View, Equatable {
             context.fill(circle(c, r * 0.18), with: shade)
             // The jewel: a ruby bearing with a glint.
             context.fill(circle(c, r * 0.08), with: .radialGradient(
-                Gradient(colors: [Color(red: 1, green: 0.55, blue: 0.6), Color(red: 0.6, green: 0.04, blue: 0.12)]),
+                Gradient(colors: [Color.p3(1, 0.55, 0.6), Color.p3(0.6, 0.04, 0.12)]),
                 center: CGPoint(x: c.x - r * 0.02, y: c.y - r * 0.02), startRadius: 0, endRadius: r * 0.09))
         }
         .opacity(0.6)
@@ -355,7 +355,7 @@ private struct Mechanism: View, Animatable {
             let planets: [(angle: Double, orbit: CGFloat, size: CGFloat, colour: Color, arm: CGFloat)] = [
                 (place(state.mercury, lag: 200), Orbit.mercury, 0.018, Color(red: 0.72, green: 0.68, blue: 0.64), 0.006),
                 (place(state.venus, lag: 150), Orbit.venus, 0.026, Color(red: 0.95, green: 0.88, blue: 0.70), 0.007),
-                (place(state.mars, lag: 70), Orbit.mars, 0.022, Color(red: 0.86, green: 0.42, blue: 0.28), 0.007),
+                (place(state.mars, lag: 70), Orbit.mars, 0.022, Color.p3(0.86, 0.42, 0.28), 0.007),
             ]
             let earthAngle = place(state.earth, lag: 110)
             let e = at(c, r * Orbit.earth, earthAngle)
@@ -369,7 +369,7 @@ private struct Mechanism: View, Animatable {
             // The sun: rays, then a glowing disc.
             var glow = context
             glow.addFilter(.blur(radius: r * 0.04))
-            glow.fill(circle(c, r * 0.08), with: .color(Color(red: 1.0, green: 0.78, blue: 0.4).opacity(0.7)))
+            glow.fill(circle(c, r * 0.08), with: .color(Color.p3(1.0, 0.78, 0.4).opacity(0.7)))
             // Straight rays between wavy flames, as on an old engraving's sun.
             var rays = Path()
             for k in 0..<12 {
@@ -386,11 +386,11 @@ private struct Mechanism: View, Animatable {
             }
             // Over the glow and edged dark, so they hold against the wheel's brass.
             context.stroke(rays, with: .color(.black.opacity(0.7)), lineWidth: 2)
-            context.fill(rays, with: .radialGradient(Gradient(colors: [Color(red: 1, green: 0.95, blue: 0.75), Color(red: 1, green: 0.76, blue: 0.35)]),
+            context.fill(rays, with: .radialGradient(Gradient(colors: [Color.p3(1, 0.95, 0.75), Color.p3(1, 0.76, 0.35)]),
                                                      center: c, startRadius: r * 0.07, endRadius: r * 0.15))
             context.fill(circle(c, r * 0.072), with: .radialGradient(
-                Gradient(colors: [Color(red: 1, green: 0.98, blue: 0.88), Color(red: 1, green: 0.8, blue: 0.4),
-                                  Color(red: 0.85, green: 0.55, blue: 0.2)]),
+                Gradient(colors: [Color.p3(1, 0.98, 0.88), Color.p3(1, 0.8, 0.4),
+                                  Color.p3(0.85, 0.55, 0.2)]),
                 center: c, startRadius: 0, endRadius: r * 0.072))
 
             for p in planets {
@@ -421,9 +421,9 @@ private struct Mechanism: View, Animatable {
                                style: StrokeStyle(lineWidth: r * 0.02, lineCap: .round))
             }
             // Noon faces the sun.
-            context.fill(circle(at(e, r * (Orbit.day + 0.034), toSun), r * 0.008), with: .color(Color(red: 1, green: 0.8, blue: 0.4)))
+            context.fill(circle(at(e, r * (Orbit.day + 0.034), toSun), r * 0.008), with: .color(Color.p3(1, 0.8, 0.4)))
             context.stroke(circle(e, r * 0.042 * 1.3), with: .color(Ink.brass.opacity(0.85)), lineWidth: 1.5)
-            sphere(context, at: e, radius: r * 0.042, colour: Color(red: 0.32, green: 0.56, blue: 0.82), sun: c)
+            sphere(context, at: e, radius: r * 0.042, colour: Color.p3(0.32, 0.56, 0.82), sun: c)
             var hand = Path()
             let handAngle = onRing(state.hour) - (1 - swing) * 240
             hand.move(to: e)

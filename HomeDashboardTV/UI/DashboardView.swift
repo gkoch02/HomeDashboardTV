@@ -9,8 +9,8 @@ private enum Palette {
     static let muted = Color(white: 0.70)
     static let faint = Color(white: 0.45)
     static let card = Color.white.opacity(0.06)
-    static let today = Color(red: 0.98, green: 0.78, blue: 0.42)
-    static let alert = Color(red: 1.0, green: 0.78, blue: 0.30)
+    static let today = Color.p3(0.98, 0.78, 0.42)
+    static let alert = Color.p3(1.0, 0.78, 0.30)
 }
 
 /// The dashboard at TV distance: the clock, weather and quote down the left, today's agenda
@@ -293,12 +293,12 @@ private struct AQIBadge: View {
     /// The EPA's band colours, lifted a little so they read on the dark ground.
     private var color: Color {
         switch airQuality.band {
-        case .good: return Color(red: 0.36, green: 0.82, blue: 0.42)
-        case .moderate: return Color(red: 0.98, green: 0.86, blue: 0.30)
-        case .sensitive: return Color(red: 1.0, green: 0.60, blue: 0.22)
-        case .unhealthy: return Color(red: 1.0, green: 0.35, blue: 0.33)
-        case .veryUnhealthy: return Color(red: 0.72, green: 0.45, blue: 0.95)
-        case .hazardous: return Color(red: 0.80, green: 0.30, blue: 0.40)
+        case .good: return Color.p3(0.36, 0.82, 0.42)
+        case .moderate: return Color.p3(0.98, 0.86, 0.30)
+        case .sensitive: return Color.p3(1.0, 0.60, 0.22)
+        case .unhealthy: return Color.p3(1.0, 0.35, 0.33)
+        case .veryUnhealthy: return Color.p3(0.72, 0.45, 0.95)
+        case .hazardous: return Color.p3(0.80, 0.30, 0.40)
         }
     }
 }

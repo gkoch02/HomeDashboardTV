@@ -112,8 +112,8 @@ private struct AgendaBuild {
 private enum Print {
     static let paper = Color(red: 0.080, green: 0.076, blue: 0.088)
     static let ink = Color(red: 0.925, green: 0.895, blue: 0.835)
-    static let red = Color(red: 0.88, green: 0.33, blue: 0.25)
-    static let ochre = Color(red: 0.92, green: 0.69, blue: 0.22)
+    static let red = Color.p3(0.88, 0.33, 0.25)
+    static let ochre = Color.p3(0.92, 0.69, 0.22)
     static let faint = Color(red: 0.925, green: 0.895, blue: 0.835).opacity(0.55)
 
     static let display = "Righteous-Regular"

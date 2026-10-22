@@ -28,6 +28,6 @@ enum SkyColour {
 
     static func color(_ h: Double) -> Color {
         let c = rgb(h)
-        return Color(red: c.0, green: c.1, blue: c.2)
+        return Color.p3(c.0, c.1, c.2)
     }
 }

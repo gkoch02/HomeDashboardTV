@@ -118,21 +118,26 @@ private enum Ink {
     /// The page.
     static let parchment = rgb(0x27, 0x1D, 0x15)
     static let parchmentDeep = rgb(0x1C, 0x14, 0x0E)
-    static let gold = rgb(0xD9, 0xB4, 0x5A)
-    static let goldBright = rgb(0xF6, 0xDE, 0x96)
-    static let goldDim = rgb(0x92, 0x74, 0x3A)
+    static let gold = p3(0xD9, 0xB4, 0x5A)
+    static let goldBright = p3(0xF6, 0xDE, 0x96)
+    static let goldDim = p3(0x92, 0x74, 0x3A)
     static let goldDeep = rgb(0x5E, 0x47, 0x20)
     static let cream = rgb(0xEC, 0xE0, 0xC4)
     static let creamDim = rgb(0xB5, 0xA5, 0x86)
     static let ash = rgb(0x6E, 0x66, 0x5A)
     /// Omens and the notice: sealing wax.
     static let wax = rgb(0x5A, 0x1E, 0x1A)
-    static let ember = rgb(0xE0, 0x62, 0x4A)
-    static let rain = rgb(0x86, 0xAE, 0xD0)
-    static let verdant = rgb(0x9A, 0xC4, 0x7E)
+    static let ember = p3(0xE0, 0x62, 0x4A)
+    static let rain = p3(0x86, 0xAE, 0xD0)
+    static let verdant = p3(0x9A, 0xC4, 0x7E)
 
     static func rgb(_ r: Int, _ g: Int, _ b: Int) -> Color {
         Color(red: Double(r) / 255, green: Double(g) / 255, blue: Double(b) / 255)
+    }
+
+    /// A hero ink, in Display P3 (`WideColour.swift`).
+    static func p3(_ r: Int, _ g: Int, _ b: Int) -> Color {
+        Color.p3(Double(r) / 255, Double(g) / 255, Double(b) / 255)
     }
 
     /// Gilt lettering: light at the top, deep at the foot.

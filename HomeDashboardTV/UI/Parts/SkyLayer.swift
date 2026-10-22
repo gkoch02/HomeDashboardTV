@@ -63,11 +63,14 @@ enum Sky {
     /// make a wall display a lamp.
     static let peak: Float = 2.5
 
-    /// A colour's components in extended sRGB, as the shaders take them.
+    /// A colour's components in extended sRGB, as the shaders take them: a Display P3 ink
+    /// (`WideColour.swift`) lands outside 0...1 where it reaches past sRGB, and the layer,
+    /// in extended sRGB, shows it.
     static func rgb(_ color: Color) -> SIMD4<Float> {
-        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
-        UIColor(color).getRed(&r, green: &g, blue: &b, alpha: &a)
-        return SIMD4(Float(r), Float(g), Float(b), Float(a))
+        guard let space = CGColorSpace(name: CGColorSpace.extendedSRGB),
+              let cg = UIColor(color).cgColor.converted(to: space, intent: .relativeColorimetric, options: nil),
+              let c = cg.components, c.count >= 3 else { return SIMD4(0, 0, 0, 1) }
+        return SIMD4(Float(c[0]), Float(c[1]), Float(c[2]), Float(cg.alpha))
     }
 }
 

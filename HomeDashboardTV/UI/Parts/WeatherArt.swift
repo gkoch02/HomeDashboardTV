@@ -12,7 +12,7 @@ struct WeatherArt: View, Equatable {
     /// Starlight, snow, mist and the moon's glow.
     var light = Color(red: 0.925, green: 0.895, blue: 0.835)
     /// The sun's rim, the lightning and the ring round the moon.
-    var accent = Color(red: 0.92, green: 0.69, blue: 0.22)
+    var accent = Color.p3(0.92, 0.69, 0.22)
 
     var body: some View {
         let scene = WeatherScene(icon: icon, size: size)
@@ -97,7 +97,7 @@ struct WeatherArt: View, Equatable {
         context.fill(
             Path(ellipseIn: CGRect(x: c.x - r * 3, y: c.y - r * 3, width: r * 6, height: r * 6)),
             with: .radialGradient(
-                Gradient(colors: [Color(red: 0.98, green: 0.62, blue: 0.20).opacity(0.30 * dimmed), accent.opacity(0)]),
+                Gradient(colors: [Color.p3(0.98, 0.62, 0.20).opacity(0.30 * dimmed), accent.opacity(0)]),
                 center: c, startRadius: r * 0.95, endRadius: r * 2.3
             )
         )
@@ -107,15 +107,15 @@ struct WeatherArt: View, Equatable {
             for p in wedge.dropFirst() { beam.addLine(to: p) }
             beam.closeSubpath()
             context.fill(beam, with: .linearGradient(
-                Gradient(colors: [Color(red: 1, green: 0.86, blue: 0.55).opacity(0.7 * dimmed), Color(red: 0.98, green: 0.62, blue: 0.20).opacity(0)]),
+                Gradient(colors: [Color.p3(1, 0.86, 0.55).opacity(0.7 * dimmed), Color.p3(0.98, 0.62, 0.20).opacity(0)]),
                 startPoint: c, endPoint: wedge[1]
             ))
         }
         let disc = Path(ellipseIn: CGRect(x: c.x - r, y: c.y - r, width: r * 2, height: r * 2))
         context.fill(disc, with: .radialGradient(
             Gradient(colors: [
-                Color(red: 1, green: 0.97, blue: 0.86).opacity(dimmed),
-                Color(red: 0.99, green: 0.84, blue: 0.47).opacity(dimmed),
+                Color.p3(1, 0.97, 0.86).opacity(dimmed),
+                Color.p3(0.99, 0.84, 0.47).opacity(dimmed),
                 accent.opacity(dimmed),
             ]),
             center: CGPoint(x: c.x - r * 0.25, y: c.y - r * 0.25), startRadius: 0, endRadius: r * 1.15
@@ -214,7 +214,7 @@ struct WeatherArt: View, Equatable {
             glow.addFilter(.blur(radius: unit * 0.03))
             glow.fill(path, with: .color(accent.opacity(0.8)))
             context.fill(path, with: .linearGradient(
-                Gradient(colors: [Color(red: 1, green: 0.95, blue: 0.75), accent]),
+                Gradient(colors: [Color.p3(1, 0.95, 0.75), accent]),
                 startPoint: path.boundingRect.origin,
                 endPoint: CGPoint(x: path.boundingRect.maxX, y: path.boundingRect.maxY)
             ))

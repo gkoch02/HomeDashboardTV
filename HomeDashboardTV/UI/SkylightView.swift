@@ -142,6 +142,7 @@ private struct SkyBackdrop: View {
     let now: Date
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(DashboardStore.self) private var store
     @State private var clock = SkyClock()
     @State private var dawn = Dawn.dark
     @State private var moonRise = 0.0
@@ -156,7 +157,7 @@ private struct SkyBackdrop: View {
             let sun = sunPlace(sky, size: size, ground: ground)
             let drift = BurnIn.drift(at: now)
             ZStack(alignment: .topLeading) {
-                SkyLayer(fragment: "skylightSky", paused: reduceMotion) { frame in
+                SkyLayer(fragment: "skylightSky", paused: reduceMotion, highlights: store.highlights) { frame in
                     let motion = clock.advance(to: frame.date, drift: sky.drift)
                     let rise = dawn.rise(at: frame.date)
                     let risen = (centre: CGPoint(x: sun.centre.x, y: sun.centre.y + (1 - rise) * Dawn.climb),

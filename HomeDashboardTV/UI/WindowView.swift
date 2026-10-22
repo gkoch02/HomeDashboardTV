@@ -111,6 +111,7 @@ private struct WindowBackdrop: View {
     let now: Date
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(DashboardStore.self) private var store
     @State private var lights = Lights.off
 
     var body: some View {
@@ -119,7 +120,7 @@ private struct WindowBackdrop: View {
         let count = lamps.events.count + (lamps.birthday == nil ? 0 : 1)
         let palette = Palette(glass: glass)
         let drift = BurnIn.drift(at: now)
-        SkyLayer(fragment: "windowPane", paused: reduceMotion) { frame in
+        SkyLayer(fragment: "windowPane", paused: reduceMotion, highlights: store.highlights) { frame in
             let time = Float(frame.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 3600))
             return WindowUniforms(
                 frame: frame.header(time: time),

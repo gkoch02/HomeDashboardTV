@@ -6,12 +6,20 @@ import SwiftUI
 ///
 /// The shader draws into a 16-bit float layer in extended sRGB rather than SwiftUI's 8-bit
 /// one, so its long dark gradients keep their precision, and on tvOS 26 or later the layer
-/// asks for extended dynamic range: where the Apple TV is putting out HDR, the shader's values
-/// above 1 show brighter than the text's white, with no bloom around them, which is what an
-/// OLED's pixels are for. The shader gets the screen's current headroom (1 where there is none,
-/// so the SDR picture is exactly what it was) and spends it only on its brightest things: the
-/// sun, lightning, the brightest folds of the aurora, the lights beyond the glass. `Sky.peak`
-/// caps how far it goes.
+/// asks for extended dynamic range: where the Apple TV's Format is an HDR or Dolby Vision mode,
+/// the shader's values above 1 show brighter than the text's white, with no bloom around them,
+/// which is what an OLED's pixels are for. The shader gets a headroom of `Sky.peak` when the
+/// highlights are on and 1 otherwise (then the SDR picture is exactly what it was), and spends
+/// it only on its brightest things: the sun, lightning, the brightest folds of the aurora, the
+/// lights beyond the glass.
+///
+/// tvOS does not say what the Format is. `UIScreen`'s headroom reads 1.0 as "potential" in
+/// every Format, and as "current" it reads 1.2 for the first seconds after the app comes up in
+/// a Dolby Vision Format and 1.0 in an SDR one, settling to 1.0 either way, while the panel
+/// shows at least 2.5 times white the whole time (measured on an Apple TV 4K with test
+/// strips). So `Highlights.automatic` turns the highlights on at the first reading above 1
+/// and keeps them on, and the settings drawer has HDR and SDR for the sighting that never
+/// comes or an output that clips.
 ///
 /// *uniforms* is asked for the shader's inputs on every frame; the sky's own motion (summed
 /// frame by frame in the layouts' clocks) lives in the closure's captures. Under Reduce Motion
@@ -21,6 +29,7 @@ import SwiftUI
 struct SkyLayer<Uniforms>: UIViewRepresentable {
     let fragment: String
     let paused: Bool
+    let highlights: DashboardStore.Highlights
     let uniforms: (SkyFrame) -> Uniforms
 
     func makeUIView(context: Context) -> SkyView<Uniforms> {
@@ -29,6 +38,7 @@ struct SkyLayer<Uniforms>: UIViewRepresentable {
 
     func updateUIView(_ view: SkyView<Uniforms>, context: Context) {
         view.uniforms = uniforms
+        view.highlights = highlights
         view.setPaused(paused)
     }
 }
@@ -48,8 +58,9 @@ struct SkyFrame {
 }
 
 enum Sky {
-    /// The most of the screen's headroom a sky uses: the brightest highlight is this many
-    /// times the text's white. More would make a wall display a lamp.
+    /// How bright a sky's highlights go, as a multiple of the text's white, when the highlights
+    /// are on. An Apple TV 4K in a Dolby Vision Format shows at least this much; more would
+    /// make a wall display a lamp.
     static let peak: Float = 2.5
 
     /// A colour's components in extended sRGB, as the shaders take them.
@@ -63,7 +74,10 @@ enum Sky {
 /// The Metal view: one full-screen triangle, the sky's uniforms in a fragment buffer.
 final class SkyView<Uniforms>: MTKView, MTKViewDelegate {
     var uniforms: ((SkyFrame) -> Uniforms)?
+    var highlights = DashboardStore.Highlights.automatic
 
+    /// Whether the screen has reported extended range since this view appeared.
+    private var sawHeadroom = false
     private let pipeline: MTLRenderPipelineState?
     private let queue: MTLCommandQueue?
 
@@ -102,10 +116,10 @@ final class SkyView<Uniforms>: MTKView, MTKViewDelegate {
 
     override func didMoveToWindow() {
         super.didMoveToWindow()
-        guard let screen = window?.screen else { return }
         if #available(tvOS 26, *) {
-            // How much of the screen's range the drawables use, so the compositor plans for it.
-            layer.contentsHeadroom = CGFloat(min(Float(screen.potentialEDRHeadroom), Sky.peak))
+            // How much of the screen's range the drawables may use, so the compositor plans
+            // for it; the screen's own "potential" reads 1.0 on tvOS whatever the Format.
+            layer.contentsHeadroom = CGFloat(Sky.peak)
         }
     }
 
@@ -116,11 +130,18 @@ final class SkyView<Uniforms>: MTKView, MTKViewDelegate {
         if paused { setNeedsDisplay() }
     }
 
-    /// The headroom the shader may use: the screen's, up to `Sky.peak`; 1 (none) before tvOS 26,
-    /// where the layer cannot ask for extended range and anything above 1 would only clip.
+    /// The headroom the shader may use: `Sky.peak` with the highlights on, else 1; always 1
+    /// before tvOS 26, where the layer cannot ask for extended range and anything above 1
+    /// would only clip.
     private var headroom: Float {
-        guard #available(tvOS 26, *), let screen = window?.screen else { return 1 }
-        return max(1, min(Float(screen.currentEDRHeadroom), Sky.peak))
+        guard #available(tvOS 26, *) else { return 1 }
+        switch highlights {
+        case .sdr: return 1
+        case .hdr: return Sky.peak
+        case .automatic:
+            if !sawHeadroom, let screen = window?.screen, screen.currentEDRHeadroom > 1 { sawHeadroom = true }
+            return sawHeadroom ? Sky.peak : 1
+        }
     }
 
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {}

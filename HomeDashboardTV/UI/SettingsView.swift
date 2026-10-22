@@ -24,7 +24,7 @@ struct SettingsView: View {
     @State private var lastFocused: [Page: String] = [:]
     @FocusState private var focused: String?
 
-    enum Page { case root, layout, keepAwake, source }
+    enum Page { case root, layout, keepAwake, highlights, source }
 
     static let width: CGFloat = 780
 
@@ -34,6 +34,7 @@ struct SettingsView: View {
             case .root: rootPage
             case .layout: layoutPage
             case .keepAwake: keepAwakePage
+            case .highlights: highlightsPage
             case .source: sourcePage
             }
         }
@@ -97,6 +98,8 @@ struct SettingsView: View {
             row(id: "layout", title: "Layout", value: store.layout.title, chevron: true) { page = .layout }
             row(id: "awake", title: "Keep Awake", detail: "Holds off the screensaver and sleep",
                 value: awakeLabel(store.keepAwakeHours), chevron: true) { page = .keepAwake }
+            row(id: "highlights", title: "Highlights", detail: "Skies brighter than white on an HDR output",
+                value: store.highlights.title, chevron: true) { page = .highlights }
             row(id: "source", title: "Source", value: sourceName, chevron: true) { page = .source }
             sectionHeader("Web UI login, if the Pi has a password")
             TextField("Username", text: $store.username)
@@ -143,6 +146,20 @@ struct SettingsView: View {
             }
             Spacer(minLength: 0)
             footnote("For that long after a remote press, the Apple TV neither starts its screensaver nor goes to sleep. After that its own timers take over: the screensaver, then sleep. Menu goes back.")
+        }
+    }
+
+    private var highlightsPage: some View {
+        Group {
+            title("Highlights")
+            ForEach(DashboardStore.Highlights.allCases, id: \.self) { choice in
+                row(id: "highlights-\(choice.rawValue)", title: choice.title, value: tick(store.highlights == choice)) {
+                    store.highlights = choice
+                    page = .root
+                }
+            }
+            Spacer(minLength: 0)
+            footnote("Skylight, Aurora and Window can draw their brightest things, the sun, lightning, the aurora's folds and the lights beyond the glass, brighter than the text's white when the Apple TV's Format is an HDR or Dolby Vision mode. Automatic turns that on once the screen reports the range; HDR turns it on regardless, for a Format the screen never reports (in an SDR Format those things clip to white); SDR keeps everything within white. Menu goes back.")
         }
     }
 
@@ -197,6 +214,7 @@ struct SettingsView: View {
             case .root: target = "layout"
             case .layout: target = "layout-\(store.layout.rawValue)"
             case .keepAwake: target = "awake-\(store.keepAwakeHours)"
+            case .highlights: target = "highlights-\(store.highlights.rawValue)"
             case .source: target = browser.found.first.map { "pi-\($0.name)" } ?? "address"
             }
         }

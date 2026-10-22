@@ -96,6 +96,7 @@ private struct AuroraSky: View {
     let now: Date
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(DashboardStore.self) private var store
     @State private var clock = AuroraClock()
     @State private var glow = Glow.dark
 
@@ -105,7 +106,7 @@ private struct AuroraSky: View {
         let edge = Color(hue: curtain.edge / 360, saturation: 0.88, brightness: 0.95)
         let fringe = Color(hue: curtain.fringe / 360, saturation: 0.8, brightness: 0.8)
         let drift = BurnIn.drift(at: now)
-        SkyLayer(fragment: "auroraSky", paused: reduceMotion) { frame in
+        SkyLayer(fragment: "auroraSky", paused: reduceMotion, highlights: store.highlights) { frame in
             let motion = clock.advance(to: frame.date, unrest: unrest)
             return AuroraUniforms(
                 frame: frame.header(time: motion.time),

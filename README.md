@@ -157,11 +157,13 @@ settings. The committed project is complete, so XcodeGen is only needed to chang
   rest). A title too long even for two lines ends in "…".
 - The layout drifts a few points every ten minutes, so an OLED TV never holds one image.
 - The live skies (Skylight, Aurora, Window) are drawn into a 16-bit layer, so their dark
-  gradients don't band, and on tvOS 26 or later with the Apple TV putting out HDR (Settings →
-  Video and Audio → Format set to an HDR or Dolby Vision format; *Match Content* only switches
-  for video) they use the screen's headroom: the sun, lightning, the brightest folds of the
-  aurora and the lights beyond the glass go brighter than the text's white, up to 2.5 times,
-  which an OLED shows without bloom. In SDR they look exactly as before.
+  gradients don't band, and on tvOS 26 or later with the Apple TV's Format set to an HDR or
+  Dolby Vision mode (Settings → Video and Audio → Format; *Match Content* only switches for
+  video) the sun, lightning, the brightest folds of the aurora and the lights beyond the glass
+  go brighter than the text's white, 2.5 times, which an OLED shows without bloom. tvOS does
+  not tell an app which Format is set, so settings → Highlights is *Automatic* (on once the
+  screen reports extended range, which it does for the first seconds in an HDR Format), *HDR*
+  (always on) or *SDR* (never). In SDR the skies look exactly as before.
 - The screensaver and sleep are held off while the app is open, always or for 1–8 hours after
   the last remote press (settings → Keep awake); after that the Apple TV's own timers apply.
 
@@ -196,8 +198,8 @@ for the drift. Then add a case to `DashboardStore.Layout` and a line to
 `DashboardScreen.content`; the settings list picks it up. Keep its inks and faces `private` to
 its file, and list any new font under `UIAppFonts` in `project.yml`. A layout with a live
 shader sky draws it through `SkyLayer` with a fragment function and a uniforms struct of
-`float4`s, as Skylight, Aurora and Window do; the frame's headroom is 1 in SDR, so a sky should
-only spend it on its brightest few things.
+`float4`s, as Skylight, Aurora and Window do; the frame's headroom is 1 with the highlights
+off, so a sky should only spend it on its brightest few things.
 
 ## Icon
 

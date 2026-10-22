@@ -133,7 +133,6 @@ final class SkyView<Uniforms>: MTKView, MTKViewDelegate {
         let frame = SkyFrame(date: Date(), size: bounds.size,
                              scale: Float(drawableSize.width / bounds.width), headroom: headroom)
         var values = uniforms(frame)
-        frameCount += 1
         encoder.setRenderPipelineState(pipeline)
         encoder.setFragmentBytes(&values, length: MemoryLayout<Uniforms>.stride, index: 0)
         encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)

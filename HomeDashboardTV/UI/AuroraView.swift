@@ -79,11 +79,11 @@ private enum Ink {
     static let text = Color(red: 0.9, green: 0.93, blue: 0.92)
     static let soft = text.opacity(0.7)
     static let faint = text.opacity(0.48)
-    static let amber = Color(red: 1.0, green: 0.76, blue: 0.32)
+    static let amber = Color.p3(1.0, 0.76, 0.32)
 
     /// The curtain's edge colour, lightened to read as text.
     static func air(_ curtain: Aurora.Curtain) -> Color {
-        Color(hue: curtain.edge / 360, saturation: 0.5, brightness: 1)
+        Color.p3(hue: curtain.edge / 360, saturation: 0.5, brightness: 1)
     }
 }
 
@@ -103,8 +103,8 @@ private struct AuroraSky: View {
     var body: some View {
         let curtain = Aurora.curtain(aqi: snapshot.sources.airQuality?.data?.aqi)
         let unrest = Aurora.unrest(windSpeed: snapshot.sources.weather?.data?.windSpeed, isMetric: snapshot.isMetric)
-        let edge = Color(hue: curtain.edge / 360, saturation: 0.88, brightness: 0.95)
-        let fringe = Color(hue: curtain.fringe / 360, saturation: 0.8, brightness: 0.8)
+        let edge = Color.p3(hue: curtain.edge / 360, saturation: 0.88, brightness: 0.95)
+        let fringe = Color.p3(hue: curtain.fringe / 360, saturation: 0.8, brightness: 0.8)
         let drift = BurnIn.drift(at: now)
         SkyLayer(fragment: "auroraSky", paused: reduceMotion, highlights: store.highlights) { frame in
             let motion = clock.advance(to: frame.date, unrest: unrest)

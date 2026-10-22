@@ -101,8 +101,8 @@ private enum Ink {
     static let cream = Color(red: 0.95, green: 0.93, blue: 0.88)
     static let faint = cream.opacity(0.55)
     static let rule = cream.opacity(0.22)
-    static let red = Color(red: 0.93, green: 0.36, blue: 0.30)
-    static let yellow = Color(red: 0.98, green: 0.80, blue: 0.33)
+    static let red = Color.p3(0.93, 0.36, 0.30)
+    static let yellow = Color.p3(0.98, 0.80, 0.33)
 }
 
 private enum Face {
@@ -319,12 +319,12 @@ private struct SunGlyph: View {
     var body: some View {
         ZStack {
             Circle()
-                .fill(RadialGradient(colors: [Color(red: 1, green: 0.85, blue: 0.55).opacity(0.5), .clear],
+                .fill(RadialGradient(colors: [Color.p3(1, 0.85, 0.55).opacity(0.5), .clear],
                                      center: .center, startRadius: radius * 0.8, endRadius: radius * 2.2))
                 .frame(width: radius * 4.4, height: radius * 4.4)
             Circle()
-                .fill(RadialGradient(colors: [Color(red: 1, green: 0.98, blue: 0.88), Color(red: 1, green: 0.86, blue: 0.50),
-                                              Color(red: 0.97, green: 0.66, blue: 0.24)],
+                .fill(RadialGradient(colors: [Color.p3(1, 0.98, 0.88), Color.p3(1, 0.86, 0.50),
+                                              Color.p3(0.97, 0.66, 0.24)],
                                      center: UnitPoint(x: 0.38, y: 0.38), startRadius: 0, endRadius: radius * 1.2))
                 .frame(width: radius * 2, height: radius * 2)
         }

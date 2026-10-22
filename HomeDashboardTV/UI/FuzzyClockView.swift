@@ -71,8 +71,8 @@ struct FuzzyClockView: Theme {
 
 private enum Ink {
     static let text = Color(red: 0.94, green: 0.94, blue: 0.95)
-    static let primary = Color(red: 0.97, green: 0.81, blue: 0.30)
-    static let secondary = Color(red: 0.58, green: 0.62, blue: 0.96)
+    static let primary = Color.p3(0.97, 0.81, 0.30)
+    static let secondary = Color.p3(0.58, 0.62, 0.96)
     static let faint = text.opacity(0.55)
     static let rule = text.opacity(0.18)
 

@@ -71,24 +71,24 @@ private enum Ink {
     static let ivory = Color(red: 0.93, green: 0.89, blue: 0.80)
     static let faint = ivory.opacity(0.55)
     static let engraving = ivory.opacity(0.32)
-    static let brass = Color(red: 0.86, green: 0.70, blue: 0.38)
-    static let mercury = Color(red: 0.88, green: 0.22, blue: 0.18)
-    static let cold = Color(red: 0.36, green: 0.56, blue: 0.92)
-    static let comfort = Color(red: 0.36, green: 0.72, blue: 0.46)
-    static let amber = Color(red: 0.97, green: 0.78, blue: 0.30)
-    static let orange = Color(red: 0.96, green: 0.55, blue: 0.22)
-    static let violet = Color(red: 0.62, green: 0.38, blue: 0.82)
+    static let brass = Color.p3(0.86, 0.70, 0.38)
+    static let mercury = Color.p3(0.88, 0.22, 0.18)
+    static let cold = Color.p3(0.36, 0.56, 0.92)
+    static let comfort = Color.p3(0.36, 0.72, 0.46)
+    static let amber = Color.p3(0.97, 0.78, 0.30)
+    static let orange = Color.p3(0.96, 0.55, 0.22)
+    static let violet = Color.p3(0.62, 0.38, 0.82)
 
     /// Polished brass round a bezel: light catching the top left and the lower right.
     static let brassRing = AngularGradient(colors: [
-        Color(red: 0.98, green: 0.88, blue: 0.58), Color(red: 0.62, green: 0.45, blue: 0.18),
-        Color(red: 0.90, green: 0.74, blue: 0.40), Color(red: 0.55, green: 0.40, blue: 0.16),
-        Color(red: 0.98, green: 0.88, blue: 0.58),
+        Color.p3(0.98, 0.88, 0.58), Color.p3(0.62, 0.45, 0.18),
+        Color.p3(0.90, 0.74, 0.40), Color.p3(0.55, 0.40, 0.16),
+        Color.p3(0.98, 0.88, 0.58),
     ], center: .center, startAngle: .degrees(-135), endAngle: .degrees(225))
 
     static let brassFace = LinearGradient(colors: [
-        Color(red: 0.99, green: 0.89, blue: 0.60), Color(red: 0.80, green: 0.62, blue: 0.30),
-        Color(red: 0.95, green: 0.80, blue: 0.48),
+        Color.p3(0.99, 0.89, 0.60), Color.p3(0.80, 0.62, 0.30),
+        Color.p3(0.95, 0.80, 0.48),
     ], startPoint: .topLeading, endPoint: .bottomTrailing)
 
     /// Enamel: a faint lift at the centre, black at the rim.

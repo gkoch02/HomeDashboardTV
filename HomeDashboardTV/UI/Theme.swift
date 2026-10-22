@@ -83,7 +83,7 @@ struct NoticeCapsule: View {
     var body: some View {
         Label(text, systemImage: "exclamationmark.arrow.circlepath")
             .font(.system(size: 22, weight: .medium))
-            .foregroundStyle(Color(red: 1.0, green: 0.78, blue: 0.30))
+            .foregroundStyle(Color.p3(1.0, 0.78, 0.30))
             .padding(.horizontal, 20)
             .padding(.vertical, 10)
             .background(.black.opacity(0.45), in: Capsule())

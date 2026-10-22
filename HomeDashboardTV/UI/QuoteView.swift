@@ -120,7 +120,7 @@ private enum Ink {
     static let cream = Color(red: 0.95, green: 0.93, blue: 0.88)
     static let faint = cream.opacity(0.55)
     static let rule = cream.opacity(0.3)
-    static let ochre = Color(red: 0.90, green: 0.66, blue: 0.27)
+    static let ochre = Color.p3(0.90, 0.66, 0.27)
 }
 
 private enum Face {

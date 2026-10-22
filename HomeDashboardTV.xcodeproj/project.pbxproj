@@ -56,6 +56,7 @@
 		DBF586DBDC1455FF0DC4F199 /* SkylightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C30E67A42F18B2067865361F /* SkylightView.swift */; };
 		E21B6926489772868CDB44A0 /* SkyLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29B0E803153CB812629ADA59 /* SkyLayer.swift */; };
 		E43884FB389F97097336E1B8 /* FuzzyClockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 656C08F19678AAA727B5755E /* FuzzyClockView.swift */; };
+		E4A90D025979E78BE7CA18DC /* WideColour.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8B868F16A1C58C2FDA721DB /* WideColour.swift */; };
 		E683ABB11290452C9675BF4E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0A63BFA37FD3C74D01808FA4 /* Assets.xcassets */; };
 		EB6312D619DA25549CF17252 /* CormorantGaramond-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F2343E09D5ADE1C0F4096554 /* CormorantGaramond-Italic.ttf */; };
 		EEC06FB2796AB38DD2F6D063 /* DashboardCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3298B6D11AB4D038081715DC /* DashboardCore */; };
@@ -138,6 +139,7 @@
 		F2343E09D5ADE1C0F4096554 /* CormorantGaramond-Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "CormorantGaramond-Italic.ttf"; sourceTree = "<group>"; };
 		F31AD003A5C8873570D9A9F2 /* demo-snapshot.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "demo-snapshot.json"; sourceTree = "<group>"; };
 		F836F52D21F1424312E73132 /* CyberpunkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyberpunkView.swift; sourceTree = "<group>"; };
+		F8B868F16A1C58C2FDA721DB /* WideColour.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WideColour.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -224,6 +226,7 @@
 				6041939B5D7B3127401CA708 /* SplitMix.swift */,
 				C1E1BFF6FCCC998B7C7EC292 /* Starfield.swift */,
 				72F2A46DC8514A7232F59DA3 /* WeatherArt.swift */,
+				F8B868F16A1C58C2FDA721DB /* WideColour.swift */,
 				5AB880AAFFAF50381C546114 /* WindowPane.metal */,
 			);
 			path = Parts;
@@ -459,6 +462,7 @@
 				668934D53CA77B99EFA43552 /* UplinkView.swift in Sources */,
 				7701A0FDED19BDD2E1A71CC9 /* WeatherArt.swift in Sources */,
 				1426E37D465A29D3AC373CD2 /* WeatherglassView.swift in Sources */,
+				E4A90D025979E78BE7CA18DC /* WideColour.swift in Sources */,
 				416BAB7435FF5AA9F705C30F /* WindowPane.metal in Sources */,
 				12DF9F160B353E555C4E28B0 /* WindowView.swift in Sources */,
 			);

@@ -208,7 +208,7 @@ extension View {
 
 private enum Ink {
     /// Dim enough to leave a dark room dark.
-    static let mark = Color(red: 0.78, green: 0.13, blue: 0.10)
+    static let mark = Color.p3(0.78, 0.13, 0.10)
 }
 
 private enum Face {

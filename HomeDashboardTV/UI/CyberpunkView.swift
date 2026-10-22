@@ -154,17 +154,22 @@ private func decrypted(_ text: String, t: Double, at: Double) -> String {
 private enum Ink {
     static let ground = rgb(0x0B, 0x08, 0x0A)
     static let glow = rgb(0x36, 0x10, 0x15)
-    static let red = rgb(0xFF, 0x5E, 0x55)
-    static let redHot = rgb(0xFF, 0x8F, 0x84)
-    static let redDim = rgb(0x9A, 0x3A, 0x36)
+    static let red = p3(0xFF, 0x5E, 0x55)
+    static let redHot = p3(0xFF, 0x8F, 0x84)
+    static let redDim = p3(0x9A, 0x3A, 0x36)
     static let redDeep = rgb(0x4A, 0x13, 0x16)
-    static let cyan = rgb(0x5E, 0xF6, 0xFF)
-    static let yellow = rgb(0xF2, 0xE2, 0x2E)
-    static let green = rgb(0x6F, 0xE0, 0x7A)
+    static let cyan = p3(0x5E, 0xF6, 0xFF)
+    static let yellow = p3(0xF2, 0xE2, 0x2E)
+    static let green = p3(0x6F, 0xE0, 0x7A)
     static let well = rgb(0x12, 0x0A, 0x0D)
 
     static func rgb(_ r: Int, _ g: Int, _ b: Int) -> Color {
         Color(red: Double(r) / 255, green: Double(g) / 255, blue: Double(b) / 255)
+    }
+
+    /// A hero ink, in Display P3 (`WideColour.swift`).
+    static func p3(_ r: Int, _ g: Int, _ b: Int) -> Color {
+        Color.p3(Double(r) / 255, Double(g) / 255, Double(b) / 255)
     }
 
     /// The air's colour: green in good air, yellow in moderate, red beyond.

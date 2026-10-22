@@ -127,9 +127,9 @@ private enum Ink {
     static let text = Color(red: 0.97, green: 0.97, blue: 0.98)
     static let soft = text.opacity(0.72)
     static let faint = text.opacity(0.46)
-    static let amber = Color(red: 1.0, green: 0.76, blue: 0.32)
-    static let now = Color(red: 1.0, green: 0.62, blue: 0.36)
-    static let rain = Color(red: 0.45, green: 0.72, blue: 1.0)
+    static let amber = Color.p3(1.0, 0.76, 0.32)
+    static let now = Color.p3(1.0, 0.62, 0.36)
+    static let rain = Color.p3(0.45, 0.72, 1.0)
 }
 
 // MARK: - The sky
@@ -363,7 +363,7 @@ private struct RGB {
 
     func mix(_ o: RGB, _ t: Double) -> RGB { RGB(r + (o.r - r) * t, g + (o.g - g) * t, b + (o.b - b) * t) }
     func scaled(_ k: Double) -> RGB { RGB(r * k, g * k, b * k) }
-    var color: Color { Color(red: r, green: g, blue: b) }
+    var color: Color { Color.p3(r, g, b) }
 }
 
 // MARK: - Over the sky
@@ -557,12 +557,12 @@ private struct WeatherNow: View {
 
     static func colour(_ band: AirQuality.Band) -> Color {
         switch band {
-        case .good: return Color(red: 0.36, green: 0.85, blue: 0.45)
-        case .moderate: return Color(red: 0.98, green: 0.84, blue: 0.3)
-        case .sensitive: return Color(red: 1.0, green: 0.6, blue: 0.25)
-        case .unhealthy: return Color(red: 0.95, green: 0.3, blue: 0.3)
-        case .veryUnhealthy: return Color(red: 0.7, green: 0.35, blue: 0.75)
-        case .hazardous: return Color(red: 0.6, green: 0.15, blue: 0.25)
+        case .good: return Color.p3(0.36, 0.85, 0.45)
+        case .moderate: return Color.p3(0.98, 0.84, 0.3)
+        case .sensitive: return Color.p3(1.0, 0.6, 0.25)
+        case .unhealthy: return Color.p3(0.95, 0.3, 0.3)
+        case .veryUnhealthy: return Color.p3(0.7, 0.35, 0.75)
+        case .hazardous: return Color.p3(0.6, 0.15, 0.25)
         }
     }
 }

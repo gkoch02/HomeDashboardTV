@@ -70,7 +70,7 @@ private enum Ink {
     static let cream = Color(red: 0.937, green: 0.902, blue: 0.831)
     static let soft = Color(red: 0.81, green: 0.77, blue: 0.68)
     static let faint = Color(red: 0.73, green: 0.68, blue: 0.6)
-    static let ochre = Color(red: 0.9, green: 0.72, blue: 0.36)
+    static let ochre = Color.p3(0.9, 0.72, 0.36)
 
     /// The lanterns, warm and each a little different, and the dots that match them.
     static let lamps: [RGB] = [
@@ -212,8 +212,8 @@ private struct RGB {
         let l = 0.3 * r + 0.59 * g + 0.11 * b
         return mix(RGB(l, l, l), amount)
     }
-    var color: Color { Color(red: r, green: g, blue: b) }
-    var vector: SIMD4<Float> { SIMD4(Float(r), Float(g), Float(b), 1) }
+    var color: Color { Color.p3(r, g, b) }
+    var vector: SIMD4<Float> { Sky.rgb(color) }
 }
 
 // MARK: - Over the glass

@@ -164,6 +164,11 @@ settings. The committed project is complete, so XcodeGen is only needed to chang
   not tell an app which Format is set, so settings → Highlights is *Automatic* (on once the
   screen reports extended range, which it does for the first seconds in an HDR Format), *HDR*
   (always on) or *SDR* (never). In SDR the skies look exactly as before.
+- The inks that carry each layout (the aurora, Skylight's dusk and its ribbon, the air-quality
+  bands, Cyberpunk's red and cyan, the Grimoire's and Uplink's golds, the Orrery's and
+  Weatherglass's brass, the Window's lamps, the painted sun) are declared in Display P3, which
+  an HDR or Dolby Vision Format sends and an OLED shows; in 4K SDR they fall back to the nearest
+  sRGB colour. Text and grounds stay sRGB.
 - The screensaver and sleep are held off while the app is open, always or for 1–8 hours after
   the last remote press (settings → Keep awake); after that the Apple TV's own timers apply.
 

@@ -1,11 +1,12 @@
-#include <metal_stdlib>
-#include <SwiftUI/SwiftUI_Metal.h>
+#include "SkyPass.h"
 using namespace metal;
 
 // The Aurora layout's sky, one pixel at a time: three curtains of light over a line of hills
 // and a still lake that holds their reflection, with stars behind, all on true black (an
 // OLED's pixels off). The colours are worked out in Swift (`AuroraView`, from `Aurora` in
 // DashboardCore); this only composes them. Positions are in points, as SwiftUI lays out.
+// Drawn by `SkyLayer` into a 16-bit extended-range layer: with headroom, the brightest folds
+// of the curtains go brighter than white.
 
 namespace aurora {
 
@@ -66,20 +67,35 @@ float2 curtains(float u, float y, float height, float phase, float unrest) {
 
 }  // namespace aurora
 
-/// - size: the view, in points.
-/// - phase: the curtains' motion, 0 to 2π, summed frame by frame in Swift so a change of wind
-///   changes their speed, never their place.
-/// - time: seconds, wrapping hourly, for the stars' twinkle and the lake's ripple, which turn
-///   a whole number of times an hour.
-/// - unrest: how restless the wind makes the curtains, 0 to 1.6.
+/// - frame: the view's size in points, the layer's scale, and the time in seconds, wrapping
+///   hourly, for the stars' twinkle and the lake's ripple, which turn a whole number of times
+///   an hour.
+/// - wave: the curtains' motion (x, 0 to 2π, summed frame by frame in Swift so a change of
+///   wind changes their speed, never their place), how restless the wind makes them (y, 0 to
+///   1.6), how far the build-in has brought the sky up (z, 0 to 1), and the headroom (w, 1 to
+///   `Sky.peak`: how bright the folds may go, as a multiple of white).
 /// - edge, fringe: the curtains' colour at the lower edge and at the top.
-/// - light: how far the build-in has brought the sky up (x), 0 to 1.
 /// - motion: the burn-in drift (z, w) the hills move with, so their line never holds one place.
-[[ stitchable ]] half4 auroraSky(float2 pos, half4 current,
-                                 float2 size, float phase, float time, float unrest,
-                                 half4 edge, half4 fringe,
-                                 float4 light, float4 motion) {
+struct AuroraUniforms {
+    float4 frame;
+    float4 wave;
+    float4 edge;
+    float4 fringe;
+    float4 motion;
+};
+
+fragment half4 auroraSky(SkyVertex in [[stage_in]], constant AuroraUniforms &sky [[buffer(0)]]) {
     using namespace aurora;
+
+    float2 pos = skyPoint(in.position, sky.frame);
+    float2 size = sky.frame.xy;
+    float time = sky.frame.w;
+    float phase = sky.wave.x;
+    float unrest = sky.wave.y;
+    float light = sky.wave.z;
+    float peak = sky.wave.w;
+    float4 edge = sky.edge, fringe = sky.fringe;
+    float4 motion = sky.motion;
 
     float2 shift = motion.zw;
     float x = pos.x - shift.x;
@@ -122,10 +138,13 @@ float2 curtains(float u, float y, float height, float phase, float unrest) {
         col = (edgeColour * l.x + fringeColour * l.y) * 0.2 * (1.0 - 0.6 * depth);
     }
 
-    // Bright, never blown: a soft shoulder keeps the folds' colour where curtains overlap.
-    col = (1.0 - exp(-col * 1.6)) * float(light.x);
+    // Bright, never blown: a soft shoulder keeps the folds' colour where curtains overlap. The
+    // shoulder's ceiling is the headroom, so with headroom the brightest folds pass white; the
+    // dim parts, where the curve is still straight, are unchanged.
+    float ceiling = 1.0 + 0.6 * (peak - 1.0);
+    col = (1.0 - exp(-col * 1.6 / ceiling)) * ceiling * light;
 
     // A step of dither breaks up banding in the long dark gradients.
-    col += (hash(pos * 1.37) - 0.5) / 255.0 * float(light.x);
-    return half4(half3(saturate(col)), 1.0h);
+    col += (hash(pos * 1.37) - 0.5) / 255.0 * light;
+    return half4(half3(max(col, 0.0)), 1.0h);
 }

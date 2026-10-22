@@ -5,7 +5,8 @@ import SwiftUI
 /// A layout drawn for the TV rather than ported from the Pi: a pane of glass with the weather
 /// on it, and nothing but light beyond, with the day set over it.
 ///
-/// The pane is a Metal shader running at 30 frames a second (`WindowPane.metal`). Beyond the
+/// The pane is a Metal shader running at 30 frames a second (`WindowPane.metal`, drawn by
+/// `SkyLayer`, so on an HDR output the lights beyond the glass pass white). Beyond the
 /// glass, far out of focus, is colour for the hour and the weather, washes of glow drifting
 /// slowly across it and a scatter of lights swaying with the wind; it never pretends to be a
 /// place. On the glass: rain leaves beads and sends drops running down, leaning with the wind,
@@ -118,30 +119,33 @@ private struct WindowBackdrop: View {
         let count = lamps.events.count + (lamps.birthday == nil ? 0 : 1)
         let palette = Palette(glass: glass)
         let drift = BurnIn.drift(at: now)
-        GeometryReader { geometry in
-            let size = geometry.size
-            TimelineView(.animation(minimumInterval: 1.0 / 30, paused: reduceMotion)) { context in
-                let time = Float(context.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 3600))
-                Rectangle()
-                    .fill(.black)
-                    .colorEffect(ShaderLibrary.windowPane(
-                        .float2(size), .float(time),
-                        .color(palette.zenith.color), .color(palette.horizon.color), .color(palette.ground.color),
-                        .color(palette.glow.color), .color(palette.lights.color),
-                        .float4(Float(palette.night), 0, glass.storm ? 1 : 0, Float(lights.level(at: context.date))),
-                        .float4(Float(glass.wet), Float(glass.drift), Float(glass.frost), Float(glass.mist)),
-                        .float4(Float(glass.snow), Float(count), 0, 0),
-                        .color(Ink.lamps[0].color), .color(Ink.lamps[1].color),
-                        .color(Ink.lamps[2].color), .color(Ink.lamps[3].color),
-                        .float4(0, 0, Float(drift.width), Float(drift.height))
-                    ))
-            }
+        SkyLayer(fragment: "windowPane", paused: reduceMotion) { frame in
+            let time = Float(frame.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 3600))
+            return WindowUniforms(
+                frame: frame.header(time: time),
+                zenith: palette.zenith.vector, horizon: palette.horizon.vector, ground: palette.ground.vector,
+                glow: palette.glow.vector, lights: palette.lights.vector,
+                light: SIMD4(Float(palette.night), frame.headroom, glass.storm ? 1 : 0, Float(lights.level(at: frame.date))),
+                glass: SIMD4(Float(glass.wet), Float(glass.drift), Float(glass.frost), Float(glass.mist)),
+                extra: SIMD4(Float(glass.snow), Float(count), 0, 0),
+                lamp0: Ink.lamps[0].vector, lamp1: Ink.lamps[1].vector,
+                lamp2: Ink.lamps[2].vector, lamp3: Ink.lamps[3].vector,
+                motion: SIMD4(0, 0, Float(drift.width), Float(drift.height)))
         }
         .background(Color.black)
         .onBuildIn(reset: { settled in lights = settled ? .on : .off }) {
             lights = .coming(.now)
         }
     }
+}
+
+/// `WindowPane.metal`'s inputs, field for field.
+private struct WindowUniforms {
+    var frame: SIMD4<Float>
+    var zenith, horizon, ground, glow, lights: SIMD4<Float>
+    var light, glass, extra: SIMD4<Float>
+    var lamp0, lamp1, lamp2, lamp3: SIMD4<Float>
+    var motion: SIMD4<Float>
 }
 
 /// The pane's build-in, timed by its own timeline (its shader's inputs do not animate): the
@@ -208,6 +212,7 @@ private struct RGB {
         return mix(RGB(l, l, l), amount)
     }
     var color: Color { Color(red: r, green: g, blue: b) }
+    var vector: SIMD4<Float> { SIMD4(Float(r), Float(g), Float(b), 1) }
 }
 
 // MARK: - Over the glass

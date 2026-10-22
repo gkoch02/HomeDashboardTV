@@ -1,11 +1,12 @@
-#include <metal_stdlib>
-#include <SwiftUI/SwiftUI_Metal.h>
+#include "SkyPass.h"
 using namespace metal;
 
 // The Skylight layout's sky, one pixel at a time: the sky's gradient for the sun's altitude,
 // the sun and its glow, stars, cloud, rain or snow, fog and lightning, over two ridges with
 // true black below them (an OLED's pixels off). The colours are worked out in Swift
 // (`SkylightView`); this only composes them. Positions are in points, as SwiftUI lays out.
+// Drawn by `SkyLayer` into a 16-bit extended-range layer: with headroom, the sun, its glow's
+// core, the stars and the lightning go brighter than white.
 
 namespace skylight {
 
@@ -55,9 +56,9 @@ float ridge(float x, float seed) {
 
 }  // namespace skylight
 
-/// - size: the view, in points.
-/// - time: seconds, wrapping hourly: what moves in a cycle (the stars' twinkle, the snow's sway,
-///   the lightning) runs at rates that fit an hour exactly, so the wrap is seamless.
+/// - frame: the view's size in points, the layer's scale, and the time in seconds, wrapping
+///   hourly: what moves in a cycle (the stars' twinkle, the snow's sway, the lightning) runs at
+///   rates that fit an hour exactly, so the wrap is seamless.
 /// - clouds: how far the cloud has drifted with the wind (x) and changed shape (y, z), summed
 ///   frame by frame in Swift so a change of wind changes its speed, not its place.
 /// - rain: each layer's fall, in cells, folded at 1024 (`fold`).
@@ -70,16 +71,40 @@ float ridge(float x, float seed) {
 ///   the stars are, and the storm (0 or 1: lightning).
 /// - weather: cloud cover, rain, snow and fog, each 0 to 1.
 /// - cloudLit, cloudShade: cloud on its sunward side and in its own shadow.
-/// - horizonY: where the ground starts.
+/// - ground: where the ground starts (x), the headroom (y, 1 to `Sky.peak`: how bright the
+///   highlights may go, as a multiple of white) and the build-in's light (z, 0 black to 1).
 /// - motion: the wind's push (x), and the burn-in drift (z, w) the ridges move with, so
 ///   their edge never holds one place.
-[[ stitchable ]] half4 skylightSky(float2 pos, half4 current,
-                                   float2 size, float time, float4 clouds, float4 rain4, float4 snow4,
-                                   half4 zenith, half4 horizon, half4 glow,
-                                   float4 sun, float4 light, float4 weather,
-                                   half4 cloudLit, half4 cloudShade,
-                                   float horizonY, float4 motion) {
+struct SkylightUniforms {
+    float4 frame;
+    float4 clouds;
+    float4 rain;
+    float4 snow;
+    float4 zenith;
+    float4 horizon;
+    float4 glow;
+    float4 sun;
+    float4 light;
+    float4 weather;
+    float4 cloudLit;
+    float4 cloudShade;
+    float4 ground;
+    float4 motion;
+};
+
+fragment half4 skylightSky(SkyVertex in [[stage_in]], constant SkylightUniforms &sky [[buffer(0)]]) {
     using namespace skylight;
+
+    float2 pos = skyPoint(in.position, sky.frame);
+    float2 size = sky.frame.xy;
+    float time = sky.frame.w;
+    float4 clouds = sky.clouds, rain4 = sky.rain, snow4 = sky.snow;
+    float4 zenith = sky.zenith, horizon = sky.horizon, glow = sky.glow;
+    float4 sun = sky.sun, light = sky.light, weather = sky.weather;
+    float4 cloudLit = sky.cloudLit, cloudShade = sky.cloudShade;
+    float horizonY = sky.ground.x;
+    float boost = sky.ground.y - 1.0;
+    float4 motion = sky.motion;
 
     float2 shift = motion.zw;
     float x = pos.x - shift.x;
@@ -103,7 +128,7 @@ float ridge(float x, float seed) {
     float2 toSun = sun.xy - pos;
     float dist = length(toSun) / size.y;
     float3 glowColour = float3(glow.rgb);
-    col += glowColour * light.x * (0.5 * exp(-dist * 5.0) + 0.4 * exp(-dist * 16.0));
+    col += glowColour * light.x * (0.5 * exp(-dist * 5.0) + 0.4 * (1.0 + 0.5 * boost) * exp(-dist * 16.0));
     float band = exp(-abs(pos.y - ground) / (size.y * 0.10));
     float spread = (pos.x - sun.x) / (size.x * 0.45);
     col += glowColour * light.y * band * exp(-spread * spread);
@@ -119,7 +144,7 @@ float ridge(float x, float seed) {
             // A whole number of cycles an hour, from about 0.7 to 2.7 radians a second.
             float rate = 6.2831853 * (400.0 + floor(1150.0 * fract(h * 13.0))) / 3600.0;
             float twinkle = 0.7 + 0.3 * sin(time * rate + h * 80.0);
-            col += float3(0.92, 0.95, 1.0) * spot * twinkle * light.z * (1.0 - 0.75 * ty);
+            col += float3(0.92, 0.95, 1.0) * spot * twinkle * light.z * (1.0 - 0.75 * ty) * (1.0 + 0.35 * boost);
         }
     }
 
@@ -127,7 +152,7 @@ float ridge(float x, float seed) {
     if (sun.w > 0.0) {
         float d = length(toSun);
         float disc = 1.0 - smoothstep(sun.z - 1.2, sun.z + 1.2, d);
-        col = mix(col, float3(1.0, 0.97, 0.9), disc * sun.w);
+        col = mix(col, float3(1.0, 0.97, 0.9) * (1.0 + boost), disc * sun.w);
     }
 
     // Cloud: fractal noise flattened toward the horizon, so the layer reads as seen from
@@ -157,7 +182,7 @@ float ridge(float x, float seed) {
             if (hk > 0.45 && dt > 0.0) {
                 flash = exp(-dt * 10.0) + 0.7 * step(0.16, dt) * exp(-(dt - 0.16) * 9.0);
             }
-            col += float3(0.78, 0.82, 1.0) * flash * (0.25 + 0.75 * density) * 0.7;
+            col += float3(0.78, 0.82, 1.0) * flash * (0.25 + 0.75 * density) * 0.7 * (1.0 + boost);
         }
     }
 
@@ -220,7 +245,9 @@ float ridge(float x, float seed) {
     float shade = mix(0.5, 1.0, smoothstep(0.0, 0.44, u)) * mix(0.68, 1.0, 1.0 - smoothstep(0.74, 1.0, u));
     col *= mix(shade, 1.0, flash * 0.5);
 
+    // The build-in: the sky comes up out of the black.
+    col *= sky.ground.z;
     // A step of dither breaks up banding in the long dark gradients.
-    col += (hash(pos * 1.37) - 0.5) / 255.0;
-    return half4(half3(saturate(col)), 1.0h);
+    col += (hash(pos * 1.37) - 0.5) / 255.0 * sky.ground.z;
+    return half4(half3(max(col, 0.0)), 1.0h);
 }

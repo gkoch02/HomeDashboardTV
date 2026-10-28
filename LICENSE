@@ -31,9 +31,8 @@ it records what the MIT grant does *not* reach.
 
 ### Bundled typefaces (`HomeDashboardTV/Resources/Fonts/`)
 
-Every bundled face comes from HomeDashboard's `fonts/`, is licensed under the
-SIL Open Font License, Version 1.1, and ships with its upstream license text
-alongside it:
+Every bundled face ships with its upstream license text alongside it. All but
+one are licensed under the SIL Open Font License, Version 1.1:
 
 | Family | License file |
 |---|---|
@@ -42,8 +41,17 @@ alongside it:
 | Cormorant Garamond | `CormorantGaramond-OFL.txt` |
 | DM Sans | `DMSans-OFL.txt` |
 | Figtree | `Figtree-OFL.txt` |
+| Jura | `Jura-OFL.txt` |
 | Manufacturing Consent | `ManufacturingConsent-OFL.txt` |
+| Michroma | `Michroma-OFL.txt` |
+| Oxanium | `Oxanium-OFL.txt` |
+| Playfair Display | `PlayfairDisplay-OFL.txt` |
+| Rajdhani | `Rajdhani-OFL.txt` |
 | Righteous | `Righteous-OFL.txt` |
+| Saira | `Saira-OFL.txt` |
+
+Goodmountain, by Hermann S Designs, is under its designer's own terms
+(`Goodmountain-LICENSE.txt`): free to use and share, not to modify or sell.
 
 The OFL requires that its text accompany the font, so a face added without its
 license file is a licensing defect, not a cosmetic omission.

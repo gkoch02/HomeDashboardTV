@@ -6,7 +6,7 @@ import SwiftUI
 final class SaverConfigureSheet {
     let window: NSWindow
 
-    init(defaults: UserDefaults) {
+    init(defaults: UserDefaults, onChange: @escaping () -> Void = {}) {
         let window = NSWindow(
             contentRect: NSRect(origin: .zero, size: NSSize(width: 480, height: 200)),
             styleMask: [.titled],
@@ -14,7 +14,7 @@ final class SaverConfigureSheet {
             defer: false
         )
         window.title = "Home Dashboard"
-        let view = SaverSettingsView(defaults: defaults, done: { [weak window] in
+        let view = SaverSettingsView(defaults: defaults, onChange: onChange, done: { [weak window] in
             guard let window else { return }
             if let parent = window.sheetParent {
                 parent.endSheet(window)

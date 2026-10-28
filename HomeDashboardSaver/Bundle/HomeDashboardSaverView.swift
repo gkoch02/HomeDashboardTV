@@ -43,6 +43,9 @@ final class HomeDashboardSaverView: ScreenSaverView {
 
     override func startAnimation() {
         if host == nil {
+            // Another process (System Settings' Options) may have written the choices since.
+            Self.defaults.synchronize()
+            Self.shared?.reloadChoices()
             let store = Self.shared ?? DashboardStore(defaults: Self.defaults)
             let rotate = Self.defaults.integer(forKey: "rotateMinutes")
             let host = NSHostingView(rootView: SaverScreen(store: store, rotateMinutes: rotate))
@@ -77,7 +80,9 @@ final class HomeDashboardSaverView: ScreenSaverView {
     override var hasConfigureSheet: Bool { true }
 
     override var configureSheet: NSWindow? {
-        if sheet == nil { sheet = SaverConfigureSheet(defaults: Self.defaults) }
+        if sheet == nil {
+            sheet = SaverConfigureSheet(defaults: Self.defaults, onChange: { Self.shared?.reloadChoices() })
+        }
         return sheet?.window
     }
 }

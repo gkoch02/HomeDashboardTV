@@ -225,6 +225,17 @@ final class DashboardStore {
         #endif
     }
 
+    /// Takes up choices saved since this store was made, for the Mac saver: its Options sheet
+    /// writes the keys from its own view, and the store outlives a session when the legacy
+    /// host never calls `stopAnimation`.
+    func reloadChoices() {
+        layout = defaults.string(forKey: Keys.layout).flatMap(Layout.init(saved:)) ?? layout
+        highlights = defaults.string(forKey: Keys.highlights).flatMap(Highlights.init(rawValue:)) ?? highlights
+        if let saved = Self.decode(defaults.string(forKey: Keys.connection)), saved != connection {
+            connect(saved)
+        }
+    }
+
     func connect(_ connection: Connection) {
         self.connection = connection
         defaults.set(Self.encode(connection), forKey: Keys.connection)

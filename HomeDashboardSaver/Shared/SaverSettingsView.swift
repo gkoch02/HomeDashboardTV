@@ -33,7 +33,7 @@ struct SaverSettingsView: View {
         let saved = defaults.string(forKey: "connection")
         _demo = State(initialValue: saved == "demo")
         let url = saved.flatMap(URL.init(string:)).flatMap { $0.host() == nil ? nil : $0 }
-        _address = State(initialValue: url.map { "\($0.host() ?? ""):\($0.port ?? 8080)" } ?? "")
+        _address = State(initialValue: url.map(Self.typed) ?? "")
         _layout = State(initialValue: defaults.string(forKey: "layout").flatMap(DashboardStore.Layout.init(saved:)) ?? .dashboard)
         _rotateMinutes = State(initialValue: defaults.integer(forKey: "rotateMinutes"))
         _highlights = State(initialValue: defaults.string(forKey: "highlights").flatMap(DashboardStore.Highlights.init(rawValue:)) ?? .automatic)
@@ -112,6 +112,15 @@ struct SaverSettingsView: View {
         .onChange(of: highlights) { _, highlights in save(highlights.rawValue, "highlights") }
     }
 
+    /// A saved URL as the field shows it: `host:port` for a plain HTTP root, which
+    /// `DashboardClient.baseURL(forTyped:)` turns back into the same URL, else the whole URL, so
+    /// opening Options and pressing Done never rewrites an HTTPS or sub-path address.
+    static func typed(_ url: URL) -> String {
+        guard url.scheme == "http", url.path == "/" || url.path.isEmpty, url.query == nil,
+              let host = url.host() else { return url.absoluteString }
+        return "\(host):\(url.port ?? 8080)"
+    }
+
     private func rotateLabel(_ minutes: Int) -> String {
         switch minutes {
         case 0: return "Never"
@@ -145,7 +154,7 @@ struct SaverSettingsView: View {
             addressError = "Couldn't reach \(found.name)."
             return
         }
-        address = "\(url.host() ?? ""):\(url.port ?? 8080)"
+        address = Self.typed(url)
         saveAddress()
     }
 }

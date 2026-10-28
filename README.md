@@ -3,32 +3,32 @@
 [![CI](https://github.com/gkoch02/HomeDashboardTV/actions/workflows/ci.yml/badge.svg)](https://github.com/gkoch02/HomeDashboardTV/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/gkoch02/HomeDashboardTV/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/gkoch02/HomeDashboardTV/actions/workflows/github-code-scanning/codeql)
 [![tvOS 17+](https://img.shields.io/badge/tvOS-17%2B-black?logo=apple)](#building-it-yourself)
-[![HomeDashboard 6.2+](https://img.shields.io/badge/HomeDashboard-6.2%2B-2f6fb2)](https://github.com/gkoch02/HomeDashboard)
+[![needs HomeDashboard 6.2+](https://img.shields.io/badge/needs-HomeDashboard%206.2%2B-2f6fb2)](https://github.com/gkoch02/HomeDashboard)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 The tvOS companion to [HomeDashboard](https://github.com/gkoch02/HomeDashboard), the Raspberry Pi e-ink dashboard.
 The Pi keeps doing the fetching (Google Calendar / ICS / CalDAV, OpenWeatherMap, birthdays)
 on its own timer; this app reads the Pi's cached snapshot from `GET /api/dashboard` and
-draws it natively at TV resolution, with no e-ink pixels and no credentials on the TV.
+draws it natively at TV resolution. The TV holds no credentials beyond the web UI's password.
 
 It is not on the App Store: it needs your own HomeDashboard Pi, and you build it onto your
 Apple TV yourself with Xcode ([Building it yourself](#building-it-yourself)).
 
 ![The dashboard on an Apple TV 4K, from HomeDashboard's dummy data](docs/dashboard.png)
 
-**Cyberpunk**, after IdleHoursTV's Cyberpunk 2077 theme: everything at once as the game's
-Journal, with the calendar as active jobs, birthdays as contacts, the weather as a scan with
-a 24-hour signal trace, the forecast, the quote as an encrypted shard and the moon.
+**Cyberpunk**: everything at once as a mercenary's journal, with the calendar as active jobs,
+birthdays as contacts, the weather as a scan with a 24-hour signal trace, the forecast, the
+quote as an encrypted shard and the moon.
 
 ![The Cyberpunk layout, from HomeDashboard's dummy data](docs/cyberpunk.png)
 
-**Uplink**, a blend of IdleHoursTV's Deus Ex, Codex and Cyberpunk themes: today as a hologram
-orbit turning with now at the front, the clock projected over it and the quote read aloud,
-between the agenda as Deus Ex's tiles and the weather as a Codex entry.
+**Uplink**: today as a hologram orbit turning with now at the front, the clock projected over
+it and the quote read aloud, between the agenda as augmented-reality tiles and the weather as
+a codex entry.
 
 ![The Uplink layout, from HomeDashboard's dummy data](docs/uplink.png)
 
-**Grimoire**, an adventurer's tome after the quest logs of Warcraft and the tabletop: the
+**Grimoire**, an adventurer's quest log: the
 calendar as quests (the one under way crossed with swords, the next marked with the gold
 exclamation), birthdays as feast days, the weather as the augury with the sky painted as an
 illuminated miniature, the moon, the quote as the words of the sage, the air as the dragon's
@@ -195,13 +195,14 @@ display. There is no web UI login on the Mac yet, so the Pi's web UI must be ope
 - `HomeDashboardTV/App`: the polling store, Bonjour discovery and the Keychain.
 - `HomeDashboardSaver`: the Mac screensaver's own screen, options and principal class, and a
   host app that shows the saver's screen in a window.
-- `HomeDashboardTV/UI`: the three layouts, each a `Theme` (`Theme.swift`), and the settings
+- `HomeDashboardTV/UI`: the layouts, each a `Theme` (`Theme.swift`), and the settings
   panel. `UI/Parts` holds what layouts share: the painted weather window (`WeatherArt`, its
   composition `WeatherScene` in `DashboardCore`; `docs/agenda-scenes.png` shows six of them),
   the moon disc, a starfield, and `SkyLayer`, the Metal view the live skies draw through
   (`SkyPass.h` is what their shaders share).
-- `HomeDashboardTV/Resources/Fonts`: Cinzel, Cormorant Garamond, Manufacturing Consent,
-  Righteous, DM Sans, Big Shoulders Display and Figtree from HomeDashboard's `fonts/` (SIL OFL; each licence beside its font), and
+- `HomeDashboardTV/Resources/Fonts`: Big Shoulders Display, Cinzel, Cormorant Garamond,
+  DM Sans, Figtree, Jura, Manufacturing Consent, Michroma, Oxanium, Playfair Display,
+  Rajdhani, Righteous and Saira (SIL OFL; each licence beside its font), and
   Goodmountain by Hermann S Designs for the Grimoire layout (its own licence beside it: free to
   use and share, not to modify or sell). The moon
   photograph (`MoonPhoto`) is the author's own full moon: the full-resolution original of
@@ -252,7 +253,9 @@ cd Packages/DashboardCore && swift test
 ```
 
 In the simulator, `-server <address>` or `-demo YES` sets the source for one run, and
-`-layout dashboard|agenda|moon|horizon` the layout:
+`-layout <name>` the layout, by its raw name (`dashboard`, `cyberpunk`, `uplink`, `grimoire`,
+`agenda`, `horizon`, `skylight`, `window`, `light`, `weatherglass`, `orrery`, `fuzzy`, `quote`,
+`moon`, `aurora`, `night`; the cases of `DashboardStore.Layout`):
 
 ```bash
 xcrun simctl launch booted dev.plumpbug.homedashboard -server 127.0.0.1:8080
@@ -270,7 +273,8 @@ as in [Building it yourself](#building-it-yourself).
 
 ## License
 
-MIT — see [LICENSE](LICENSE). The bundled typefaces are third-party works under the SIL
-Open Font License 1.1, each shipped with its upstream license text, and the demo data
-carries a few short quotations that are not ours to license; the **Third-party content**
-section of [LICENSE](LICENSE) sets out both.
+MIT — see [LICENSE](LICENSE). The bundled typefaces are third-party works, each shipped
+with its upstream license text: all under the SIL Open Font License 1.1 except Goodmountain,
+which is under its designer's own terms. The demo data carries a few short quotations that
+are not ours to license. The **Third-party content** section of [LICENSE](LICENSE) sets out
+all of it.

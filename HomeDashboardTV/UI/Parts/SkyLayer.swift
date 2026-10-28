@@ -21,27 +21,38 @@ import SwiftUI
 /// and keeps them on, and the settings drawer has HDR and SDR for the sighting that never
 /// comes or an output that clips.
 ///
+/// The Mac screensaver's layer asks for the same range, and there the screen does say: a
+/// display whose potential headroom is above 1 (an XDR or HDR panel) turns the highlights on.
+///
 /// *uniforms* is asked for the shader's inputs on every frame; the sky's own motion (summed
 /// frame by frame in the layouts' clocks) lives in the closure's captures. Under Reduce Motion
 /// (*paused*) the sky draws once per change of its inputs instead of thirty times a second.
 /// The shaders' inputs are structs of `SIMD4<Float>` only, matching their Metal `float4`s field
 /// for field, so the two layouts agree without a bridging header.
-struct SkyLayer<Uniforms>: UIViewRepresentable {
+struct SkyLayer<Uniforms> {
     let fragment: String
     let paused: Bool
     let highlights: DashboardStore.Highlights
     let uniforms: (SkyFrame) -> Uniforms
 
-    func makeUIView(context: Context) -> SkyView<Uniforms> {
-        SkyView(fragment: fragment)
-    }
-
-    func updateUIView(_ view: SkyView<Uniforms>, context: Context) {
+    private func update(_ view: SkyView<Uniforms>) {
         view.uniforms = uniforms
         view.highlights = highlights
         view.setPaused(paused)
     }
 }
+
+#if canImport(UIKit)
+extension SkyLayer: UIViewRepresentable {
+    func makeUIView(context: Context) -> SkyView<Uniforms> { SkyView(fragment: fragment) }
+    func updateUIView(_ view: SkyView<Uniforms>, context: Context) { update(view) }
+}
+#else
+extension SkyLayer: NSViewRepresentable {
+    func makeNSView(context: Context) -> SkyView<Uniforms> { SkyView(fragment: fragment) }
+    func updateNSView(_ view: SkyView<Uniforms>, context: Context) { update(view) }
+}
+#endif
 
 /// One frame of a sky: when, how big in points, the layer's scale, and the headroom to use.
 struct SkyFrame {
@@ -68,7 +79,7 @@ enum Sky {
     /// in extended sRGB, shows it.
     static func rgb(_ color: Color) -> SIMD4<Float> {
         guard let space = CGColorSpace(name: CGColorSpace.extendedSRGB),
-              let cg = UIColor(color).cgColor.converted(to: space, intent: .relativeColorimetric, options: nil),
+              let cg = PlatformColor(color).cgColor.converted(to: space, intent: .relativeColorimetric, options: nil),
               let c = cg.components, c.count >= 3 else { return SIMD4(0, 0, 0, 1) }
         return SIMD4(Float(c[0]), Float(c[1]), Float(c[2]), Float(cg.alpha))
     }
@@ -87,7 +98,7 @@ final class SkyView<Uniforms>: MTKView, MTKViewDelegate {
     init(fragment: String) {
         let device = MTLCreateSystemDefaultDevice()
         queue = device?.makeCommandQueue()
-        if let device, let library = device.makeDefaultLibrary() {
+        if let device, let library = try? device.makeDefaultLibrary(bundle: PlatformBundle.resources) {
             let descriptor = MTLRenderPipelineDescriptor()
             descriptor.vertexFunction = library.makeFunction(name: "skyVertex")
             descriptor.fragmentFunction = library.makeFunction(name: fragment)
@@ -99,15 +110,20 @@ final class SkyView<Uniforms>: MTKView, MTKViewDelegate {
         super.init(frame: .zero, device: device)
         colorPixelFormat = .rgba16Float
         framebufferOnly = true
+        #if canImport(UIKit)
         isOpaque = true
         backgroundColor = .black
+        #endif
         clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 1)
         preferredFramesPerSecond = 30
         if let layer = layer as? CAMetalLayer {
             // The shaders' numbers are sRGB-encoded, as SwiftUI's were; extended, so that
             // values above 1 reach the compositor.
             layer.colorspace = CGColorSpace(name: CGColorSpace.extendedSRGB)
-            if #available(tvOS 26, *) {
+            #if os(macOS)
+            layer.wantsExtendedDynamicRangeContent = true
+            #endif
+            if #available(tvOS 26, macOS 26, *) {
                 layer.preferredDynamicRange = .high
             }
         }
@@ -117,11 +133,24 @@ final class SkyView<Uniforms>: MTKView, MTKViewDelegate {
     @available(*, unavailable)
     required init(coder: NSCoder) { fatalError("SkyView is made in code") }
 
+    #if canImport(UIKit)
     override func didMoveToWindow() {
         super.didMoveToWindow()
-        if #available(tvOS 26, *) {
-            // How much of the screen's range the drawables may use, so the compositor plans
-            // for it; the screen's own "potential" reads 1.0 on tvOS whatever the Format.
+        claimHeadroom()
+    }
+    #else
+    override var isOpaque: Bool { true }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        claimHeadroom()
+    }
+    #endif
+
+    /// How much of the screen's range the drawables may use, so the compositor plans for it;
+    /// the screen's own "potential" reads 1.0 on tvOS whatever the Format.
+    private func claimHeadroom() {
+        if #available(tvOS 26, macOS 26, *), let layer = layer as? CAMetalLayer {
             layer.contentsHeadroom = CGFloat(Sky.peak)
         }
     }
@@ -130,7 +159,11 @@ final class SkyView<Uniforms>: MTKView, MTKViewDelegate {
     func setPaused(_ paused: Bool) {
         isPaused = paused
         enableSetNeedsDisplay = paused
+        #if canImport(UIKit)
         if paused { setNeedsDisplay() }
+        #else
+        if paused { needsDisplay = true }
+        #endif
     }
 
     /// The headroom the shader may use: `Sky.peak` with the highlights on, else 1; always 1
@@ -142,7 +175,11 @@ final class SkyView<Uniforms>: MTKView, MTKViewDelegate {
         case .sdr: return 1
         case .hdr: return Sky.peak
         case .automatic:
+            #if canImport(UIKit)
             if !sawHeadroom, let screen = window?.screen, screen.currentEDRHeadroom > 1 { sawHeadroom = true }
+            #else
+            if !sawHeadroom, let screen = window?.screen, screen.maximumPotentialExtendedDynamicRangeColorComponentValue > 1 { sawHeadroom = true }
+            #endif
             return sawHeadroom ? Sky.peak : 1
         }
     }

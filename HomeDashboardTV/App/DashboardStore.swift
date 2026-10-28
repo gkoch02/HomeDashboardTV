@@ -1,13 +1,19 @@
 import DashboardCore
 import Foundation
 import Observation
+#if canImport(UIKit)
 import UIKit
+#endif
 
 /// Where the snapshot comes from, and the polling loop that keeps it current.
 ///
 /// The Pi refreshes its cache on its own timer, so polling faster than every few minutes
 /// only re-reads the same file. The last good snapshot stays on screen through a failure;
 /// `problem` says what went wrong and since when.
+///
+/// The Mac screensaver runs one too, over its own defaults: there is no remote, so no settings
+/// panel over the layout and no idle timer to hold, and no web UI login (the password lives in
+/// the TV's Keychain).
 @MainActor
 @Observable
 final class DashboardStore {
@@ -120,10 +126,14 @@ final class DashboardStore {
     }
 
     var password: String {
-        didSet { Keychain.password = password.isEmpty ? nil : password }
+        didSet {
+            #if canImport(UIKit)
+            Keychain.password = password.isEmpty ? nil : password
+            #endif
+        }
     }
 
-    private let defaults = UserDefaults.standard
+    private let defaults: UserDefaults
     private var loop: Task<Void, Never>?
     private var idleCheck: Task<Void, Never>?
     private var lastInteraction = Date.now
@@ -141,11 +151,16 @@ final class DashboardStore {
         static let pressureSource = "pressureSource"
     }
 
-    init() {
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
         username = defaults.string(forKey: Keys.username) ?? "admin"
         // `-layout moon` sets it for a run too, since launch arguments land in UserDefaults.
         layout = defaults.string(forKey: Keys.layout).flatMap(Layout.init(saved:)) ?? .dashboard
+        #if canImport(UIKit)
         password = Keychain.password ?? ""
+        #else
+        password = ""
+        #endif
         keepAwakeHours = defaults.integer(forKey: Keys.keepAwakeHours)
         highlights = defaults.string(forKey: Keys.highlights).flatMap(Highlights.init(rawValue:)) ?? .automatic
         pressureHistory = PressureHistory()
@@ -157,7 +172,9 @@ final class DashboardStore {
         } else {
             connection = Self.decode(defaults.string(forKey: Keys.connection))
         }
+        #if canImport(UIKit)
         settingsVisible = connection == nil
+        #endif
         // Readings from another source (a `-demo` run, another Pi) would make a trend out of
         // two places, so the history is kept only for the source it came from.
         if let connection, defaults.string(forKey: Keys.pressureSource) == Self.encode(connection) {
@@ -168,6 +185,7 @@ final class DashboardStore {
 
     func start() {
         noteInteraction()
+        #if canImport(UIKit)
         if idleCheck == nil {
             idleCheck = Task { [weak self] in
                 while !Task.isCancelled {
@@ -176,6 +194,7 @@ final class DashboardStore {
                 }
             }
         }
+        #endif
         guard loop == nil else { return }
         loop = Task { [weak self] in
             while !Task.isCancelled {
@@ -186,6 +205,12 @@ final class DashboardStore {
         }
     }
 
+    /// Stops polling, for the screensaver's end.
+    func stop() {
+        loop?.cancel()
+        loop = nil
+    }
+
     /// Any remote press, and the app coming back to the foreground: restarts "Keep awake".
     func noteInteraction() {
         lastInteraction = .now
@@ -194,8 +219,21 @@ final class DashboardStore {
 
     /// Holds the idle timer until "Keep awake" has run out since the last remote press.
     private func updateIdleTimer(now: Date = .now) {
+        #if canImport(UIKit)
         let hold = keepAwakeHours == 0 || now.timeIntervalSince(lastInteraction) < Double(keepAwakeHours * 3600)
         if UIApplication.shared.isIdleTimerDisabled != hold { UIApplication.shared.isIdleTimerDisabled = hold }
+        #endif
+    }
+
+    /// Takes up choices saved since this store was made, for the Mac saver: its Options sheet
+    /// writes the keys from its own view, and the store outlives a session when the legacy
+    /// host never calls `stopAnimation`.
+    func reloadChoices() {
+        layout = defaults.string(forKey: Keys.layout).flatMap(Layout.init(saved:)) ?? layout
+        highlights = defaults.string(forKey: Keys.highlights).flatMap(Highlights.init(rawValue:)) ?? highlights
+        if let saved = Self.decode(defaults.string(forKey: Keys.connection)), saved != connection {
+            connect(saved)
+        }
     }
 
     func connect(_ connection: Connection) {
@@ -234,6 +272,21 @@ final class DashboardStore {
         }
     }
 
+    /// One line for the corner: the connection is down, or a source the Pi is still showing has
+    /// gone stale. Nothing when everything is current.
+    var notice: String? {
+        if let since = failingSince {
+            return "Can't reach the dashboard since \(since.formatted(date: .omitted, time: .shortened))"
+        }
+        guard let sources = snapshot?.sources else { return nil }
+        let stale = [
+            ("Calendar", sources.events?.staleness),
+            ("Weather", sources.weather?.staleness),
+            ("Birthdays", sources.birthdays?.staleness),
+        ].filter { $0.1?.isWorthFlagging == true }.map(\.0)
+        return stale.isEmpty ? nil : "\(ListFormatter.localizedString(byJoining: stale)) not updated lately"
+    }
+
     /// Keeps the weather's pressure, stamped with when the Pi fetched it: polling the same cache
     /// again adds nothing, and a new fetch is a new reading.
     private func recordPressure(_ snapshot: Snapshot) {
@@ -246,7 +299,7 @@ final class DashboardStore {
     }
 
     private static func demoSnapshot() throws -> Snapshot {
-        guard let url = Bundle.main.url(forResource: "demo-snapshot", withExtension: "json") else {
+        guard let url = PlatformBundle.resources.url(forResource: "demo-snapshot", withExtension: "json") else {
             throw CocoaError(.fileNoSuchFile)
         }
         return try DashboardClient.validated(Data(contentsOf: url))

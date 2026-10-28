@@ -172,12 +172,29 @@ settings. The committed project is complete, so XcodeGen is only needed to chang
 - The screensaver and sleep are held off while the app is open, always or for 1–8 hours after
   the last remote press (settings → Keep awake); after that the Apple TV's own timers apply.
 
+## On the Mac
+
+The same layouts also run as a Mac screensaver, `Home Dashboard.saver`, reading the same Pi.
+Build and install it with:
+
+```bash
+Tools/install_saver.sh
+```
+
+Then pick **Home Dashboard** under System Settings → Screen Saver, and set the Pi's address
+(or Demo data), the layout, and whether the layouts take turns under its **Options**. The
+layouts are drawn at the TV's 1920×1080 points and scaled to the display; on a 16:10 screen
+they get the extra height. The skies' highlights go brighter than white on an XDR or HDR
+display. There is no web UI login on the Mac yet, so the Pi's web UI must be open.
+
 ## Layout
 
 - `Packages/DashboardCore`: the payload model, decoding of the Pi's Python timestamps, the
   agenda (events per day in the Pi's zone), the HTTP client and the demo-data shift. No UI;
   `swift test` runs it on the Mac.
 - `HomeDashboardTV/App`: the polling store, Bonjour discovery and the Keychain.
+- `HomeDashboardSaver`: the Mac screensaver's own screen, options and principal class, and a
+  host app that shows the saver's screen in a window.
 - `HomeDashboardTV/UI`: the three layouts, each a `Theme` (`Theme.swift`), and the settings
   panel. `UI/Parts` holds what layouts share: the painted weather window (`WeatherArt`, its
   composition `WeatherScene` in `DashboardCore`; `docs/agenda-scenes.png` shows six of them),
@@ -199,9 +216,12 @@ A layout is a view conforming to `Theme`: its body is the plate, `backdrop` what
 behind it, and optionally `notice(_:)` its style for the corner line. `ThemeFrame` adds the
 burn-in drift, the notice's place and the Pi's time zone, so a layout only draws. Set
 `fullBleed` to have the whole screen instead of the overscan safe area, and keep a 10 pt margin
-for the drift. Then add a case to `DashboardStore.Layout` and a line to
-`DashboardScreen.content`; the settings list picks it up. Keep its inks and faces `private` to
-its file, and list any new font under `UIAppFonts` in `project.yml`. A layout with a live
+for the drift. Then add a case to `DashboardStore.Layout` and a line to `LayoutSwitch`
+(`Theme.swift`); the settings list and the Mac saver pick it up. Keep its inks and faces `private` to
+its file, and list any new font under `UIAppFonts` in `project.yml` (the Mac saver registers every
+bundled font itself). A layout must build for macOS too: platform types go through
+`UI/Parts/Platform.swift` (`PlatformColor`, `PlatformFont`, `Font.descriptor`), and resources
+come from `PlatformBundle.resources`, never `Bundle.main`, which is the screensaver host there. A layout with a live
 shader sky draws it through `SkyLayer` with a fragment function and a uniforms struct of
 `float4`s, as Skylight, Aurora and Window do; the frame's headroom is 1 with the highlights
 off, so a sky should only spend it on its brightest few things.
@@ -239,6 +259,11 @@ xcrun simctl launch booted dev.plumpbug.homedashboard -server 127.0.0.1:8080
 ```
 
 (With your own `BUNDLE_ID_PREFIX`, the bundle identifier is `<prefix>.homedashboard`.)
+
+The **HomeDashboardSaverHost** scheme shows the saver's screen in a window and takes the same
+`-server`, `-demo` and `-layout` arguments; arrow keys step through the layouts, `-window WxH`
+sizes it, `-showOptions YES` opens the Options sheet, and `-snapshot <path> [-settle <s>]`
+writes the window as a PNG and quits.
 
 A device build needs a registered Apple TV for its development profile; signing is set up
 as in [Building it yourself](#building-it-yourself).

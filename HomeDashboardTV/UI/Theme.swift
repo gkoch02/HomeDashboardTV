@@ -12,7 +12,7 @@ import SwiftUI
 /// gets the whole screen and keeps its own margin, at least 10 pt for the drift.
 ///
 /// To add one: conform a view, add a case to `DashboardStore.Layout`, and a line to
-/// `DashboardScreen.content`. Shared pieces (the weather painting, the moon disc, a starfield)
+/// `LayoutSwitch`. Shared pieces (the weather painting, the moon disc, a starfield)
 /// are in `Parts/`; keep the theme's own inks and faces `private` to its file.
 protocol Theme: View {
     associatedtype Backdrop: View
@@ -61,6 +61,40 @@ struct ThemeFrame<T: Theme>: View {
                 }
             }
             .environment(\.timeZone, theme.snapshot.timeZone)
+    }
+}
+
+/// The layout for a `DashboardStore.Layout`, framed. The TV's `DashboardScreen` and the Mac
+/// screensaver's `SaverScreen` both put this inside the screen they own.
+struct LayoutSwitch: View {
+    let layout: DashboardStore.Layout
+    let snapshot: Snapshot
+    let now: Date
+    let notice: String?
+
+    var body: some View {
+        switch layout {
+        case .dashboard: frame(DashboardView.self)
+        case .agenda: frame(AgendaPlateView.self)
+        case .moon: frame(MoonView.self)
+        case .horizon: frame(HorizonView.self)
+        case .light: frame(LightCycleView.self)
+        case .quote: frame(QuoteView.self)
+        case .night: frame(NightView.self)
+        case .skylight: frame(SkylightView.self)
+        case .fuzzy: frame(FuzzyClockView.self)
+        case .weatherglass: frame(WeatherglassView.self)
+        case .aurora: frame(AuroraView.self)
+        case .orrery: frame(OrreryView.self)
+        case .window: frame(WindowView.self)
+        case .cyberpunk: frame(CyberpunkView.self)
+        case .uplink: frame(UplinkView.self)
+        case .grimoire: frame(GrimoireView.self)
+        }
+    }
+
+    private func frame<T: Theme>(_ theme: T.Type) -> some View {
+        ThemeFrame(theme: T(snapshot: snapshot, now: now), now: now, notice: notice)
     }
 }
 

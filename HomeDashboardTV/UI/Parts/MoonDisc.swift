@@ -22,7 +22,7 @@ struct MoonDisc: View {
     }
 
     private var photo: some View {
-        Image("MoonPhoto")
+        Image("MoonPhoto", bundle: PlatformBundle.resources)
             .resizable()
             .interpolation(.high)
             .antialiased(true)

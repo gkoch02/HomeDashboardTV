@@ -83,54 +83,15 @@ struct DashboardScreen: View {
     private var content: some View {
             TimelineView(.everyMinute) { context in
                 if let snapshot = store.snapshot {
-                    layout(store.layout, snapshot, context.date)
+                    LayoutSwitch(layout: store.layout, snapshot: snapshot, now: context.date,
+                                 notice: store.notice)
                         .id(store.layout)
                         .opacity(shown)
                         .background { Color.black.ignoresSafeArea() }
                 } else if store.connection != nil {
-                    Waiting(problem: store.problem)
+                    Waiting(problem: store.problem, hint: "Click to change where the dashboard comes from.")
                 }
             }
-    }
-
-    @ViewBuilder private func layout(_ layout: DashboardStore.Layout, _ snapshot: Snapshot, _ now: Date) -> some View {
-                    switch layout {
-                    case .dashboard: frame(DashboardView.self, snapshot, now)
-                    case .agenda: frame(AgendaPlateView.self, snapshot, now)
-                    case .moon: frame(MoonView.self, snapshot, now)
-                    case .horizon: frame(HorizonView.self, snapshot, now)
-                    case .light: frame(LightCycleView.self, snapshot, now)
-                    case .quote: frame(QuoteView.self, snapshot, now)
-                    case .night: frame(NightView.self, snapshot, now)
-                    case .skylight: frame(SkylightView.self, snapshot, now)
-                    case .fuzzy: frame(FuzzyClockView.self, snapshot, now)
-                    case .weatherglass: frame(WeatherglassView.self, snapshot, now)
-                    case .aurora: frame(AuroraView.self, snapshot, now)
-                    case .orrery: frame(OrreryView.self, snapshot, now)
-                    case .window: frame(WindowView.self, snapshot, now)
-                    case .cyberpunk: frame(CyberpunkView.self, snapshot, now)
-                    case .uplink: frame(UplinkView.self, snapshot, now)
-                    case .grimoire: frame(GrimoireView.self, snapshot, now)
-                    }
-    }
-
-    private func frame<T: Theme>(_ theme: T.Type, _ snapshot: Snapshot, _ now: Date) -> some View {
-        ThemeFrame(theme: T(snapshot: snapshot, now: now), now: now, notice: notice(now: now))
-    }
-
-    /// One line for the corner: the connection is down, or a source the Pi is still showing has
-    /// gone stale. Nothing when everything is current.
-    private func notice(now: Date) -> String? {
-        if let since = store.failingSince {
-            return "Can't reach the dashboard since \(since.formatted(date: .omitted, time: .shortened))"
-        }
-        guard let sources = store.snapshot?.sources else { return nil }
-        let stale = [
-            ("Calendar", sources.events?.staleness),
-            ("Weather", sources.weather?.staleness),
-            ("Birthdays", sources.birthdays?.staleness),
-        ].filter { $0.1?.isWorthFlagging == true }.map(\.0)
-        return stale.isEmpty ? nil : "\(ListFormatter.localizedString(byJoining: stale)) not updated lately"
     }
 }
 
@@ -140,23 +101,4 @@ struct DashboardScreen: View {
 private enum FadeThroughBlack {
     /// Each half: out to black, then in from it.
     static let half = 0.28
-}
-
-private struct Waiting: View {
-    let problem: String?
-
-    var body: some View {
-        VStack(spacing: 24) {
-            ProgressView()
-            Text(problem ?? "Reading the dashboard…")
-                .font(.system(size: 32))
-                .foregroundStyle(.secondary)
-            if problem != nil {
-                Text("Click to change where the dashboard comes from.")
-                    .font(.system(size: 26))
-                    .foregroundStyle(.tertiary)
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
 }

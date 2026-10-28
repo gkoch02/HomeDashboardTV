@@ -86,14 +86,13 @@ private enum Face {
     static let text = "DMSans-9ptRegular"
 
     /// Cormorant with lining figures: its default old-style ones set the time's 1 as an I.
-    static func figures(_ size: CGFloat, weight: UIFont.Weight) -> Font {
-        let descriptor = UIFontDescriptor(fontAttributes: [
-            .family: display,
-            .traits: [UIFontDescriptor.TraitKey.weight: weight],
-            .featureSettings: [[UIFontDescriptor.FeatureKey.type: kNumberCaseType,
-                                UIFontDescriptor.FeatureKey.selector: kUpperCaseNumbersSelector]],
-        ])
-        return Font(UIFont(descriptor: descriptor, size: size))
+    static func figures(_ size: CGFloat, weight: PlatformFont.Weight) -> Font {
+        .descriptor([
+            kCTFontFamilyNameAttribute: display,
+            kCTFontTraitsAttribute: [kCTFontWeightTrait: weight.rawValue],
+            kCTFontFeatureSettingsAttribute: [[kCTFontFeatureTypeIdentifierKey: kNumberCaseType,
+                                               kCTFontFeatureSelectorIdentifierKey: kUpperCaseNumbersSelector]],
+        ], size: size)
     }
 }
 

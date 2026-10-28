@@ -1,6 +1,5 @@
 import DashboardCore
 import SwiftUI
-import UIKit
 
 /// A layout of the TV's own, blended from three of IdleHoursTV's game themes into one terminal:
 /// *Deus Ex*'s gold on black, its slab tiles and stat bar; the *Mass Effect* Codex's navy
@@ -262,12 +261,10 @@ private enum Face {
     private static func saira(_ size: CGFloat, weight: CGFloat, width: CGFloat) -> Font {
         let key = "\(size)|\(weight)|\(width)"
         if let f = cache[key] { return f }
-        let variation = UIFontDescriptor.AttributeName(rawValue: kCTFontVariationAttribute as String)
-        let descriptor = UIFontDescriptor(fontAttributes: [
-            .name: "Saira-Thin",
-            variation: [weightAxis: weight, widthAxis: width],
-        ])
-        let f = Font(UIFont(descriptor: descriptor, size: size) as CTFont)
+        let f = Font.descriptor([
+            kCTFontNameAttribute: "Saira-Thin",
+            kCTFontVariationAttribute: [weightAxis: weight, widthAxis: width],
+        ], size: size)
         cache[key] = f
         return f
     }

@@ -8,63 +8,188 @@
 
 /* Begin PBXBuildFile section */
 		00B3C70A424BF2CD94123F64 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 708E7FA2EC39FD82617171C5 /* Keychain.swift */; };
+		00B78686378AD6BC3F73AB9E /* SkyPass.metal in Sources */ = {isa = PBXBuildFile; fileRef = 7060A835EC6B2CBBC9D10C6A /* SkyPass.metal */; };
+		03A8EF962A677C50CF446E5A /* Figtree-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8D623B4B66C03F6E41617CBC /* Figtree-ExtraBold.ttf */; };
+		041AFCD1321113B5632AA565 /* MoonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10DA38EC1D96409C50598DB5 /* MoonView.swift */; };
+		045B15FFD87429E4805DEEBA /* SkyLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29B0E803153CB812629ADA59 /* SkyLayer.swift */; };
+		0488004DDB30A11659FA0DAC /* Platform.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC42DA855CF4CE4E75414E2 /* Platform.swift */; };
+		04D0A951260EF22D46328671 /* BigShouldersDisplay-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 76149526166AFF15A3A36459 /* BigShouldersDisplay-Black.ttf */; };
+		0619B1D55E18B5B701DCFEBB /* demo-snapshot.json in Resources */ = {isa = PBXBuildFile; fileRef = F31AD003A5C8873570D9A9F2 /* demo-snapshot.json */; };
+		075FFC6791CC7BDBC1AA94A4 /* thumbnail.png in Resources */ = {isa = PBXBuildFile; fileRef = C605A43D00DB7EC27B78B27B /* thumbnail.png */; };
+		07D44882302973BDED3666C4 /* Rajdhani-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 596F4764C5072FB1383315F4 /* Rajdhani-Medium.ttf */; };
+		0CB790EE9750893E4D7D33C9 /* BuildIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D6560F916DAE5BD81DA2DBC /* BuildIn.swift */; };
+		0F4DF7A2B435E33476AB58E8 /* Rajdhani-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2ABE50ACD8B843A99D8BB62C /* Rajdhani-SemiBold.ttf */; };
+		1271662842DF4A8259EAE8C3 /* Cinzel.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 61DD62983158D3984EC63FFB /* Cinzel.ttf */; };
+		12DA2FC08663AEB2E645C8E8 /* SaverConfigureSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58CAF982AE960AC363A557B8 /* SaverConfigureSheet.swift */; };
 		12DF9F160B353E555C4E28B0 /* WindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2256A097691D68B2477F76EF /* WindowView.swift */; };
 		1426E37D465A29D3AC373CD2 /* WeatherglassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0FD297DE56AF1DD7F7DAFB2 /* WeatherglassView.swift */; };
 		16285FD177D64B1D9A35C006 /* SkyColour.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1982EDDF2B6A3E033A01C63 /* SkyColour.swift */; };
 		18033621437C98349750E47C /* ManufacturingConsent-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5BCEA6F65BFB1AF66825E854 /* ManufacturingConsent-Regular.ttf */; };
 		1848039F6E75D7821BB4AFEB /* DMSans.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F7B2857FB7AFDA686A83D0B /* DMSans.ttf */; };
+		184AB96CF2B8B17A5DC0F5DB /* ScreenSaver.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBC60B945D426588BFC1B6E2 /* ScreenSaver.framework */; };
+		19E3E7911EC3B58E24E361D1 /* WindowPane.metal in Sources */ = {isa = PBXBuildFile; fileRef = 5AB880AAFFAF50381C546114 /* WindowPane.metal */; };
+		1A140B0B75CC1E4F404DDC8F /* CyberpunkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F836F52D21F1424312E73132 /* CyberpunkView.swift */; };
+		1BCE9EE72C27A795F9A8D444 /* OrreryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 333B7105DB6D07E312E56484 /* OrreryView.swift */; };
 		1D535A92E7CDDFD49C58C839 /* BigShouldersDisplay-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 76149526166AFF15A3A36459 /* BigShouldersDisplay-Black.ttf */; };
+		1DD81A9082A69A83D66A68E5 /* WideColour.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8B868F16A1C58C2FDA721DB /* WideColour.swift */; };
+		1F432C518904766F67E9D48B /* Righteous-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 24D3FE4C261142D9F0D912CA /* Righteous-Regular.ttf */; };
+		1FE2BDE766ABA0304CDA7D5E /* SaverConfigureSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58CAF982AE960AC363A557B8 /* SaverConfigureSheet.swift */; };
 		234A879AF993DBACD53A1C57 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2103C0B8C55F989AF037F3 /* Theme.swift */; };
+		2624313E86B76D43DEFF4907 /* HomeDashboardSaverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AD603EB325E79CD652796A1 /* HomeDashboardSaverView.swift */; };
+		28327584EC0645A55391061E /* Michroma-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B97455432CBD74EA8E8AB21C /* Michroma-Regular.ttf */; };
+		290CECF90B2AC968BB2E2D58 /* Michroma-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B97455432CBD74EA8E8AB21C /* Michroma-Regular.ttf */; };
+		2A38CA27E28367DB009D24D6 /* MoonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10DA38EC1D96409C50598DB5 /* MoonView.swift */; };
 		2D1E841FFFAEA12219FFC264 /* SkyPass.metal in Sources */ = {isa = PBXBuildFile; fileRef = 7060A835EC6B2CBBC9D10C6A /* SkyPass.metal */; };
+		2D7AA9752AB7842109B76741 /* GrimoireView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42DAF9DA804F0B04C8DDE091 /* GrimoireView.swift */; };
+		2E0B99F08E86BB9603A81679 /* Goodmountain-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2F751680BA84ACA609A49B68 /* Goodmountain-Regular.otf */; };
+		30BE9A550DCB933008E6FA77 /* GrimoireView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42DAF9DA804F0B04C8DDE091 /* GrimoireView.swift */; };
 		323A78D9DFE43D04189A8C2C /* HorizonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB6C810B9D81A542EB0FA9F /* HorizonView.swift */; };
+		33819518853E84EC37AF7C00 /* SkyLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29B0E803153CB812629ADA59 /* SkyLayer.swift */; };
+		35BF17B7592CF0AE379EE0FB /* MoonDisc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 472A321210B7C12D4CF15E22 /* MoonDisc.swift */; };
+		36F93E0D203BA480FED7B10D /* DashboardCore in Frameworks */ = {isa = PBXBuildFile; productRef = 720BEA3F5C969E5907E0ADC3 /* DashboardCore */; };
+		39CE8A9C218BF6EAFFB4CB6B /* CormorantGaramond-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F2343E09D5ADE1C0F4096554 /* CormorantGaramond-Italic.ttf */; };
+		3BCEC13F8450309CEA5113CC /* SkyColour.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1982EDDF2B6A3E033A01C63 /* SkyColour.swift */; };
+		3C2B6FC0A731A7A03D161988 /* FuzzyClockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 656C08F19678AAA727B5755E /* FuzzyClockView.swift */; };
+		3C93013F9701BF979B109C05 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 708E7FA2EC39FD82617171C5 /* Keychain.swift */; };
+		3CB5B0DA6249E85634D5AC7B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0A63BFA37FD3C74D01808FA4 /* Assets.xcassets */; };
+		3DA7151BF8690A7A136E4BB8 /* Cinzel.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 61DD62983158D3984EC63FFB /* Cinzel.ttf */; };
+		3F2452848B435A92E4F78576 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2103C0B8C55F989AF037F3 /* Theme.swift */; };
 		416BAB7435FF5AA9F705C30F /* WindowPane.metal in Sources */ = {isa = PBXBuildFile; fileRef = 5AB880AAFFAF50381C546114 /* WindowPane.metal */; };
 		419C22D1A074B4220E3F5C25 /* OrreryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 333B7105DB6D07E312E56484 /* OrreryView.swift */; };
+		41E7CCE7F89D8B958A8764C2 /* Waiting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B863E210F47745375816A0F /* Waiting.swift */; };
 		45CC7B2D9A0AEA7DE3A89251 /* Rajdhani-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2ABE50ACD8B843A99D8BB62C /* Rajdhani-SemiBold.ttf */; };
 		460AFA6DC7DC369E67096935 /* Cinzel.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 61DD62983158D3984EC63FFB /* Cinzel.ttf */; };
 		465B5A043627B49E6D691ED8 /* SkylightSky.metal in Sources */ = {isa = PBXBuildFile; fileRef = EAEE458EE1F37F100274CB01 /* SkylightSky.metal */; };
 		4743623BB70CE9459A0B24DD /* CormorantGaramond.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A68DDBCA1329C420B50A6188 /* CormorantGaramond.ttf */; };
 		47B5FE44A09AEF0AA9B9D4E5 /* Goodmountain-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2F751680BA84ACA609A49B68 /* Goodmountain-Regular.otf */; };
+		48B52B32E3C9D90A47EA2379 /* SkylightSky.metal in Sources */ = {isa = PBXBuildFile; fileRef = EAEE458EE1F37F100274CB01 /* SkylightSky.metal */; };
 		48BB3B40E6E914FDBE11153A /* DashboardStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8986DA2F23A6044A8D92D3B4 /* DashboardStore.swift */; };
 		4BB3C08A2A618021AF181B82 /* QuoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4098608C8444AC0C661DD3D1 /* QuoteView.swift */; };
 		4CFB5517937BBA9E4159B7BF /* PlayfairDisplay-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5A14D92835DFD740F4F1432D /* PlayfairDisplay-Bold.ttf */; };
+		4D5885900A1EAD704ED038D8 /* AuroraSky.metal in Sources */ = {isa = PBXBuildFile; fileRef = A4E3CE2DB7FE94F4CB142505 /* AuroraSky.metal */; };
+		4DABC7D90431CCE192CBE003 /* AgendaPlateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A7D3CB3930F0208F3F6CD8B /* AgendaPlateView.swift */; };
+		4DB124C03AA81F00D7B09170 /* NightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4CD028BD1DA5124D982E2E8 /* NightView.swift */; };
+		4E308F2AB1B7529E8351C1EE /* thumbnail@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FF8E5BC06A75165FC2A32B1B /* thumbnail@2x.png */; };
+		4EC87A43AD898326E3944768 /* WindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2256A097691D68B2477F76EF /* WindowView.swift */; };
+		503372A82E2AA01E25665085 /* NightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4CD028BD1DA5124D982E2E8 /* NightView.swift */; };
+		50B640932D5F7D71E6D065AE /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 660A98750F7DEDD3E9B93FCE /* DashboardView.swift */; };
 		5411EFF0CE28E3D06B5DE4F4 /* GrimoireView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42DAF9DA804F0B04C8DDE091 /* GrimoireView.swift */; };
 		54F0157FE87CCD17BBC04712 /* Figtree-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8D623B4B66C03F6E41617CBC /* Figtree-ExtraBold.ttf */; };
+		5698D374676827802680D51A /* CyberpunkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F836F52D21F1424312E73132 /* CyberpunkView.swift */; };
+		56C4250D2795D53E745F7E2E /* WindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2256A097691D68B2477F76EF /* WindowView.swift */; };
+		5714612F30435A5AAC99E85E /* WeatherArt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72F2A46DC8514A7232F59DA3 /* WeatherArt.swift */; };
 		5870F7893C97C7CB9405BC4D /* Jura-Variable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 47C24A3D1B5321D2D19DA285 /* Jura-Variable.ttf */; };
+		5BADCF84DFB0E1AF97CBAD1D /* HomeDashboardSaverHostApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ED3F1A2AAF1B6C4B07F0EFA /* HomeDashboardSaverHostApp.swift */; };
+		5CAB591CEF6589834986C633 /* Platform.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC42DA855CF4CE4E75414E2 /* Platform.swift */; };
+		5CC5C673FF0E59D4293B71D5 /* WeatherArt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72F2A46DC8514A7232F59DA3 /* WeatherArt.swift */; };
+		5D8AB3D17CF894A6AC7D54FF /* DashboardStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8986DA2F23A6044A8D92D3B4 /* DashboardStore.swift */; };
+		5D8E093F91C07CA9492C99FF /* DMSans.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F7B2857FB7AFDA686A83D0B /* DMSans.ttf */; };
 		60B9ABEACDE09E876B36F3F1 /* PiBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B3C54094507B36DC31C7C76 /* PiBrowser.swift */; };
+		614E46DD746F8AF5D8470787 /* DashboardStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8986DA2F23A6044A8D92D3B4 /* DashboardStore.swift */; };
+		62E0C546A892A2A1EFA433C2 /* PiBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B3C54094507B36DC31C7C76 /* PiBrowser.swift */; };
+		6319A036BDF054A4644609DE /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 708E7FA2EC39FD82617171C5 /* Keychain.swift */; };
+		665E0292FCDC6F9AAF4E36EC /* thumbnail@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FF8E5BC06A75165FC2A32B1B /* thumbnail@2x.png */; };
 		668934D53CA77B99EFA43552 /* UplinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71287ECAC4ACEC3BE2DB09CF /* UplinkView.swift */; };
+		682516CA25FA4BE6B09DD54D /* CormorantGaramond.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A68DDBCA1329C420B50A6188 /* CormorantGaramond.ttf */; };
+		68F52C9B0F5E4DFC6C3D7D82 /* QuoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4098608C8444AC0C661DD3D1 /* QuoteView.swift */; };
+		6D04B574D6374478A9114B2C /* BigShouldersDisplay-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CED58FBF03979E34EA7C79D3 /* BigShouldersDisplay-ExtraBold.ttf */; };
+		72250E2D944D7FA2653CDE28 /* PlayfairDisplay-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5A14D92835DFD740F4F1432D /* PlayfairDisplay-Bold.ttf */; };
+		72D2A3DD336F41E98C66854C /* WeatherglassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0FD297DE56AF1DD7F7DAFB2 /* WeatherglassView.swift */; };
 		73B1A71294BDD2E4BA0FC68B /* Michroma-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B97455432CBD74EA8E8AB21C /* Michroma-Regular.ttf */; };
+		74B9317F044EA4AE03FCB430 /* SkylightSky.metal in Sources */ = {isa = PBXBuildFile; fileRef = EAEE458EE1F37F100274CB01 /* SkylightSky.metal */; };
+		75FD43C30D380536823310E7 /* SaverScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AD9B7CE0DB54D6C6308F222 /* SaverScreen.swift */; };
 		7701A0FDED19BDD2E1A71CC9 /* WeatherArt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72F2A46DC8514A7232F59DA3 /* WeatherArt.swift */; };
 		77285EF0F0FD9A8ED107921F /* BigShouldersDisplay-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CED58FBF03979E34EA7C79D3 /* BigShouldersDisplay-ExtraBold.ttf */; };
 		7ABAC51A5C68DEC61FE7DBA5 /* SplitMix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6041939B5D7B3127401CA708 /* SplitMix.swift */; };
+		7B3042A5CA7B97732F46E509 /* WideColour.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8B868F16A1C58C2FDA721DB /* WideColour.swift */; };
 		7E6CE2079A42A622309DEC52 /* DashboardScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4CAFF9985B9F380C5555D3D /* DashboardScreen.swift */; };
 		7E84F655354C4B325DAE7DF9 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 660A98750F7DEDD3E9B93FCE /* DashboardView.swift */; };
+		7ED49A7470CD662768A817F0 /* DMSans.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F7B2857FB7AFDA686A83D0B /* DMSans.ttf */; };
 		8117374DFD07F2DCA93E9A9D /* Oxanium-Variable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7489A5D000CB1D9AFB28D8D2 /* Oxanium-Variable.ttf */; };
+		84C237BDD626659DE77A0F29 /* AuroraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 746246E776D4B3F02920D6AF /* AuroraView.swift */; };
+		85C7A18340A251ED4612258E /* Oxanium-Variable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7489A5D000CB1D9AFB28D8D2 /* Oxanium-Variable.ttf */; };
+		86798B1D7A4A76BD8320EFF3 /* HorizonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB6C810B9D81A542EB0FA9F /* HorizonView.swift */; };
+		86FA390432D62184EE914F46 /* ManufacturingConsent-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5BCEA6F65BFB1AF66825E854 /* ManufacturingConsent-Regular.ttf */; };
+		8847CCED94E8E3B0A4FE1D6D /* Waiting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B863E210F47745375816A0F /* Waiting.swift */; };
+		88A30D2C84D9384DFBAE44E3 /* PlayfairDisplay-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5A14D92835DFD740F4F1432D /* PlayfairDisplay-Bold.ttf */; };
+		8C7900786C9B022E4410BB7E /* LightCycleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E57CFC146044F906194B6656 /* LightCycleView.swift */; };
+		8D01F6E778C00CB6548642E3 /* SkylightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C30E67A42F18B2067865361F /* SkylightView.swift */; };
+		8EA6DC510B8740D49A5B6A70 /* SaverScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AD9B7CE0DB54D6C6308F222 /* SaverScreen.swift */; };
 		9344DC299A5326219B6516DC /* LightCycleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E57CFC146044F906194B6656 /* LightCycleView.swift */; };
+		9399119726ED894EE24A5844 /* Jura-Variable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 47C24A3D1B5321D2D19DA285 /* Jura-Variable.ttf */; };
+		9465C7BA4F176E02966E96DA /* UplinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71287ECAC4ACEC3BE2DB09CF /* UplinkView.swift */; };
 		9645C744C0BB544F09B9A0CE /* AgendaPlateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A7D3CB3930F0208F3F6CD8B /* AgendaPlateView.swift */; };
+		96C5055D5A479DF6A833D390 /* Rajdhani-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2ABE50ACD8B843A99D8BB62C /* Rajdhani-SemiBold.ttf */; };
+		9864298E2C8CAA57A2EB828A /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 660A98750F7DEDD3E9B93FCE /* DashboardView.swift */; };
+		9A91CCF46AFB87F2337D5DFF /* CormorantGaramond.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A68DDBCA1329C420B50A6188 /* CormorantGaramond.ttf */; };
 		9DE130CDBDEFF4158B8BD1E0 /* Saira-Variable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 55D94D86D387DBCDDEAF25C4 /* Saira-Variable.ttf */; };
 		9DED23C742D31A9622FEDF31 /* CyberpunkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F836F52D21F1424312E73132 /* CyberpunkView.swift */; };
+		9E7B386A2E0AF03AC47297B1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0A63BFA37FD3C74D01808FA4 /* Assets.xcassets */; };
+		A047A7CF7EA2861542034C09 /* BuildIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D6560F916DAE5BD81DA2DBC /* BuildIn.swift */; };
+		A0E2AE772A93BB426CD67D7C /* WindowPane.metal in Sources */ = {isa = PBXBuildFile; fileRef = 5AB880AAFFAF50381C546114 /* WindowPane.metal */; };
+		A4B1EBEC5DD1B227E82C397A /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2103C0B8C55F989AF037F3 /* Theme.swift */; };
 		A56CCAD2FA51F96FCACA8EED /* RemoteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5C83EE56FEAB64DF4BCEF1 /* RemoteTests.swift */; };
+		A5780E9720424B319C2B61F2 /* BigShouldersDisplay-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 76149526166AFF15A3A36459 /* BigShouldersDisplay-Black.ttf */; };
+		A61EAD67B2D253AD49B5761E /* DashboardCore in Frameworks */ = {isa = PBXBuildFile; productRef = F245BFB5E03B057EF7ACA3C4 /* DashboardCore */; };
 		A702BE2F6D6D411D256D80BE /* MoonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10DA38EC1D96409C50598DB5 /* MoonView.swift */; };
+		A88BA437ED93A66FDBF3CB92 /* Platform.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC42DA855CF4CE4E75414E2 /* Platform.swift */; };
+		A953DE59E32757AB8B0D790D /* CormorantGaramond-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F2343E09D5ADE1C0F4096554 /* CormorantGaramond-Italic.ttf */; };
+		AA4849B6661F903740ECD323 /* Rajdhani-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6258588CD3B78DBF295BCA7D /* Rajdhani-Bold.ttf */; };
+		ADE52C073A8B3EF66ACD3141 /* AuroraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 746246E776D4B3F02920D6AF /* AuroraView.swift */; };
 		AF192DD826C00E051CE81A5E /* AuroraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 746246E776D4B3F02920D6AF /* AuroraView.swift */; };
 		B4314A66BEB07B6ADB8167FC /* demo-snapshot.json in Resources */ = {isa = PBXBuildFile; fileRef = F31AD003A5C8873570D9A9F2 /* demo-snapshot.json */; };
+		B54848CA6E6D2A8C7C54AFEF /* Figtree-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8D623B4B66C03F6E41617CBC /* Figtree-ExtraBold.ttf */; };
+		B58E356E244A0CCABD7FA0E1 /* BigShouldersDisplay-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CED58FBF03979E34EA7C79D3 /* BigShouldersDisplay-ExtraBold.ttf */; };
+		BB0EF7AAB0C9097A8A9D2413 /* SkyPass.metal in Sources */ = {isa = PBXBuildFile; fileRef = 7060A835EC6B2CBBC9D10C6A /* SkyPass.metal */; };
 		BB501FDE97EAB93BA7415424 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBCC482A09982EB05EE52C5 /* SettingsView.swift */; };
+		BCA3FBD94D2665A24D735ADF /* SkyColour.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1982EDDF2B6A3E033A01C63 /* SkyColour.swift */; };
+		BD75BC86A3BC1ADA88E3C246 /* AgendaPlateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A7D3CB3930F0208F3F6CD8B /* AgendaPlateView.swift */; };
 		C07A7F25F4E3DD42B9DAF047 /* AuroraSky.metal in Sources */ = {isa = PBXBuildFile; fileRef = A4E3CE2DB7FE94F4CB142505 /* AuroraSky.metal */; };
+		C09D7B5216F3E15461D0A114 /* Rajdhani-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6258588CD3B78DBF295BCA7D /* Rajdhani-Bold.ttf */; };
+		C0E793C28915AB248EE81007 /* SkylightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C30E67A42F18B2067865361F /* SkylightView.swift */; };
 		C16BCCB4AEE8231608362608 /* BuildIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D6560F916DAE5BD81DA2DBC /* BuildIn.swift */; };
 		C5E2D782A5D8AF6532B9A6FA /* MoonDisc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 472A321210B7C12D4CF15E22 /* MoonDisc.swift */; };
+		C6F5E865E55D4A2870431FC2 /* PiBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B3C54094507B36DC31C7C76 /* PiBrowser.swift */; };
+		C74E0712ED3EB6DC80C57553 /* LightCycleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E57CFC146044F906194B6656 /* LightCycleView.swift */; };
+		C811F524452E311B3447A7A5 /* Waiting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B863E210F47745375816A0F /* Waiting.swift */; };
+		CA195870E98C80BD9992519B /* SaverSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE1C4D8F55459949EB3C0CA8 /* SaverSettingsView.swift */; };
 		CA50D3C14F2FCFC864D00375 /* Rajdhani-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6258588CD3B78DBF295BCA7D /* Rajdhani-Bold.ttf */; };
+		CF47D01DDB0785959598AC94 /* Starfield.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E1BFF6FCCC998B7C7EC292 /* Starfield.swift */; };
 		D022FE87E73DB8C7AF8A49A8 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 9740313FCCA386C7F996F6FA /* PrivacyInfo.xcprivacy */; };
+		D04D1F26D90D928ADC088EAF /* SplitMix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6041939B5D7B3127401CA708 /* SplitMix.swift */; };
+		D3EA1F1E7C8AF9B9AE1F425B /* Starfield.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E1BFF6FCCC998B7C7EC292 /* Starfield.swift */; };
+		D3FD6A882BD1B4FB4E9AFC0C /* demo-snapshot.json in Resources */ = {isa = PBXBuildFile; fileRef = F31AD003A5C8873570D9A9F2 /* demo-snapshot.json */; };
+		D648467493BBA9849D79A2A3 /* Righteous-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 24D3FE4C261142D9F0D912CA /* Righteous-Regular.ttf */; };
+		D670C4DE0A1F514DC7F1F674 /* Jura-Variable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 47C24A3D1B5321D2D19DA285 /* Jura-Variable.ttf */; };
+		D8504C2AE1322A5D7C00B8D1 /* FuzzyClockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 656C08F19678AAA727B5755E /* FuzzyClockView.swift */; };
+		DA3294AD6FA5BD861839CB51 /* MoonDisc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 472A321210B7C12D4CF15E22 /* MoonDisc.swift */; };
 		DBF586DBDC1455FF0DC4F199 /* SkylightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C30E67A42F18B2067865361F /* SkylightView.swift */; };
+		DC2970476F1693010D906921 /* Oxanium-Variable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7489A5D000CB1D9AFB28D8D2 /* Oxanium-Variable.ttf */; };
+		DC7AF0B15164C95B28C8ADC7 /* Saira-Variable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 55D94D86D387DBCDDEAF25C4 /* Saira-Variable.ttf */; };
+		DD2D1DFEB58FFDBA168EA613 /* AuroraSky.metal in Sources */ = {isa = PBXBuildFile; fileRef = A4E3CE2DB7FE94F4CB142505 /* AuroraSky.metal */; };
+		DDC2A72FE09AF06ED764CC4D /* Rajdhani-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 596F4764C5072FB1383315F4 /* Rajdhani-Medium.ttf */; };
+		DEA6B400B38EB86A5C710896 /* WeatherglassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0FD297DE56AF1DD7F7DAFB2 /* WeatherglassView.swift */; };
+		E1E4CD6290809BD7E0274A36 /* SplitMix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6041939B5D7B3127401CA708 /* SplitMix.swift */; };
 		E21B6926489772868CDB44A0 /* SkyLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29B0E803153CB812629ADA59 /* SkyLayer.swift */; };
+		E31055346A3957B2359920F5 /* SaverSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE1C4D8F55459949EB3C0CA8 /* SaverSettingsView.swift */; };
+		E373F5A753E2B71471272ED6 /* Saira-Variable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 55D94D86D387DBCDDEAF25C4 /* Saira-Variable.ttf */; };
 		E43884FB389F97097336E1B8 /* FuzzyClockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 656C08F19678AAA727B5755E /* FuzzyClockView.swift */; };
 		E4A90D025979E78BE7CA18DC /* WideColour.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8B868F16A1C58C2FDA721DB /* WideColour.swift */; };
 		E683ABB11290452C9675BF4E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0A63BFA37FD3C74D01808FA4 /* Assets.xcassets */; };
 		EB6312D619DA25549CF17252 /* CormorantGaramond-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F2343E09D5ADE1C0F4096554 /* CormorantGaramond-Italic.ttf */; };
 		EEC06FB2796AB38DD2F6D063 /* DashboardCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3298B6D11AB4D038081715DC /* DashboardCore */; };
+		EF2A62A819F4BC068D23FCB7 /* thumbnail.png in Resources */ = {isa = PBXBuildFile; fileRef = C605A43D00DB7EC27B78B27B /* thumbnail.png */; };
+		F24B083594B609B6F9FE7AF5 /* ManufacturingConsent-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5BCEA6F65BFB1AF66825E854 /* ManufacturingConsent-Regular.ttf */; };
 		F307849DC1335E469A4963A0 /* HomeDashboardApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63DD5EE230242228C007145D /* HomeDashboardApp.swift */; };
+		F51E15B6DA230E1477FD5277 /* HorizonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB6C810B9D81A542EB0FA9F /* HorizonView.swift */; };
 		F52B09283F9DD6AD0C077B82 /* NightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4CD028BD1DA5124D982E2E8 /* NightView.swift */; };
+		F5CED89FDAA0872D820FE889 /* QuoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4098608C8444AC0C661DD3D1 /* QuoteView.swift */; };
+		F618FB1D18B9A1449060A621 /* OrreryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 333B7105DB6D07E312E56484 /* OrreryView.swift */; };
 		F6D82CA18651E239EAE2A7DC /* Starfield.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E1BFF6FCCC998B7C7EC292 /* Starfield.swift */; };
 		F758B12F3C7CA752CF16F9D0 /* Righteous-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 24D3FE4C261142D9F0D912CA /* Righteous-Regular.ttf */; };
 		FBB409C27D2182C99172AF15 /* Rajdhani-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 596F4764C5072FB1383315F4 /* Rajdhani-Medium.ttf */; };
+		FC04F7DA1F2D20AC673E4AE8 /* UplinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71287ECAC4ACEC3BE2DB09CF /* UplinkView.swift */; };
+		FC1A8610DAC9B563A0A37007 /* Goodmountain-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2F751680BA84ACA609A49B68 /* Goodmountain-Regular.otf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -79,6 +204,9 @@
 
 /* Begin PBXFileReference section */
 		0A63BFA37FD3C74D01808FA4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		0AD603EB325E79CD652796A1 /* HomeDashboardSaverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeDashboardSaverView.swift; sourceTree = "<group>"; };
+		0AD9B7CE0DB54D6C6308F222 /* SaverScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaverScreen.swift; sourceTree = "<group>"; };
+		0B0A9F8052BD77757AE4C06E /* HomeDashboardSaverHost.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HomeDashboardSaverHost.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0B3C54094507B36DC31C7C76 /* PiBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiBrowser.swift; sourceTree = "<group>"; };
 		10DA38EC1D96409C50598DB5 /* MoonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoonView.swift; sourceTree = "<group>"; };
 		1A7D3CB3930F0208F3F6CD8B /* AgendaPlateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgendaPlateView.swift; sourceTree = "<group>"; };
@@ -98,13 +226,17 @@
 		4C2103C0B8C55F989AF037F3 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		53F9A78BB2607C29E062F3B0 /* HomeDashboardUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HomeDashboardUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		55D94D86D387DBCDDEAF25C4 /* Saira-Variable.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Saira-Variable.ttf"; sourceTree = "<group>"; };
+		58CAF982AE960AC363A557B8 /* SaverConfigureSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaverConfigureSheet.swift; sourceTree = "<group>"; };
 		596F4764C5072FB1383315F4 /* Rajdhani-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Rajdhani-Medium.ttf"; sourceTree = "<group>"; };
 		5A14D92835DFD740F4F1432D /* PlayfairDisplay-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "PlayfairDisplay-Bold.ttf"; sourceTree = "<group>"; };
 		5AB880AAFFAF50381C546114 /* WindowPane.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = WindowPane.metal; sourceTree = "<group>"; };
+		5B863E210F47745375816A0F /* Waiting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Waiting.swift; sourceTree = "<group>"; };
 		5BCEA6F65BFB1AF66825E854 /* ManufacturingConsent-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "ManufacturingConsent-Regular.ttf"; sourceTree = "<group>"; };
+		5ED3F1A2AAF1B6C4B07F0EFA /* HomeDashboardSaverHostApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeDashboardSaverHostApp.swift; sourceTree = "<group>"; };
 		6041939B5D7B3127401CA708 /* SplitMix.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitMix.swift; sourceTree = "<group>"; };
 		61DD62983158D3984EC63FFB /* Cinzel.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Cinzel.ttf; sourceTree = "<group>"; };
 		6258588CD3B78DBF295BCA7D /* Rajdhani-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Rajdhani-Bold.ttf"; sourceTree = "<group>"; };
+		63D983FCA3EB3BDE986560A2 /* HomeDashboardSaver.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HomeDashboardSaver.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		63DD5EE230242228C007145D /* HomeDashboardApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeDashboardApp.swift; sourceTree = "<group>"; };
 		656C08F19678AAA727B5755E /* FuzzyClockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FuzzyClockView.swift; sourceTree = "<group>"; };
 		660A98750F7DEDD3E9B93FCE /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
@@ -124,12 +256,16 @@
 		A4CAFF9985B9F380C5555D3D /* DashboardScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardScreen.swift; sourceTree = "<group>"; };
 		A4E3CE2DB7FE94F4CB142505 /* AuroraSky.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = AuroraSky.metal; sourceTree = "<group>"; };
 		A68DDBCA1329C420B50A6188 /* CormorantGaramond.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = CormorantGaramond.ttf; sourceTree = "<group>"; };
+		AE1C4D8F55459949EB3C0CA8 /* SaverSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaverSettingsView.swift; sourceTree = "<group>"; };
 		B11D136C433B5D7FD6C407D9 /* Home Dashboard.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "Home Dashboard.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B97455432CBD74EA8E8AB21C /* Michroma-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Michroma-Regular.ttf"; sourceTree = "<group>"; };
+		BBC60B945D426588BFC1B6E2 /* ScreenSaver.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScreenSaver.framework; path = System/Library/Frameworks/ScreenSaver.framework; sourceTree = SDKROOT; };
 		BDBCC482A09982EB05EE52C5 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		BEC42DA855CF4CE4E75414E2 /* Platform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Platform.swift; sourceTree = "<group>"; };
 		C1E1BFF6FCCC998B7C7EC292 /* Starfield.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Starfield.swift; sourceTree = "<group>"; };
 		C30E67A42F18B2067865361F /* SkylightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkylightView.swift; sourceTree = "<group>"; };
 		C4CD028BD1DA5124D982E2E8 /* NightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightView.swift; sourceTree = "<group>"; };
+		C605A43D00DB7EC27B78B27B /* thumbnail.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = thumbnail.png; sourceTree = "<group>"; };
 		C73B1F8A158D7CE5DE173E01 /* DashboardCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = DashboardCore; path = Packages/DashboardCore; sourceTree = SOURCE_ROOT; };
 		CED58FBF03979E34EA7C79D3 /* BigShouldersDisplay-ExtraBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "BigShouldersDisplay-ExtraBold.ttf"; sourceTree = "<group>"; };
 		D0FD297DE56AF1DD7F7DAFB2 /* WeatherglassView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherglassView.swift; sourceTree = "<group>"; };
@@ -140,9 +276,27 @@
 		F31AD003A5C8873570D9A9F2 /* demo-snapshot.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "demo-snapshot.json"; sourceTree = "<group>"; };
 		F836F52D21F1424312E73132 /* CyberpunkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyberpunkView.swift; sourceTree = "<group>"; };
 		F8B868F16A1C58C2FDA721DB /* WideColour.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WideColour.swift; sourceTree = "<group>"; };
+		FF8E5BC06A75165FC2A32B1B /* thumbnail@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "thumbnail@2x.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		44B0F8BFEF703C10A26A5645 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A61EAD67B2D253AD49B5761E /* DashboardCore in Frameworks */,
+				184AB96CF2B8B17A5DC0F5DB /* ScreenSaver.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9C6B92C846DD10CCA95B98B8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				36F93E0D203BA480FED7B10D /* DashboardCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CF55BBDFE7D9EEF06CDA4ECE /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -162,6 +316,14 @@
 			path = Config;
 			sourceTree = "<group>";
 		};
+		0356AFFB678A987B81F38D52 /* Bundle */ = {
+			isa = PBXGroup;
+			children = (
+				0AD603EB325E79CD652796A1 /* HomeDashboardSaverView.swift */,
+			);
+			path = Bundle;
+			sourceTree = "<group>";
+		};
 		053C1BD7847BD27195E0E9B4 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
@@ -174,9 +336,21 @@
 			isa = PBXGroup;
 			children = (
 				B11D136C433B5D7FD6C407D9 /* Home Dashboard.app */,
+				63D983FCA3EB3BDE986560A2 /* HomeDashboardSaver.bundle */,
+				0B0A9F8052BD77757AE4C06E /* HomeDashboardSaverHost.app */,
 				53F9A78BB2607C29E062F3B0 /* HomeDashboardUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		2493545754E88E6C6342EA45 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				58CAF982AE960AC363A557B8 /* SaverConfigureSheet.swift */,
+				0AD9B7CE0DB54D6C6308F222 /* SaverScreen.swift */,
+				AE1C4D8F55459949EB3C0CA8 /* SaverSettingsView.swift */,
+			);
+			path = Shared;
 			sourceTree = "<group>";
 		};
 		51176171595685C45C216FB2 /* Fonts */ = {
@@ -204,6 +378,22 @@
 			path = Fonts;
 			sourceTree = "<group>";
 		};
+		6A5965E3136833EE99939580 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				BBC60B945D426588BFC1B6E2 /* ScreenSaver.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		7367162C0DE49A8AD7C05A70 /* Host */ = {
+			isa = PBXGroup;
+			children = (
+				5ED3F1A2AAF1B6C4B07F0EFA /* HomeDashboardSaverHostApp.swift */,
+			);
+			path = Host;
+			sourceTree = "<group>";
+		};
 		771AFCC3F41AF7DA6A5D716B /* HomeDashboardUITests */ = {
 			isa = PBXGroup;
 			children = (
@@ -212,12 +402,25 @@
 			path = HomeDashboardUITests;
 			sourceTree = "<group>";
 		};
+		7F213AD529C4550596D572A2 /* HomeDashboardSaver */ = {
+			isa = PBXGroup;
+			children = (
+				C605A43D00DB7EC27B78B27B /* thumbnail.png */,
+				FF8E5BC06A75165FC2A32B1B /* thumbnail@2x.png */,
+				0356AFFB678A987B81F38D52 /* Bundle */,
+				7367162C0DE49A8AD7C05A70 /* Host */,
+				2493545754E88E6C6342EA45 /* Shared */,
+			);
+			path = HomeDashboardSaver;
+			sourceTree = "<group>";
+		};
 		819153AE226C9E1E05B57C87 /* Parts */ = {
 			isa = PBXGroup;
 			children = (
 				A4E3CE2DB7FE94F4CB142505 /* AuroraSky.metal */,
 				1D6560F916DAE5BD81DA2DBC /* BuildIn.swift */,
 				472A321210B7C12D4CF15E22 /* MoonDisc.swift */,
+				BEC42DA855CF4CE4E75414E2 /* Platform.swift */,
 				F1982EDDF2B6A3E033A01C63 /* SkyColour.swift */,
 				29B0E803153CB812629ADA59 /* SkyLayer.swift */,
 				EAEE458EE1F37F100274CB01 /* SkylightSky.metal */,
@@ -225,6 +428,7 @@
 				7060A835EC6B2CBBC9D10C6A /* SkyPass.metal */,
 				6041939B5D7B3127401CA708 /* SplitMix.swift */,
 				C1E1BFF6FCCC998B7C7EC292 /* Starfield.swift */,
+				5B863E210F47745375816A0F /* Waiting.swift */,
 				72F2A46DC8514A7232F59DA3 /* WeatherArt.swift */,
 				F8B868F16A1C58C2FDA721DB /* WideColour.swift */,
 				5AB880AAFFAF50381C546114 /* WindowPane.metal */,
@@ -284,9 +488,11 @@
 			isa = PBXGroup;
 			children = (
 				0123A16F59895241FC459E4A /* Config */,
+				7F213AD529C4550596D572A2 /* HomeDashboardSaver */,
 				E60E330D634A2C6AA113C70F /* HomeDashboardTV */,
 				771AFCC3F41AF7DA6A5D716B /* HomeDashboardUITests */,
 				053C1BD7847BD27195E0E9B4 /* Packages */,
+				6A5965E3136833EE99939580 /* Frameworks */,
 				177C3E4F5ABEFD3B526E3F56 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -305,6 +511,26 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		0BFF3B1DA5BFD836866F954C /* HomeDashboardSaver */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8CB6F477EEC04BEFFF885223 /* Build configuration list for PBXNativeTarget "HomeDashboardSaver" */;
+			buildPhases = (
+				0480D72177BC1DE5D8E7D072 /* Sources */,
+				59490ED93592CE78602E52E2 /* Resources */,
+				44B0F8BFEF703C10A26A5645 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HomeDashboardSaver;
+			packageProductDependencies = (
+				F245BFB5E03B057EF7ACA3C4 /* DashboardCore */,
+			);
+			productName = HomeDashboardSaver;
+			productReference = 63D983FCA3EB3BDE986560A2 /* HomeDashboardSaver.bundle */;
+			productType = "com.apple.product-type.bundle";
+		};
 		59B6F95BBAEF30F318F97A34 /* HomeDashboard */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3E80956CFDE3DBDD080A0A17 /* Build configuration list for PBXNativeTarget "HomeDashboard" */;
@@ -343,6 +569,26 @@
 			productReference = 53F9A78BB2607C29E062F3B0 /* HomeDashboardUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		CE15AD32C9C978B6D1E4EB41 /* HomeDashboardSaverHost */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C787CD35AEC697C4F4516214 /* Build configuration list for PBXNativeTarget "HomeDashboardSaverHost" */;
+			buildPhases = (
+				61307D3446B9E6745E55080A /* Sources */,
+				9E61B3C2EE3C71DFFC54AAB6 /* Resources */,
+				9C6B92C846DD10CCA95B98B8 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HomeDashboardSaverHost;
+			packageProductDependencies = (
+				720BEA3F5C969E5907E0ADC3 /* DashboardCore */,
+			);
+			productName = HomeDashboardSaverHost;
+			productReference = 0B0A9F8052BD77757AE4C06E /* HomeDashboardSaverHost.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -352,6 +598,10 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 2700;
 				TargetAttributes = {
+					0BFF3B1DA5BFD836866F954C = {
+						DevelopmentTeam = FGG98L437R;
+						ProvisioningStyle = Automatic;
+					};
 					59B6F95BBAEF30F318F97A34 = {
 						DevelopmentTeam = FGG98L437R;
 						ProvisioningStyle = Automatic;
@@ -360,6 +610,10 @@
 						DevelopmentTeam = FGG98L437R;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 59B6F95BBAEF30F318F97A34;
+					};
+					CE15AD32C9C978B6D1E4EB41 = {
+						DevelopmentTeam = FGG98L437R;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -382,6 +636,8 @@
 			targets = (
 				59B6F95BBAEF30F318F97A34 /* HomeDashboard */,
 				B04779F0352A3EBCAB0BBB12 /* HomeDashboardUITests */,
+				0BFF3B1DA5BFD836866F954C /* HomeDashboardSaver */,
+				CE15AD32C9C978B6D1E4EB41 /* HomeDashboardSaverHost */,
 			);
 		};
 /* End PBXProject section */
@@ -415,9 +671,112 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		59490ED93592CE78602E52E2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9E7B386A2E0AF03AC47297B1 /* Assets.xcassets in Resources */,
+				A5780E9720424B319C2B61F2 /* BigShouldersDisplay-Black.ttf in Resources */,
+				6D04B574D6374478A9114B2C /* BigShouldersDisplay-ExtraBold.ttf in Resources */,
+				1271662842DF4A8259EAE8C3 /* Cinzel.ttf in Resources */,
+				39CE8A9C218BF6EAFFB4CB6B /* CormorantGaramond-Italic.ttf in Resources */,
+				682516CA25FA4BE6B09DD54D /* CormorantGaramond.ttf in Resources */,
+				7ED49A7470CD662768A817F0 /* DMSans.ttf in Resources */,
+				03A8EF962A677C50CF446E5A /* Figtree-ExtraBold.ttf in Resources */,
+				FC1A8610DAC9B563A0A37007 /* Goodmountain-Regular.otf in Resources */,
+				D670C4DE0A1F514DC7F1F674 /* Jura-Variable.ttf in Resources */,
+				F24B083594B609B6F9FE7AF5 /* ManufacturingConsent-Regular.ttf in Resources */,
+				290CECF90B2AC968BB2E2D58 /* Michroma-Regular.ttf in Resources */,
+				DC2970476F1693010D906921 /* Oxanium-Variable.ttf in Resources */,
+				88A30D2C84D9384DFBAE44E3 /* PlayfairDisplay-Bold.ttf in Resources */,
+				AA4849B6661F903740ECD323 /* Rajdhani-Bold.ttf in Resources */,
+				DDC2A72FE09AF06ED764CC4D /* Rajdhani-Medium.ttf in Resources */,
+				0F4DF7A2B435E33476AB58E8 /* Rajdhani-SemiBold.ttf in Resources */,
+				1F432C518904766F67E9D48B /* Righteous-Regular.ttf in Resources */,
+				E373F5A753E2B71471272ED6 /* Saira-Variable.ttf in Resources */,
+				D3FD6A882BD1B4FB4E9AFC0C /* demo-snapshot.json in Resources */,
+				EF2A62A819F4BC068D23FCB7 /* thumbnail.png in Resources */,
+				4E308F2AB1B7529E8351C1EE /* thumbnail@2x.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9E61B3C2EE3C71DFFC54AAB6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3CB5B0DA6249E85634D5AC7B /* Assets.xcassets in Resources */,
+				04D0A951260EF22D46328671 /* BigShouldersDisplay-Black.ttf in Resources */,
+				B58E356E244A0CCABD7FA0E1 /* BigShouldersDisplay-ExtraBold.ttf in Resources */,
+				3DA7151BF8690A7A136E4BB8 /* Cinzel.ttf in Resources */,
+				A953DE59E32757AB8B0D790D /* CormorantGaramond-Italic.ttf in Resources */,
+				9A91CCF46AFB87F2337D5DFF /* CormorantGaramond.ttf in Resources */,
+				5D8E093F91C07CA9492C99FF /* DMSans.ttf in Resources */,
+				B54848CA6E6D2A8C7C54AFEF /* Figtree-ExtraBold.ttf in Resources */,
+				2E0B99F08E86BB9603A81679 /* Goodmountain-Regular.otf in Resources */,
+				9399119726ED894EE24A5844 /* Jura-Variable.ttf in Resources */,
+				86FA390432D62184EE914F46 /* ManufacturingConsent-Regular.ttf in Resources */,
+				28327584EC0645A55391061E /* Michroma-Regular.ttf in Resources */,
+				85C7A18340A251ED4612258E /* Oxanium-Variable.ttf in Resources */,
+				72250E2D944D7FA2653CDE28 /* PlayfairDisplay-Bold.ttf in Resources */,
+				C09D7B5216F3E15461D0A114 /* Rajdhani-Bold.ttf in Resources */,
+				07D44882302973BDED3666C4 /* Rajdhani-Medium.ttf in Resources */,
+				96C5055D5A479DF6A833D390 /* Rajdhani-SemiBold.ttf in Resources */,
+				D648467493BBA9849D79A2A3 /* Righteous-Regular.ttf in Resources */,
+				DC7AF0B15164C95B28C8ADC7 /* Saira-Variable.ttf in Resources */,
+				0619B1D55E18B5B701DCFEBB /* demo-snapshot.json in Resources */,
+				075FFC6791CC7BDBC1AA94A4 /* thumbnail.png in Resources */,
+				665E0292FCDC6F9AAF4E36EC /* thumbnail@2x.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		0480D72177BC1DE5D8E7D072 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4DABC7D90431CCE192CBE003 /* AgendaPlateView.swift in Sources */,
+				DD2D1DFEB58FFDBA168EA613 /* AuroraSky.metal in Sources */,
+				84C237BDD626659DE77A0F29 /* AuroraView.swift in Sources */,
+				0CB790EE9750893E4D7D33C9 /* BuildIn.swift in Sources */,
+				1A140B0B75CC1E4F404DDC8F /* CyberpunkView.swift in Sources */,
+				614E46DD746F8AF5D8470787 /* DashboardStore.swift in Sources */,
+				50B640932D5F7D71E6D065AE /* DashboardView.swift in Sources */,
+				D8504C2AE1322A5D7C00B8D1 /* FuzzyClockView.swift in Sources */,
+				2D7AA9752AB7842109B76741 /* GrimoireView.swift in Sources */,
+				2624313E86B76D43DEFF4907 /* HomeDashboardSaverView.swift in Sources */,
+				86798B1D7A4A76BD8320EFF3 /* HorizonView.swift in Sources */,
+				6319A036BDF054A4644609DE /* Keychain.swift in Sources */,
+				C74E0712ED3EB6DC80C57553 /* LightCycleView.swift in Sources */,
+				DA3294AD6FA5BD861839CB51 /* MoonDisc.swift in Sources */,
+				2A38CA27E28367DB009D24D6 /* MoonView.swift in Sources */,
+				503372A82E2AA01E25665085 /* NightView.swift in Sources */,
+				1BCE9EE72C27A795F9A8D444 /* OrreryView.swift in Sources */,
+				62E0C546A892A2A1EFA433C2 /* PiBrowser.swift in Sources */,
+				5CAB591CEF6589834986C633 /* Platform.swift in Sources */,
+				F5CED89FDAA0872D820FE889 /* QuoteView.swift in Sources */,
+				12DA2FC08663AEB2E645C8E8 /* SaverConfigureSheet.swift in Sources */,
+				8EA6DC510B8740D49A5B6A70 /* SaverScreen.swift in Sources */,
+				E31055346A3957B2359920F5 /* SaverSettingsView.swift in Sources */,
+				BCA3FBD94D2665A24D735ADF /* SkyColour.swift in Sources */,
+				33819518853E84EC37AF7C00 /* SkyLayer.swift in Sources */,
+				00B78686378AD6BC3F73AB9E /* SkyPass.metal in Sources */,
+				74B9317F044EA4AE03FCB430 /* SkylightSky.metal in Sources */,
+				8D01F6E778C00CB6548642E3 /* SkylightView.swift in Sources */,
+				D04D1F26D90D928ADC088EAF /* SplitMix.swift in Sources */,
+				D3EA1F1E7C8AF9B9AE1F425B /* Starfield.swift in Sources */,
+				A4B1EBEC5DD1B227E82C397A /* Theme.swift in Sources */,
+				9465C7BA4F176E02966E96DA /* UplinkView.swift in Sources */,
+				41E7CCE7F89D8B958A8764C2 /* Waiting.swift in Sources */,
+				5CC5C673FF0E59D4293B71D5 /* WeatherArt.swift in Sources */,
+				72D2A3DD336F41E98C66854C /* WeatherglassView.swift in Sources */,
+				7B3042A5CA7B97732F46E509 /* WideColour.swift in Sources */,
+				19E3E7911EC3B58E24E361D1 /* WindowPane.metal in Sources */,
+				4EC87A43AD898326E3944768 /* WindowView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1AF8D348CDC215C37A7632C2 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -449,6 +808,7 @@
 				F52B09283F9DD6AD0C077B82 /* NightView.swift in Sources */,
 				419C22D1A074B4220E3F5C25 /* OrreryView.swift in Sources */,
 				60B9ABEACDE09E876B36F3F1 /* PiBrowser.swift in Sources */,
+				A88BA437ED93A66FDBF3CB92 /* Platform.swift in Sources */,
 				4BB3C08A2A618021AF181B82 /* QuoteView.swift in Sources */,
 				BB501FDE97EAB93BA7415424 /* SettingsView.swift in Sources */,
 				16285FD177D64B1D9A35C006 /* SkyColour.swift in Sources */,
@@ -460,11 +820,57 @@
 				F6D82CA18651E239EAE2A7DC /* Starfield.swift in Sources */,
 				234A879AF993DBACD53A1C57 /* Theme.swift in Sources */,
 				668934D53CA77B99EFA43552 /* UplinkView.swift in Sources */,
+				C811F524452E311B3447A7A5 /* Waiting.swift in Sources */,
 				7701A0FDED19BDD2E1A71CC9 /* WeatherArt.swift in Sources */,
 				1426E37D465A29D3AC373CD2 /* WeatherglassView.swift in Sources */,
 				E4A90D025979E78BE7CA18DC /* WideColour.swift in Sources */,
 				416BAB7435FF5AA9F705C30F /* WindowPane.metal in Sources */,
 				12DF9F160B353E555C4E28B0 /* WindowView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		61307D3446B9E6745E55080A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BD75BC86A3BC1ADA88E3C246 /* AgendaPlateView.swift in Sources */,
+				4D5885900A1EAD704ED038D8 /* AuroraSky.metal in Sources */,
+				ADE52C073A8B3EF66ACD3141 /* AuroraView.swift in Sources */,
+				A047A7CF7EA2861542034C09 /* BuildIn.swift in Sources */,
+				5698D374676827802680D51A /* CyberpunkView.swift in Sources */,
+				5D8AB3D17CF894A6AC7D54FF /* DashboardStore.swift in Sources */,
+				9864298E2C8CAA57A2EB828A /* DashboardView.swift in Sources */,
+				3C2B6FC0A731A7A03D161988 /* FuzzyClockView.swift in Sources */,
+				30BE9A550DCB933008E6FA77 /* GrimoireView.swift in Sources */,
+				5BADCF84DFB0E1AF97CBAD1D /* HomeDashboardSaverHostApp.swift in Sources */,
+				F51E15B6DA230E1477FD5277 /* HorizonView.swift in Sources */,
+				3C93013F9701BF979B109C05 /* Keychain.swift in Sources */,
+				8C7900786C9B022E4410BB7E /* LightCycleView.swift in Sources */,
+				35BF17B7592CF0AE379EE0FB /* MoonDisc.swift in Sources */,
+				041AFCD1321113B5632AA565 /* MoonView.swift in Sources */,
+				4DB124C03AA81F00D7B09170 /* NightView.swift in Sources */,
+				F618FB1D18B9A1449060A621 /* OrreryView.swift in Sources */,
+				C6F5E865E55D4A2870431FC2 /* PiBrowser.swift in Sources */,
+				0488004DDB30A11659FA0DAC /* Platform.swift in Sources */,
+				68F52C9B0F5E4DFC6C3D7D82 /* QuoteView.swift in Sources */,
+				1FE2BDE766ABA0304CDA7D5E /* SaverConfigureSheet.swift in Sources */,
+				75FD43C30D380536823310E7 /* SaverScreen.swift in Sources */,
+				CA195870E98C80BD9992519B /* SaverSettingsView.swift in Sources */,
+				3BCEC13F8450309CEA5113CC /* SkyColour.swift in Sources */,
+				045B15FFD87429E4805DEEBA /* SkyLayer.swift in Sources */,
+				BB0EF7AAB0C9097A8A9D2413 /* SkyPass.metal in Sources */,
+				48B52B32E3C9D90A47EA2379 /* SkylightSky.metal in Sources */,
+				C0E793C28915AB248EE81007 /* SkylightView.swift in Sources */,
+				E1E4CD6290809BD7E0274A36 /* SplitMix.swift in Sources */,
+				CF47D01DDB0785959598AC94 /* Starfield.swift in Sources */,
+				3F2452848B435A92E4F78576 /* Theme.swift in Sources */,
+				FC04F7DA1F2D20AC673E4AE8 /* UplinkView.swift in Sources */,
+				8847CCED94E8E3B0A4FE1D6D /* Waiting.swift in Sources */,
+				5714612F30435A5AAC99E85E /* WeatherArt.swift in Sources */,
+				DEA6B400B38EB86A5C710896 /* WeatherglassView.swift in Sources */,
+				1DD81A9082A69A83D66A68E5 /* WideColour.swift in Sources */,
+				A0E2AE772A93BB426CD67D7C /* WindowPane.metal in Sources */,
+				56C4250D2795D53E745F7E2E /* WindowView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -479,6 +885,28 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		4069E5A82004982127A3FF93 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HomeDashboardSaver/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(BUNDLE_ID_PREFIX).homedashboard.saver";
+				PRODUCT_NAME = "Home Dashboard";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				WRAPPER_EXTENSION = saver;
+			};
+			name = Release;
+		};
 		4EE1466125F8A7F5411FDF7B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -519,6 +947,47 @@
 				TEST_TARGET_NAME = HomeDashboard;
 			};
 			name = Release;
+		};
+		69B0008E5F5C118C712FE156 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HomeDashboardSaver/Host/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Home Dashboard Saver Host";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(BUNDLE_ID_PREFIX).homedashboard.saverhost";
+				PRODUCT_NAME = HomeDashboardSaverHost;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		7BC4C9C99466EC565CCBB8F8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HomeDashboardSaver/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(BUNDLE_ID_PREFIX).homedashboard.saver";
+				PRODUCT_NAME = "Home Dashboard";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				WRAPPER_EXTENSION = saver;
+			};
+			name = Debug;
 		};
 		B95AE3C0A6FEAC18257C4CF9 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -575,11 +1044,11 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = appletvos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -605,6 +1074,25 @@
 				TEST_TARGET_NAME = HomeDashboard;
 			};
 			name = Debug;
+		};
+		DB51CBEE43D2A8AA253BCDCD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HomeDashboardSaver/Host/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Home Dashboard Saver Host";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(BUNDLE_ID_PREFIX).homedashboard.saverhost";
+				PRODUCT_NAME = HomeDashboardSaverHost;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
 		};
 		E3C84E43217A6758E1DF0218 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -655,10 +1143,10 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = appletvos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
@@ -711,11 +1199,29 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
+		8CB6F477EEC04BEFFF885223 /* Build configuration list for PBXNativeTarget "HomeDashboardSaver" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7BC4C9C99466EC565CCBB8F8 /* Debug */,
+				4069E5A82004982127A3FF93 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		A5A944D916CC8EF48E37002D /* Build configuration list for PBXNativeTarget "HomeDashboardUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D3C0104FF410BD447415A5E6 /* Debug */,
 				5111E163BDDEA3BB125B83D3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C787CD35AEC697C4F4516214 /* Build configuration list for PBXNativeTarget "HomeDashboardSaverHost" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				69B0008E5F5C118C712FE156 /* Debug */,
+				DB51CBEE43D2A8AA253BCDCD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -731,6 +1237,14 @@
 
 /* Begin XCSwiftPackageProductDependency section */
 		3298B6D11AB4D038081715DC /* DashboardCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DashboardCore;
+		};
+		720BEA3F5C969E5907E0ADC3 /* DashboardCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DashboardCore;
+		};
+		F245BFB5E03B057EF7ACA3C4 /* DashboardCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DashboardCore;
 		};

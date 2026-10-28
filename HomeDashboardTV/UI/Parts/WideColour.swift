@@ -17,7 +17,7 @@ extension Color {
     /// would make it in sRGB.
     static func p3(hue: Double, saturation: Double, brightness: Double) -> Color {
         var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
-        UIColor(hue: hue, saturation: saturation, brightness: brightness, alpha: 1).getRed(&r, green: &g, blue: &b, alpha: &a)
+        PlatformColor(hue: hue, saturation: saturation, brightness: brightness, alpha: 1).getRed(&r, green: &g, blue: &b, alpha: &a)
         return p3(Double(r), Double(g), Double(b))
     }
 }

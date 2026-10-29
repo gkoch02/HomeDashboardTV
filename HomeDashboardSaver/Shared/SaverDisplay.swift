@@ -5,7 +5,8 @@ import AppKit
 /// Options lists every connected display, and each saver view looks up the display it is on.
 ///
 /// A display is keyed by its vendor, model and serial, which stay the same across reconnects
-/// and restarts, unlike its `CGDirectDisplayID`.
+/// and restarts, unlike its `CGDirectDisplayID`. One that reports no serial (zero) takes its
+/// unit number instead, so two such displays of the same model don't share a key.
 enum SaverDisplay {
     /// The defaults key: a dictionary from display key to a layout's raw value. A display
     /// without an entry shows the shared `layout`.
@@ -14,7 +15,9 @@ enum SaverDisplay {
     static func key(for screen: NSScreen) -> String? {
         guard let number = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber else { return nil }
         let id = CGDirectDisplayID(number.uint32Value)
-        return "\(CGDisplayVendorNumber(id))-\(CGDisplayModelNumber(id))-\(CGDisplaySerialNumber(id))"
+        let serial = CGDisplaySerialNumber(id)
+        let last = serial != 0 ? "\(serial)" : "u\(CGDisplayUnitNumber(id))"
+        return "\(CGDisplayVendorNumber(id))-\(CGDisplayModelNumber(id))-\(last)"
     }
 
     /// Every display's own layout, by display key.

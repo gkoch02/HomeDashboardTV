@@ -20,7 +20,8 @@ struct SaverSettingsView: View {
     @State private var demo: Bool
     @State private var address: String
     @State private var layout: DashboardStore.Layout
-    /// The connected displays, by key and name, when there is more than one.
+    /// The connected displays, by key and name, when there is more than one, or when the one
+    /// left still has a layout of its own, so it can be put back.
     private let displays: [(key: String, name: String)]
     @State private var displayLayouts: [String: String]
     @State private var rotateMinutes: Int
@@ -40,8 +41,9 @@ struct SaverSettingsView: View {
         _address = State(initialValue: url.map(Self.typed) ?? "")
         _layout = State(initialValue: defaults.string(forKey: "layout").flatMap(DashboardStore.Layout.init(saved:)) ?? .dashboard)
         let screens = NSScreen.screens.compactMap { s in SaverDisplay.key(for: s).map { (key: $0, name: s.localizedName) } }
-        displays = screens.count > 1 ? screens : []
-        _displayLayouts = State(initialValue: SaverDisplay.layouts(in: defaults))
+        let displayLayouts = SaverDisplay.layouts(in: defaults)
+        displays = screens.count > 1 || screens.contains { displayLayouts[$0.key] != nil } ? screens : []
+        _displayLayouts = State(initialValue: displayLayouts)
         _rotateMinutes = State(initialValue: defaults.integer(forKey: "rotateMinutes"))
         _highlights = State(initialValue: defaults.string(forKey: "highlights").flatMap(DashboardStore.Highlights.init(rawValue:)) ?? .automatic)
     }

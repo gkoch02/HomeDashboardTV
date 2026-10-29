@@ -11,10 +11,15 @@ import SwiftUI
 /// Each shows its display's own layout if Options set one (`SaverDisplay`).
 @objc(HomeDashboardSaverView)
 final class HomeDashboardSaverView: ScreenSaverView {
-    private static let defaults: UserDefaults = {
-        let module = Bundle(for: HomeDashboardSaverView.self).bundleIdentifier ?? "dev.plumpbug.homedashboard.saver"
-        return ScreenSaverDefaults(forModuleWithName: module) ?? .standard
-    }()
+    private static let module = Bundle(for: HomeDashboardSaverView.self).bundleIdentifier ?? "dev.plumpbug.homedashboard.saver"
+
+    /// The choices, which Options writes. The saver only reads them: a `ScreenSaverDefaults`
+    /// writes back every key it holds when it saves, so a write here from a running saver would
+    /// put back the choices it started with over any Options has saved since.
+    private static let defaults: UserDefaults = ScreenSaverDefaults(forModuleWithName: module) ?? .standard
+
+    /// What the saver records (the pressure history), kept apart from the choices for that reason.
+    private static let state: UserDefaults = ScreenSaverDefaults(forModuleWithName: module + ".state") ?? .standard
 
     /// Point the layouts at this bundle and register its faces, once per process.
     private static let prepared: Void = {
@@ -47,7 +52,7 @@ final class HomeDashboardSaverView: ScreenSaverView {
             // Another process (System Settings' Options) may have written the choices since.
             Self.defaults.synchronize()
             Self.shared?.reloadChoices()
-            let store = Self.shared ?? DashboardStore(defaults: Self.defaults)
+            let store = Self.shared ?? DashboardStore(defaults: Self.defaults, state: Self.state)
             let rotate = Self.defaults.integer(forKey: "rotateMinutes")
             // The display's own layout, if Options gave it one; matched by size should the
             // view not be in its window yet.

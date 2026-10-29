@@ -7,7 +7,9 @@ import SwiftUI
 /// The layouts are drawn for a 1920×1080-point TV, so the screen is laid out at that scale
 /// (as wide or as tall as the display's shape needs, the other side 1920 or 1080) and scaled
 /// to fit, with tvOS's overscan margins as its safe area: a layout that keeps inside it on the
-/// TV keeps inside it here, and a full-bleed one runs to the edge.
+/// TV keeps inside it here, and a full-bleed one runs to the edge. A display bigger than the
+/// TV gets the layouts at 1:1 on a bigger canvas instead of scaled up: `scaleEffect` enlarges
+/// text as a bitmap, which blurs it.
 ///
 /// With `rotateMinutes` set, the layouts take turns in the settings list's order, each for
 /// that long, with the TV's fade through black between them.
@@ -23,7 +25,7 @@ struct SaverScreen: View {
 
     var body: some View {
         GeometryReader { screen in
-            let scale = min(screen.size.width / Self.tv.width, screen.size.height / Self.tv.height)
+            let scale = min(screen.size.width / Self.tv.width, screen.size.height / Self.tv.height, 1)
             let canvas = CGSize(width: screen.size.width / max(scale, 0.01), height: screen.size.height / max(scale, 0.01))
             content
                 .safeAreaPadding(Self.overscan)

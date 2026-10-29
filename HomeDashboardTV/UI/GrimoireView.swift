@@ -11,7 +11,7 @@ import SwiftUI
 /// and the chronicler's date, with the realm (the weather's place) and the year at the right.
 /// Down the left, the calendar as the quest log (the quest under way crossed with swords, the
 /// next one marked with the gold exclamation, dailies with a scroll) and the month's birthdays
-/// as feast days under a crown. In the middle, the augury: the sky painted as an illuminated
+/// as feast days under a gold star. In the middle, the augury: the sky painted as an illuminated
 /// miniature beside the temperature, any alerts as omens under a skull, the readings as runes
 /// over their bars, the next day as the tide of the hours, and the days to come as five small
 /// miniatures. On the right, the moon in a gold ring with its phase and next turning, the day's
@@ -539,7 +539,7 @@ private struct QuestLog: View {
                 }
                 if !feasts.isEmpty {
                     HStack(spacing: 12 * u) {
-                        Glyph("👑", size: 24)
+                        Glyph("✦", size: 24)
                         Gilt("Feast Days", size: 28)
                         Rule(diamond: .trailing)
                     }
@@ -655,7 +655,9 @@ private struct FeastRow: View {
     var body: some View {
         let today = feast.daysAway == 0
         HStack(spacing: 0) {
-            Glyph("👑", size: 30, colour: today ? Ink.goldBright : Ink.goldDim)
+            // Not Goodmountain's 👑: that is a tall, narrow helm, a smudge at this size. ✦ is
+            // the system face's, which Goodmountain falls back to.
+            Glyph("✦", size: 30, colour: today ? Ink.goldBright : Ink.goldDim)
                 .shadow(color: Ink.gold.opacity(today ? 0.8 : 0), radius: 8 * u)
                 .frame(width: 58 * u)
             VStack(alignment: .leading, spacing: u) {

@@ -11,13 +11,21 @@ import SwiftUI
 /// TV gets the layouts at 1:1 on a bigger canvas instead of scaled up: `scaleEffect` enlarges
 /// text as a bitmap, which blurs it.
 ///
-/// With `rotateMinutes` set, the layouts take turns in the settings list's order, each for
-/// that long, with the TV's fade through black between them.
+/// It shows the store's layout unless given the display's own (`SaverDisplay`). With
+/// `rotateMinutes` set, the layouts take turns in the settings list's order from there, each
+/// for that long, with the TV's fade through black between them.
 struct SaverScreen: View {
     let store: DashboardStore
     var rotateMinutes = 0
+    /// The display's own layout, or nil for the store's; then the rotation's.
     @State private var layout: DashboardStore.Layout?
     @State private var shown: CGFloat = 1
+
+    init(store: DashboardStore, rotateMinutes: Int = 0, layout: DashboardStore.Layout? = nil) {
+        self.store = store
+        self.rotateMinutes = rotateMinutes
+        _layout = State(initialValue: layout)
+    }
 
     /// The TV's screen in points, and its overscan safe area.
     static let tv = CGSize(width: 1920, height: 1080)

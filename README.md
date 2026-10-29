@@ -182,7 +182,8 @@ Tools/install_saver.sh
 ```
 
 Then pick **Home Dashboard** under System Settings → Screen Saver, and set the Pi's address
-(or Demo data), the layout, and whether the layouts take turns under its **Options**. The
+(or Demo data), the layout, and whether the layouts take turns under its **Options**; with
+more than one display, each can have a layout of its own there. The
 layouts are drawn at the TV's 1920×1080 points and scaled down to a smaller display; on a
 16:10 screen they get the extra height, and on a bigger one they stay at 1:1 with more room
 around them, since scaling up blurs the text. The skies' highlights go brighter than white on

@@ -8,6 +8,7 @@ import SwiftUI
 ///
 /// The host runs one of these per display in one process, and they share one store, built by
 /// the first to start and stopped with the last: one poll of the Pi however many displays.
+/// Each shows its display's own layout if Options set one (`SaverDisplay`).
 @objc(HomeDashboardSaverView)
 final class HomeDashboardSaverView: ScreenSaverView {
     private static let defaults: UserDefaults = {
@@ -48,7 +49,11 @@ final class HomeDashboardSaverView: ScreenSaverView {
             Self.shared?.reloadChoices()
             let store = Self.shared ?? DashboardStore(defaults: Self.defaults)
             let rotate = Self.defaults.integer(forKey: "rotateMinutes")
-            let host = NSHostingView(rootView: SaverScreen(store: store, rotateMinutes: rotate))
+            // The display's own layout, if Options gave it one; matched by size should the
+            // view not be in its window yet.
+            let screen = window?.screen ?? NSScreen.screens.first { $0.frame.size == bounds.size }
+            let own = SaverDisplay.layout(for: screen, in: Self.defaults)
+            let host = NSHostingView(rootView: SaverScreen(store: store, rotateMinutes: rotate, layout: own))
             host.frame = bounds
             host.autoresizingMask = [.width, .height]
             addSubview(host)

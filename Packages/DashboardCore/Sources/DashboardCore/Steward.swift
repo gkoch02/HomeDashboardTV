@@ -104,6 +104,27 @@ public enum Steward {
         }
     }
 
+    /// The whole hours of *zone* inside *window*, for its ticks and labels: on the zone's hour,
+    /// which in a zone a half or three quarters off UTC isn't UTC's.
+    public static func hours(in window: Window, zone: TimeZone) -> [Date] {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = zone
+        guard var hour = cal.nextDate(after: window.start.addingTimeInterval(-1), matching: DateComponents(minute: 0, second: 0),
+                                      matchingPolicy: .nextTime) else { return [] }
+        var out: [Date] = []
+        while hour < window.end {
+            out.append(hour)
+            hour += 3600
+        }
+        return out
+    }
+
+    /// The temperature trace: the 24-hour ribbon (`Skylight.ribbon`) cut to *window*, which it
+    /// runs a little past.
+    public static func trace(_ weather: Weather, now: Date, window: Window) -> [Skylight.Point] {
+        Skylight.ribbon(weather, now: now).filter { $0.time >= window.start && $0.time <= window.end }
+    }
+
     /// The hours between the strip's labels: the fewest that leave *minSpacing* points between
     /// labels at *hourWidth* points an hour.
     public static func labelStep(hourWidth: Double, minSpacing: Double) -> Int {

@@ -439,7 +439,7 @@ private struct Strip: View {
                 VStack(alignment: .leading, spacing: 0) {
                     trace(window)
                         .frame(height: Self.traceHeight * u)
-                    band(window, sunTimes: sunTimes)
+                    band(window, sunTimes: sunTimes, zone: zone)
                         .frame(height: Self.bandHeight * u)
                     hours(window, zone: zone)
                         .frame(height: 34 * u)
@@ -458,7 +458,7 @@ private struct Strip: View {
     /// bars under it.
     @ViewBuilder private func trace(_ window: Steward.Window) -> some View {
         if let weather = snapshot.sources.weather?.data {
-            let points = Skylight.ribbon(weather, now: now)
+            let points = Steward.trace(weather, now: now, window: window)
             let lo = points.map(\.temp).min() ?? 0, hi = points.map(\.temp).max() ?? 1
             let top = 38 * u, bottom = (Self.traceHeight - 16) * u
             let y = { (t: Double) in bottom - CGFloat(Cyberpunk.fraction(t, low: lo, high: hi)) * (bottom - top) }
@@ -496,8 +496,9 @@ private struct Strip: View {
     }
 
     /// The daylight as a lit band along a hairline, and a tick each hour.
-    private func band(_ window: Steward.Window, sunTimes: [(time: Date, rise: Bool)]) -> some View {
+    private func band(_ window: Steward.Window, sunTimes: [(time: Date, rise: Bool)], zone: TimeZone) -> some View {
         let stretches = Steward.daylight(sunTimes, window: window)
+        let ticks = Steward.hours(in: window, zone: zone)
         return Canvas { gc, size in
             let mid = size.height / 2
             gc.fill(Path(CGRect(x: 0, y: mid - 0.6 * u, width: size.width, height: 1.2 * u)), with: .color(.white.opacity(0.14)))
@@ -506,11 +507,9 @@ private struct Strip: View {
                 gc.fill(Path(r), with: .linearGradient(Gradient(colors: [Ink.blue.opacity(0.18), Ink.blue.opacity(0.38), Ink.blue.opacity(0.18)]),
                                                        startPoint: CGPoint(x: r.minX, y: 0), endPoint: CGPoint(x: r.maxX, y: 0)))
             }
-            var tick = Date(timeIntervalSince1970: (window.start.timeIntervalSince1970 / 3600).rounded(.up) * 3600)
-            while tick < window.end {
+            for tick in ticks {
                 let tx = x(window.fraction(tick))
                 gc.fill(Path(CGRect(x: tx - 0.6 * u, y: mid + 5 * u, width: 1.2 * u, height: 5 * u)), with: .color(Ink.dim))
-                tick += 3600
             }
         }
     }
@@ -521,15 +520,10 @@ private struct Strip: View {
         let step = Steward.labelStep(hourWidth: hourWidth, minSpacing: 92)
         var cal = Calendar(identifier: .gregorian)
         cal.timeZone = zone
-        var labels: [Date] = []
-        var tick = Date(timeIntervalSince1970: (window.start.timeIntervalSince1970 / 3600).rounded(.up) * 3600)
-        while tick < window.end {
+        // Clear of now's label, and of the ends.
+        let labels = Steward.hours(in: window, zone: zone).filter { tick in
             let f = window.fraction(tick)
-            // Clear of now's label, and of the ends.
-            if cal.component(.hour, from: tick) % step == 0, abs(f - window.fraction(now)) > 0.025, f > 0.015, f < 0.985 {
-                labels.append(tick)
-            }
-            tick += 3600
+            return cal.component(.hour, from: tick) % step == 0 && abs(f - window.fraction(now)) > 0.025 && f > 0.015 && f < 0.985
         }
         return ZStack(alignment: .topLeading) {
             ForEach(labels, id: \.self) { t in

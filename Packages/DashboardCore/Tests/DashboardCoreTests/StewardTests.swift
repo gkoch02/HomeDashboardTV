@@ -73,6 +73,31 @@ final class StewardTests: XCTestCase {
         XCTAssertTrue(Steward.daylight([], window: window).isEmpty)
     }
 
+    func testHoursAreTheZonesOwn() throws {
+        let now = date("2026-10-14T12:10:00-04:00")
+        let window = Steward.Window(now: now)
+        let kolkata = try XCTUnwrap(TimeZone(identifier: "Asia/Kolkata"))
+        let hours = Steward.hours(in: window, zone: kolkata)
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = kolkata
+        XCTAssertEqual(hours.count, 24)
+        XCTAssertTrue(hours.allSatisfy { cal.component(.minute, from: $0) == 0 })
+        XCTAssertTrue(hours.allSatisfy { $0 >= window.start && $0 < window.end })
+        XCTAssertEqual(hours.first, date("2026-10-14T11:30:00-04:00"))
+        let york = try XCTUnwrap(TimeZone(identifier: "America/New_York"))
+        XCTAssertEqual(Steward.hours(in: window, zone: york).first, date("2026-10-14T12:00:00-04:00"))
+    }
+
+    func testTheTraceStaysOnTheStrip() throws {
+        let weather = try XCTUnwrap(try snapshot().sources.weather?.data)
+        let now = date("2026-10-14T12:00:00-04:00")
+        let window = Steward.Window(now: now)
+        let trace = Steward.trace(weather, now: now, window: window)
+        XCTAssertFalse(trace.isEmpty)
+        XCTAssertTrue(trace.allSatisfy { (0...1).contains(window.fraction($0.time)) })
+        XCTAssertTrue(trace.first?.isNow == true)
+    }
+
     func testLabelsStepByWhatFits() {
         XCTAssertEqual(Steward.labelStep(hourWidth: 105, minSpacing: 90), 1)
         XCTAssertEqual(Steward.labelStep(hourWidth: 75, minSpacing: 90), 2)

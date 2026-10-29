@@ -1,4 +1,5 @@
 import AppKit
+import SwiftUI
 
 /// A display as the saver's per-display layouts know it. System Settings lets each display run
 /// its own screensaver but never tells a saver's Options which display it is configuring, so
@@ -29,5 +30,15 @@ enum SaverDisplay {
     static func layout(for screen: NSScreen?, in defaults: UserDefaults) -> DashboardStore.Layout? {
         guard let screen, let key = key(for: screen), let saved = layouts(in: defaults)[key] else { return nil }
         return DashboardStore.Layout(saved: saved)
+    }
+
+    /// The side of *screen* the nearest other display sits on, for the layouts made as a pair
+    /// (`\.partnerEdge`); nil with only the one.
+    static func partnerEdge(for screen: NSScreen?) -> HorizontalEdge? {
+        guard let screen else { return nil }
+        let others = NSScreen.screens.filter { $0 != screen }
+        guard let nearest = others.min(by: { abs($0.frame.midX - screen.frame.midX) < abs($1.frame.midX - screen.frame.midX) })
+        else { return nil }
+        return nearest.frame.midX < screen.frame.midX ? .leading : .trailing
     }
 }

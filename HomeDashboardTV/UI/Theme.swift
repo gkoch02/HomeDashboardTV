@@ -89,6 +89,8 @@ struct LayoutSwitch: View {
         case .window: frame(WindowView.self)
         case .cyberpunk: frame(CyberpunkView.self)
         case .uplink: frame(UplinkView.self)
+        case .steward: frame(StewardView.self)
+        case .wing: frame(StewardWingView.self)
         case .grimoire: frame(GrimoireView.self)
         }
     }
@@ -96,6 +98,13 @@ struct LayoutSwitch: View {
     private func frame<T: Theme>(_ theme: T.Type) -> some View {
         ThemeFrame(theme: T(snapshot: snapshot, now: now), now: now, notice: notice)
     }
+}
+
+extension EnvironmentValues {
+    /// The side of this screen another display sits on, for the layouts made as a pair
+    /// (Steward and its wing); nil with none beside it, as on the TV. The Mac saver sets it from
+    /// the displays' arrangement.
+    @Entry var partnerEdge: HorizontalEdge? = nil
 }
 
 /// Moves the plate a few points every ten minutes, so an OLED set never holds one image.

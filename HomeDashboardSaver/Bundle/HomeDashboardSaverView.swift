@@ -53,7 +53,8 @@ final class HomeDashboardSaverView: ScreenSaverView {
             // view not be in its window yet.
             let screen = window?.screen ?? NSScreen.screens.first { $0.frame.size == bounds.size }
             let own = SaverDisplay.layout(for: screen, in: Self.defaults)
-            let host = NSHostingView(rootView: SaverScreen(store: store, rotateMinutes: rotate, layout: own))
+            let host = NSHostingView(rootView: SaverScreen(store: store, rotateMinutes: rotate, layout: own,
+                                                           partnerEdge: SaverDisplay.partnerEdge(for: screen)))
             host.frame = bounds
             host.autoresizingMask = [.width, .height]
             addSubview(host)

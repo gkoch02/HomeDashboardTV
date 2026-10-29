@@ -7,7 +7,8 @@ import SwiftUI
 /// through the layouts. `-snapshot <path> [-settle <s>]` captures the window after the
 /// build-ins have played and quits, for screenshots and visual checks; `-window WxH` sizes the
 /// window (default 1280×720), for a look at a 16:10 display or the System Settings preview's
-/// scale. `-showOptions YES` opens the saver's Options sheet as a window beside it (and
+/// scale. `-partner leading|trailing` says which side another display sits, for the paired
+/// layouts. `-showOptions YES` opens the saver's Options sheet as a window beside it (and
 /// `-snapshot` captures that instead), to check the sheet sizes to its rows.
 @main
 struct HomeDashboardSaverHostApp: App {
@@ -52,8 +53,15 @@ struct HostRoot: View {
     /// `-showOptions`: the Options sheet, kept while it is up.
     @MainActor static var options: SaverConfigureSheet?
 
+    private static let partnerEdge: HorizontalEdge? = switch UserDefaults.standard.string(forKey: "partner") {
+    case "leading": .leading
+    case "trailing": .trailing
+    default: nil
+    }
+
     var body: some View {
-        SaverScreen(store: store, rotateMinutes: UserDefaults.standard.integer(forKey: "rotateMinutes"))
+        SaverScreen(store: store, rotateMinutes: UserDefaults.standard.integer(forKey: "rotateMinutes"),
+                    partnerEdge: Self.partnerEdge)
             .id(ObjectIdentifier(store))
             .focusable()
             .focusEffectDisabled()

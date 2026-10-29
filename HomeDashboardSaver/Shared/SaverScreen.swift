@@ -11,19 +11,24 @@ import SwiftUI
 /// TV gets the layouts at 1:1 on a bigger canvas instead of scaled up: `scaleEffect` enlarges
 /// text as a bitmap, which blurs it.
 ///
-/// It shows the store's layout unless given the display's own (`SaverDisplay`). With
+/// It shows the store's layout unless given the display's own (`SaverDisplay`), and tells the
+/// paired layouts which side the other display is on. With
 /// `rotateMinutes` set, the layouts take turns in the settings list's order from there, each
 /// for that long, with the TV's fade through black between them.
 struct SaverScreen: View {
     let store: DashboardStore
     var rotateMinutes = 0
+    /// The side another display sits on, for the paired layouts.
+    var partnerEdge: HorizontalEdge?
     /// The display's own layout, or nil for the store's; then the rotation's.
     @State private var layout: DashboardStore.Layout?
     @State private var shown: CGFloat = 1
 
-    init(store: DashboardStore, rotateMinutes: Int = 0, layout: DashboardStore.Layout? = nil) {
+    init(store: DashboardStore, rotateMinutes: Int = 0, layout: DashboardStore.Layout? = nil,
+         partnerEdge: HorizontalEdge? = nil) {
         self.store = store
         self.rotateMinutes = rotateMinutes
+        self.partnerEdge = partnerEdge
         _layout = State(initialValue: layout)
     }
 
@@ -40,6 +45,7 @@ struct SaverScreen: View {
                 .frame(width: canvas.width, height: canvas.height)
                 .environment(store)
                 .environment(\.colorScheme, .dark)
+                .environment(\.partnerEdge, partnerEdge)
                 .scaleEffect(scale)
                 .frame(width: screen.size.width, height: screen.size.height)
         }

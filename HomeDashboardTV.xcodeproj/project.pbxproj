@@ -55,6 +55,7 @@
 		3CB5B0DA6249E85634D5AC7B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0A63BFA37FD3C74D01808FA4 /* Assets.xcassets */; };
 		3DA7151BF8690A7A136E4BB8 /* Cinzel.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 61DD62983158D3984EC63FFB /* Cinzel.ttf */; };
 		3F2452848B435A92E4F78576 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2103C0B8C55F989AF037F3 /* Theme.swift */; };
+		3F600AF84DB785F4C4E689C3 /* StewardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF363026DA0C93A074601BEC /* StewardView.swift */; };
 		416BAB7435FF5AA9F705C30F /* WindowPane.metal in Sources */ = {isa = PBXBuildFile; fileRef = 5AB880AAFFAF50381C546114 /* WindowPane.metal */; };
 		419C22D1A074B4220E3F5C25 /* OrreryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 333B7105DB6D07E312E56484 /* OrreryView.swift */; };
 		41E7CCE7F89D8B958A8764C2 /* Waiting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B863E210F47745375816A0F /* Waiting.swift */; };
@@ -70,6 +71,7 @@
 		4D5885900A1EAD704ED038D8 /* AuroraSky.metal in Sources */ = {isa = PBXBuildFile; fileRef = A4E3CE2DB7FE94F4CB142505 /* AuroraSky.metal */; };
 		4DABC7D90431CCE192CBE003 /* AgendaPlateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A7D3CB3930F0208F3F6CD8B /* AgendaPlateView.swift */; };
 		4DB124C03AA81F00D7B09170 /* NightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4CD028BD1DA5124D982E2E8 /* NightView.swift */; };
+		4DB38C72872EBA727AF99EC1 /* StewardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF363026DA0C93A074601BEC /* StewardView.swift */; };
 		4E308F2AB1B7529E8351C1EE /* thumbnail@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FF8E5BC06A75165FC2A32B1B /* thumbnail@2x.png */; };
 		4EC87A43AD898326E3944768 /* WindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2256A097691D68B2477F76EF /* WindowView.swift */; };
 		503372A82E2AA01E25665085 /* NightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4CD028BD1DA5124D982E2E8 /* NightView.swift */; };
@@ -114,6 +116,7 @@
 		8847CCED94E8E3B0A4FE1D6D /* Waiting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B863E210F47745375816A0F /* Waiting.swift */; };
 		88A30D2C84D9384DFBAE44E3 /* PlayfairDisplay-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5A14D92835DFD740F4F1432D /* PlayfairDisplay-Bold.ttf */; };
 		8C7900786C9B022E4410BB7E /* LightCycleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E57CFC146044F906194B6656 /* LightCycleView.swift */; };
+		8CA2FA68ED8A6D652B0CA6A9 /* StewardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF363026DA0C93A074601BEC /* StewardView.swift */; };
 		8D01F6E778C00CB6548642E3 /* SkylightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C30E67A42F18B2067865361F /* SkylightView.swift */; };
 		8EA6DC510B8740D49A5B6A70 /* SaverScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AD9B7CE0DB54D6C6308F222 /* SaverScreen.swift */; };
 		9344DC299A5326219B6516DC /* LightCycleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E57CFC146044F906194B6656 /* LightCycleView.swift */; };
@@ -279,6 +282,7 @@
 		F31AD003A5C8873570D9A9F2 /* demo-snapshot.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "demo-snapshot.json"; sourceTree = "<group>"; };
 		F836F52D21F1424312E73132 /* CyberpunkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyberpunkView.swift; sourceTree = "<group>"; };
 		F8B868F16A1C58C2FDA721DB /* WideColour.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WideColour.swift; sourceTree = "<group>"; };
+		FF363026DA0C93A074601BEC /* StewardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StewardView.swift; sourceTree = "<group>"; };
 		FF8E5BC06A75165FC2A32B1B /* thumbnail@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "thumbnail@2x.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -468,6 +472,7 @@
 				4098608C8444AC0C661DD3D1 /* QuoteView.swift */,
 				BDBCC482A09982EB05EE52C5 /* SettingsView.swift */,
 				C30E67A42F18B2067865361F /* SkylightView.swift */,
+				FF363026DA0C93A074601BEC /* StewardView.swift */,
 				4C2103C0B8C55F989AF037F3 /* Theme.swift */,
 				71287ECAC4ACEC3BE2DB09CF /* UplinkView.swift */,
 				D0FD297DE56AF1DD7F7DAFB2 /* WeatherglassView.swift */,
@@ -771,6 +776,7 @@
 				8D01F6E778C00CB6548642E3 /* SkylightView.swift in Sources */,
 				D04D1F26D90D928ADC088EAF /* SplitMix.swift in Sources */,
 				D3EA1F1E7C8AF9B9AE1F425B /* Starfield.swift in Sources */,
+				4DB38C72872EBA727AF99EC1 /* StewardView.swift in Sources */,
 				A4B1EBEC5DD1B227E82C397A /* Theme.swift in Sources */,
 				9465C7BA4F176E02966E96DA /* UplinkView.swift in Sources */,
 				41E7CCE7F89D8B958A8764C2 /* Waiting.swift in Sources */,
@@ -823,6 +829,7 @@
 				DBF586DBDC1455FF0DC4F199 /* SkylightView.swift in Sources */,
 				7ABAC51A5C68DEC61FE7DBA5 /* SplitMix.swift in Sources */,
 				F6D82CA18651E239EAE2A7DC /* Starfield.swift in Sources */,
+				8CA2FA68ED8A6D652B0CA6A9 /* StewardView.swift in Sources */,
 				234A879AF993DBACD53A1C57 /* Theme.swift in Sources */,
 				668934D53CA77B99EFA43552 /* UplinkView.swift in Sources */,
 				C811F524452E311B3447A7A5 /* Waiting.swift in Sources */,
@@ -869,6 +876,7 @@
 				C0E793C28915AB248EE81007 /* SkylightView.swift in Sources */,
 				E1E4CD6290809BD7E0274A36 /* SplitMix.swift in Sources */,
 				CF47D01DDB0785959598AC94 /* Starfield.swift in Sources */,
+				3F600AF84DB785F4C4E689C3 /* StewardView.swift in Sources */,
 				3F2452848B435A92E4F78576 /* Theme.swift in Sources */,
 				FC04F7DA1F2D20AC673E4AE8 /* UplinkView.swift in Sources */,
 				8847CCED94E8E3B0A4FE1D6D /* Waiting.swift in Sources */,

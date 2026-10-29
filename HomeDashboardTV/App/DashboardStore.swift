@@ -28,7 +28,7 @@ final class DashboardStore {
     /// down to the calmest, with Night, the after-dark plate, last. Saved by raw value, so
     /// reordering keeps a saved choice.
     enum Layout: String, CaseIterable {
-        case dashboard, cyberpunk, uplink, grimoire, agenda, horizon, skylight, window, light, weatherglass, orrery, fuzzy, quote, moon, aurora, night
+        case dashboard, cyberpunk, uplink, steward, wing, grimoire, agenda, horizon, skylight, window, light, weatherglass, orrery, fuzzy, quote, moon, aurora, night
 
         var title: String {
             switch self {
@@ -47,6 +47,8 @@ final class DashboardStore {
             case .window: return "Window"
             case .cyberpunk: return "Cyberpunk"
             case .uplink: return "Uplink"
+            case .steward: return "Steward"
+            case .wing: return "Steward Wing"
             case .grimoire: return "Grimoire"
             }
         }
@@ -81,7 +83,7 @@ final class DashboardStore {
     private(set) var pressureHistory: PressureHistory
 
     var layout: Layout {
-        didSet { defaults.set(layout.rawValue, forKey: Keys.layout) }
+        didSet { save(layout.rawValue, Keys.layout) }
     }
 
     /// Hours without a remote press for which the app holds tvOS's idle timer; 0 is always.
@@ -118,7 +120,7 @@ final class DashboardStore {
     }
 
     var highlights: Highlights {
-        didSet { defaults.set(highlights.rawValue, forKey: Keys.highlights) }
+        didSet { save(highlights.rawValue, Keys.highlights) }
     }
 
     var username: String {
@@ -134,6 +136,8 @@ final class DashboardStore {
     }
 
     private let defaults: UserDefaults
+    /// Where the store keeps what it records rather than what was chosen: the pressure history.
+    private let state: UserDefaults
     private var loop: Task<Void, Never>?
     private var idleCheck: Task<Void, Never>?
     private var lastInteraction = Date.now
@@ -151,8 +155,12 @@ final class DashboardStore {
         static let pressureSource = "pressureSource"
     }
 
-    init(defaults: UserDefaults = .standard) {
+    /// The choices come from *defaults*; the history goes to *state*, the same unless given.
+    /// The Mac saver keeps them apart: a screensaver's defaults write back every key they hold
+    /// when they save, so a saver recording pressure undid whatever Options had saved since.
+    init(defaults: UserDefaults = .standard, state: UserDefaults? = nil) {
         self.defaults = defaults
+        self.state = state ?? defaults
         username = defaults.string(forKey: Keys.username) ?? "admin"
         // `-layout moon` sets it for a run too, since launch arguments land in UserDefaults.
         layout = defaults.string(forKey: Keys.layout).flatMap(Layout.init(saved:)) ?? .dashboard
@@ -177,8 +185,8 @@ final class DashboardStore {
         #endif
         // Readings from another source (a `-demo` run, another Pi) would make a trend out of
         // two places, so the history is kept only for the source it came from.
-        if let connection, defaults.string(forKey: Keys.pressureSource) == Self.encode(connection) {
-            pressureHistory = defaults.data(forKey: Keys.pressureHistory)
+        if let connection, self.state.string(forKey: Keys.pressureSource) == Self.encode(connection) {
+            pressureHistory = self.state.data(forKey: Keys.pressureHistory)
                 .flatMap { try? JSONDecoder().decode(PressureHistory.self, from: $0) } ?? PressureHistory()
         }
     }
@@ -236,9 +244,16 @@ final class DashboardStore {
         }
     }
 
+    /// Saves a choice unless it is already what is saved: taking up the Mac saver's choices
+    /// (`reloadChoices`) must not write them back, which would leave its defaults holding
+    /// changes to save over Options' next ones.
+    private func save(_ value: String, _ key: String) {
+        if defaults.string(forKey: key) != value { defaults.set(value, forKey: key) }
+    }
+
     func connect(_ connection: Connection) {
         self.connection = connection
-        defaults.set(Self.encode(connection), forKey: Keys.connection)
+        save(Self.encode(connection), Keys.connection)
         // Another source's snapshot must not stay up as if it were this one's.
         snapshot = nil
         pressureHistory = PressureHistory()
@@ -294,8 +309,8 @@ final class DashboardStore {
         let before = pressureHistory
         pressureHistory.record(hPa, at: weather.fetchedAt ?? .now)
         guard pressureHistory != before, let data = try? JSONEncoder().encode(pressureHistory) else { return }
-        defaults.set(data, forKey: Keys.pressureHistory)
-        defaults.set(Self.encode(connection), forKey: Keys.pressureSource)
+        state.set(data, forKey: Keys.pressureHistory)
+        state.set(Self.encode(connection), forKey: Keys.pressureSource)
     }
 
     private static func demoSnapshot() throws -> Snapshot {

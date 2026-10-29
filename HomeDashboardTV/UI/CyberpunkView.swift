@@ -18,7 +18,8 @@ import SwiftUI
 /// flickers on, and the headings break out of hex. Settled, now and then the clock glitches
 /// with a cyan ghost (not under Reduce Motion).
 ///
-/// Drawn at 1920 x 1080 and scaled to the screen.
+/// Laid out at 1920 x 1080 and scaled to the screen by multiplying its sizes by `u` (from the
+/// environment), not with `scaleEffect`, which enlarges text as a bitmap and blurs it.
 struct CyberpunkView: Theme {
     let snapshot: Snapshot
     let now: Date
@@ -37,9 +38,9 @@ struct CyberpunkView: Theme {
             let scale = min(geometry.size.width / Self.size.width, geometry.size.height / Self.size.height)
             // The timeline runs only while the menu boots: at rest the screen stays still.
             TimelineView(.animation(minimumInterval: 1 / 30, paused: !boot.isBooting)) { context in
-                screen(t: boot.elapsed(at: context.date))
-                    .frame(width: Self.size.width, height: Self.size.height, alignment: .topLeading)
-                    .scaleEffect(scale)
+                screen(t: boot.elapsed(at: context.date), u: scale)
+                    .environment(\.cyberpunkUnit, scale)
+                    .frame(width: Self.size.width * scale, height: Self.size.height * scale, alignment: .topLeading)
                     .frame(width: geometry.size.width, height: geometry.size.height)
             }
         }
@@ -86,28 +87,33 @@ struct CyberpunkView: Theme {
 
     // MARK: The screen
 
-    private func screen(t: Double) -> some View {
+    private func screen(t: Double, u: CGFloat) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             Header(snapshot: snapshot, now: now, t: t)
-                .frame(height: 70)
+                .frame(height: 70 * u)
             Rule(t: t)
-                .padding(.horizontal, -Metrics.margin)
-                .frame(height: 44)
-            HStack(alignment: .top, spacing: Metrics.gutter) {
+                .padding(.horizontal, -Metrics.margin * u)
+                .frame(height: 44 * u)
+            HStack(alignment: .top, spacing: Metrics.gutter * u) {
                 LeftColumn(snapshot: snapshot, now: now, t: t, glitch: glitch)
-                    .frame(width: Metrics.leftWidth, height: Metrics.bodyHeight, alignment: .topLeading)
+                    .frame(width: Metrics.leftWidth * u, height: Metrics.bodyHeight * u, alignment: .topLeading)
                 RightColumn(snapshot: snapshot, now: now, t: t,
                             previousPressure: store.pressureHistory.previous(now: now))
-                    .frame(maxWidth: .infinity, maxHeight: Metrics.bodyHeight, alignment: .topLeading)
+                    .frame(maxWidth: .infinity, maxHeight: Metrics.bodyHeight * u, alignment: .topLeading)
             }
             Spacer(minLength: 0)
             Footer(snapshot: snapshot, now: now)
                 .flicker(t, at: 1.0)
         }
-        .padding(.horizontal, Metrics.margin)
-        .padding(.top, 34)
-        .padding(.bottom, 30)
+        .padding(.horizontal, Metrics.margin * u)
+        .padding(.top, 34 * u)
+        .padding(.bottom, 30 * u)
     }
+}
+
+extension EnvironmentValues {
+    /// Points on screen per point of Cyberpunk's 1920 x 1080 layout.
+    @Entry fileprivate var cyberpunkUnit: CGFloat = 1
 }
 
 // MARK: - The boot
@@ -214,6 +220,7 @@ private struct Legend: View {
     var face = Face.semibold
     var colour = Ink.red
     var tracking: CGFloat = 0.08
+    @Environment(\.cyberpunkUnit) private var u
 
     init(_ text: String, size: CGFloat, face: String = Face.semibold, colour: Color = Ink.red, tracking: CGFloat = 0.08) {
         self.text = text
@@ -225,8 +232,8 @@ private struct Legend: View {
 
     var body: some View {
         Text(text.uppercased())
-            .font(.custom(face, size: size))
-            .tracking(size * tracking)
+            .font(.custom(face, size: size * u))
+            .tracking(size * u * tracking)
             .foregroundStyle(colour)
             .lineLimit(1)
     }
@@ -235,7 +242,18 @@ private struct Legend: View {
 extension View {
     /// A neon bloom in *colour* behind the view.
     fileprivate func bloom(_ colour: Color, radius: CGFloat, opacity: Double = 0.6) -> some View {
-        shadow(color: colour.opacity(opacity), radius: radius)
+        modifier(Bloom(colour: colour, radius: radius, opacity: opacity))
+    }
+}
+
+private struct Bloom: ViewModifier {
+    let colour: Color
+    let radius: CGFloat
+    let opacity: Double
+    @Environment(\.cyberpunkUnit) private var u
+
+    func body(content: Content) -> some View {
+        content.shadow(color: colour.opacity(opacity), radius: radius * u)
     }
 }
 
@@ -261,10 +279,11 @@ private struct Pane<Content: View>: View {
     let title: String
     var code: String?
     @ViewBuilder var content: Content
+    @Environment(\.cyberpunkUnit) private var u
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 12) {
+        VStack(alignment: .leading, spacing: 10 * u) {
+            HStack(spacing: 12 * u) {
                 Mark()
                 Legend(title, size: 18, colour: Ink.red, tracking: 0.14)
                 Spacer(minLength: 0)
@@ -272,14 +291,14 @@ private struct Pane<Content: View>: View {
             }
             content
         }
-        .padding(.horizontal, 24)
-        .padding(.top, 16)
-        .padding(.bottom, 18)
+        .padding(.horizontal, 24 * u)
+        .padding(.top, 16 * u)
+        .padding(.bottom, 18 * u)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(Bevelled(cut: 18).fill(Ink.well.opacity(0.78)))
-        .overlay(Bevelled(cut: 18).stroke(Ink.red.opacity(0.32), lineWidth: 1.2))
+        .background(Bevelled(cut: 18 * u).fill(Ink.well.opacity(0.78)))
+        .overlay(Bevelled(cut: 18 * u).stroke(Ink.red.opacity(0.32), lineWidth: 1.2 * u))
         .overlay(alignment: .topLeading) {
-            Rectangle().fill(Ink.red).frame(width: 64, height: 3).offset(y: -1)
+            Rectangle().fill(Ink.red).frame(width: 64 * u, height: 3 * u).offset(y: -1 * u)
         }
     }
 }
@@ -287,11 +306,12 @@ private struct Pane<Content: View>: View {
 /// The fine print's mark: three stepped bars.
 private struct Mark: View {
     var colour = Ink.redDim
+    @Environment(\.cyberpunkUnit) private var u
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 3) {
+        VStack(alignment: .leading, spacing: 3 * u) {
             ForEach(0..<3, id: \.self) { k in
-                Rectangle().fill(colour).frame(width: 26 - CGFloat(k) * 8, height: 4)
+                Rectangle().fill(colour).frame(width: (26 - CGFloat(k) * 8) * u, height: 4 * u)
             }
         }
     }
@@ -302,6 +322,7 @@ private struct Bar: View {
     let fraction: Double
     var colour = Ink.red
     var height: CGFloat = 4
+    @Environment(\.cyberpunkUnit) private var u
 
     var body: some View {
         GeometryReader { g in
@@ -311,7 +332,7 @@ private struct Bar: View {
                     .bloom(colour, radius: 4, opacity: 0.5)
             }
         }
-        .frame(height: height)
+        .frame(height: height * u)
     }
 }
 
@@ -369,11 +390,12 @@ private struct Header: View {
     let snapshot: Snapshot
     let now: Date
     let t: Double
+    @Environment(\.cyberpunkUnit) private var u
 
     var body: some View {
         let zone = snapshot.timeZone
         ZStack {
-            HStack(alignment: .bottom, spacing: 44) {
+            HStack(alignment: .bottom, spacing: 44 * u) {
                 if let weather = snapshot.sources.weather?.data {
                     stat("\(Int(weather.currentTemp.rounded()))°", "TEMP", Ink.cyan,
                          Cyberpunk.fraction(weather.currentTemp, low: weather.low, high: weather.high))
@@ -386,7 +408,7 @@ private struct Header: View {
             .flicker(t, at: 0.2)
             Tabs()
                 .flicker(t, at: 0.25)
-            HStack(alignment: .firstTextBaseline, spacing: 16) {
+            HStack(alignment: .firstTextBaseline, spacing: 16 * u) {
                 Spacer(minLength: 0)
                 Legend(now.formatted(Date.FormatStyle(timeZone: zone).weekday(.abbreviated)), size: 24, colour: Ink.yellow)
                 Legend(now.formatted(Date.FormatStyle(timeZone: zone).day().month(.abbreviated).year()),
@@ -397,10 +419,10 @@ private struct Header: View {
     }
 
     private func stat(_ value: String, _ label: String, _ colour: Color, _ fraction: Double) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .firstTextBaseline, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8 * u) {
+            HStack(alignment: .firstTextBaseline, spacing: 10 * u) {
                 Text(value)
-                    .font(.custom(Face.bold, size: 42))
+                    .font(.custom(Face.bold, size: 42 * u))
                     .foregroundStyle(colour)
                     .monospacedDigit()
                 Legend(label, size: 20, colour: colour, tracking: 0.06)
@@ -414,29 +436,30 @@ private struct Header: View {
 /// The game's menu tabs, JOURNAL lit, between the shoulder-button keys.
 private struct Tabs: View {
     static let names = ["MAP", "CHARACTER", "JOURNAL", "CRAFTING", "INVENTORY"]
+    @Environment(\.cyberpunkUnit) private var u
 
     var body: some View {
-        HStack(spacing: 40) {
+        HStack(spacing: 40 * u) {
             key("1")
             ForEach(Array(Self.names.enumerated()), id: \.offset) { i, name in
                 let lit = name == "JOURNAL"
-                HStack(spacing: 10) {
+                HStack(spacing: 10 * u) {
                     TabIcon(index: i)
-                        .stroke(lit ? Ink.cyan : Ink.red.opacity(0.9), lineWidth: 1.8)
-                        .frame(width: 16, height: 16)
+                        .stroke(lit ? Ink.cyan : Ink.red.opacity(0.9), lineWidth: 1.8 * u)
+                        .frame(width: 16 * u, height: 16 * u)
                     Legend(name, size: 19, colour: lit ? Ink.cyan : Ink.red.opacity(0.9), tracking: 0.06)
                 }
                 .bloom(Ink.cyan, radius: lit ? 8 : 0, opacity: lit ? 0.6 : 0)
             }
             key("3")
         }
-        .padding(.top, 14)
+        .padding(.top, 14 * u)
     }
 
     private func key(_ label: String) -> some View {
         Legend(label, size: 18, colour: Ink.cyan, tracking: 0)
-            .frame(width: 30, height: 27)
-            .overlay(Rectangle().stroke(Ink.cyan.opacity(0.7), lineWidth: 1.5))
+            .frame(width: 30 * u, height: 27 * u)
+            .overlay(Rectangle().stroke(Ink.cyan.opacity(0.7), lineWidth: 1.5 * u))
     }
 }
 
@@ -445,21 +468,22 @@ private struct TabIcon: Shape {
     let index: Int
 
     func path(in r: CGRect) -> Path {
-        let c = CGPoint(x: r.midX, y: r.midY), s = r.width / 2
+        // Drawn for a 16-point frame.
+        let c = CGPoint(x: r.midX, y: r.midY), s = r.width / 2, q = r.width / 16
         var p = Path()
         switch index {
         case 0, 4:
             p.move(to: CGPoint(x: c.x, y: c.y - s)); p.addLine(to: CGPoint(x: c.x + s, y: c.y))
             p.addLine(to: CGPoint(x: c.x, y: c.y + s)); p.addLine(to: CGPoint(x: c.x - s, y: c.y)); p.closeSubpath()
-            if index == 4 { p.addRect(CGRect(x: c.x - 1.5, y: c.y - 1.5, width: 3, height: 3)) }
+            if index == 4 { p.addRect(CGRect(x: c.x - 1.5 * q, y: c.y - 1.5 * q, width: 3 * q, height: 3 * q)) }
         case 1:
             p.addEllipse(in: r)
-            p.addEllipse(in: CGRect(x: c.x - 2, y: c.y - 4, width: 4, height: 4))
+            p.addEllipse(in: CGRect(x: c.x - 2 * q, y: c.y - 4 * q, width: 4 * q, height: 4 * q))
         case 2:
             p.addRect(r)
             for k in 0..<3 {
-                let y = c.y - 3.5 + CGFloat(k) * 3.5
-                p.move(to: CGPoint(x: c.x - 4, y: y)); p.addLine(to: CGPoint(x: c.x + 4, y: y))
+                let y = c.y + (CGFloat(k) - 1) * 3.5 * q
+                p.move(to: CGPoint(x: c.x - 4 * q, y: y)); p.addLine(to: CGPoint(x: c.x + 4 * q, y: y))
             }
         default:
             for k in 0..<6 {
@@ -477,21 +501,22 @@ private struct TabIcon: Shape {
 /// cyan run under JOURNAL and DATABASE beneath it.
 private struct Rule: View {
     let t: Double
+    @Environment(\.cyberpunkUnit) private var u
 
     var body: some View {
         let grow = min(max((t - 0.05) / 0.4, 0), 1)
         let eased = 1 - pow(1 - grow, 3)
-        VStack(spacing: 6) {
+        VStack(spacing: 6 * u) {
             ZStack {
-                Rectangle().fill(Ink.red).frame(height: 2).bloom(Ink.red, radius: 5, opacity: 0.7)
-                Rectangle().fill(Ink.cyan).frame(width: 170, height: 4).bloom(Ink.cyan, radius: 6)
+                Rectangle().fill(Ink.red).frame(height: 2 * u).bloom(Ink.red, radius: 5, opacity: 0.7)
+                Rectangle().fill(Ink.cyan).frame(width: 170 * u, height: 4 * u).bloom(Ink.cyan, radius: 6)
             }
             .scaleEffect(x: max(eased, 0.001), anchor: .center)
             Legend("DATABASE", size: 16, colour: Ink.red.opacity(0.85), tracking: 0.14)
                 .flicker(t, at: 0.4)
         }
         .frame(maxHeight: .infinity, alignment: .top)
-        .padding(.top, 6)
+        .padding(.top, 6 * u)
     }
 }
 
@@ -509,6 +534,7 @@ private struct LeftColumn: View {
     private static let rowHeight: CGFloat = 72
     private static let rowGap: CGFloat = 10
     private static let sectionGap: CGFloat = 26
+    @Environment(\.cyberpunkUnit) private var u
 
     var body: some View {
         let contacts = Cyberpunk.contacts(snapshot, now: now, limit: 3)
@@ -519,10 +545,10 @@ private struct LeftColumn: View {
         let jobs = Cyberpunk.jobs(snapshot, now: now, limit: limit)
         VStack(alignment: .leading, spacing: 0) {
             Clock(snapshot: snapshot, now: now, t: t, glitch: glitch)
-                .frame(height: Self.clockHeight, alignment: .topLeading)
+                .frame(height: Self.clockHeight * u, alignment: .topLeading)
             Heading(title: "ACTIVE JOBS", chip: true, count: jobs.count)
                 .flicker(t, at: 0.35)
-            VStack(alignment: .leading, spacing: Self.rowGap) {
+            VStack(alignment: .leading, spacing: Self.rowGap * u) {
                 if jobs.isEmpty {
                     Entry(title: "NO ACTIVE JOBS", sub: "CHECK BACK WITH YOUR FIXER", style: .locked)
                         .flicker(t, at: 0.45)
@@ -530,21 +556,21 @@ private struct LeftColumn: View {
                 ForEach(Array(jobs.enumerated()), id: \.element) { i, job in
                     JobRow(job: job, now: now, zone: snapshot.timeZone)
                         .flicker(t, at: 0.42 + Double(i) * 0.06)
-                        .offset(x: t < 0.42 + Double(i) * 0.06 + 0.25 ? -24 * (1 - max(0, t - 0.42 - Double(i) * 0.06) / 0.25) : 0)
+                        .offset(x: t < 0.42 + Double(i) * 0.06 + 0.25 ? -24 * u * (1 - max(0, t - 0.42 - Double(i) * 0.06) / 0.25) : 0)
                 }
             }
-            .padding(.top, Self.rowGap)
+            .padding(.top, Self.rowGap * u)
             if !contacts.isEmpty {
                 Heading(title: "CONTACTS", chip: false, count: contacts.count)
-                    .padding(.top, Self.sectionGap)
+                    .padding(.top, Self.sectionGap * u)
                     .flicker(t, at: 0.8)
-                VStack(alignment: .leading, spacing: Self.rowGap) {
+                VStack(alignment: .leading, spacing: Self.rowGap * u) {
                     ForEach(Array(contacts.enumerated()), id: \.element) { i, birthday in
                         ContactRow(birthday: birthday, now: now, zone: snapshot.timeZone)
                             .flicker(t, at: 0.86 + Double(i) * 0.06)
                     }
                 }
-                .padding(.top, Self.rowGap)
+                .padding(.top, Self.rowGap * u)
             }
         }
     }
@@ -556,6 +582,7 @@ private struct Clock: View {
     let now: Date
     let t: Double
     let glitch: Bool
+    @Environment(\.cyberpunkUnit) private var u
 
     var body: some View {
         let zone = snapshot.timeZone
@@ -564,35 +591,35 @@ private struct Clock: View {
         let place = snapshot.sources.weather?.data?.locationName.map { $0.uppercased() }
         VStack(alignment: .leading, spacing: 0) {
             ZStack(alignment: .topLeading) {
-                if glitch { face(clock, colour: Ink.cyan).offset(x: -10).opacity(0.7).blendMode(.screen) }
+                if glitch { face(clock, colour: Ink.cyan).offset(x: -10 * u).opacity(0.7).blendMode(.screen) }
                 face(clock, colour: Ink.red)
                     .bloom(Ink.red, radius: 18, opacity: 0.55)
-                    .offset(x: glitch ? 6 : 0)
+                    .offset(x: glitch ? 6 * u : 0)
             }
             .flicker(t, at: 0.15)
-            HStack(spacing: 12) {
-                Diamond().fill(Ink.cyan).frame(width: 12, height: 12)
+            HStack(spacing: 12 * u) {
+                Diamond().fill(Ink.cyan).frame(width: 12 * u, height: 12 * u)
                 Legend(place ?? "NIGHT CITY", size: 24, colour: Ink.cyan, tracking: 0.1)
                 Legend("//  \(place == nil ? Cyberpunk.district(hour24: hour) : "DISTRICT")", size: 20,
                        colour: Ink.redDim, tracking: 0.1)
             }
-            .padding(.top, -8)
+            .padding(.top, -8 * u)
             .flicker(t, at: 0.3)
         }
     }
 
     private func face(_ clock: (time: String, period: String?), colour: Color) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 14) {
+        HStack(alignment: .firstTextBaseline, spacing: 14 * u) {
             Text(clock.time)
-                .font(.custom(Face.bold, size: 196))
+                .font(.custom(Face.bold, size: 196 * u))
                 .monospacedDigit()
-                .kerning(-2)
+                .kerning(-2 * u)
             if let period = clock.period {
-                Text(period).font(.custom(Face.semibold, size: 48))
+                Text(period).font(.custom(Face.semibold, size: 48 * u))
             }
         }
         .foregroundStyle(colour)
-        .frame(height: 190)
+        .frame(height: 190 * u)
     }
 }
 
@@ -611,19 +638,20 @@ private struct Heading: View {
     let title: String
     let chip: Bool
     let count: Int
+    @Environment(\.cyberpunkUnit) private var u
 
     var body: some View {
-        HStack(spacing: 14) {
+        HStack(spacing: 14 * u) {
             Legend(title, size: 22, colour: Ink.red, tracking: 0.06)
-            if chip { Rectangle().fill(Ink.yellow).frame(width: 24, height: 11) }
+            if chip { Rectangle().fill(Ink.yellow).frame(width: 24 * u, height: 11 * u) }
             Spacer(minLength: 0)
             Legend("\(count)", size: 20, colour: Ink.redDim, tracking: 0)
-            Caret().stroke(Ink.red, lineWidth: 2).frame(width: 20, height: 12)
+            Caret().stroke(Ink.red, lineWidth: 2 * u).frame(width: 20 * u, height: 12 * u)
         }
-        .padding(.horizontal, 18)
-        .frame(height: 44)
-        .background(Bevelled(cut: 12).fill(Ink.redDeep.opacity(0.4)))
-        .overlay(Bevelled(cut: 12).stroke(Ink.red.opacity(0.75), lineWidth: 1.5))
+        .padding(.horizontal, 18 * u)
+        .frame(height: 44 * u)
+        .background(Bevelled(cut: 12 * u).fill(Ink.redDeep.opacity(0.4)))
+        .overlay(Bevelled(cut: 12 * u).stroke(Ink.red.opacity(0.75), lineWidth: 1.5 * u))
     }
 }
 
@@ -644,53 +672,54 @@ private struct Entry: View {
     let sub: String
     var subColour: Color?
     let style: Style
+    @Environment(\.cyberpunkUnit) private var u
 
     var body: some View {
         let open = style == .open || style == .live
         HStack(spacing: 0) {
             ShardGlyph()
                 .fill((open ? Ink.red : Ink.redDim).opacity(open ? 0.85 : 0.5), style: FillStyle(eoFill: true))
-                .frame(width: 26, height: 38)
-                .frame(width: 70)
-            VStack(alignment: .leading, spacing: 3) {
+                .frame(width: 26 * u, height: 38 * u)
+                .frame(width: 70 * u)
+            VStack(alignment: .leading, spacing: 3 * u) {
                 Text(title)
-                    .font(.custom(Face.semibold, size: 25))
-                    .tracking(25 * 0.03)
+                    .font(.custom(Face.semibold, size: 25 * u))
+                    .tracking(25 * u * 0.03)
                     .foregroundStyle(open ? Color.white.opacity(0.94) : style == .locked ? Ink.red.opacity(0.45) : Ink.red.opacity(0.9))
                     .lineLimit(1)
                 Legend(sub, size: 17, colour: subColour ?? (open ? Ink.redHot : Ink.redDim), tracking: 0.1)
             }
-            .padding(.leading, 18)
-            Spacer(minLength: 12)
+            .padding(.leading, 18 * u)
+            Spacer(minLength: 12 * u)
             if style == .open {
                 // The cyan cursor parked on the tracked job.
-                Rectangle().stroke(Ink.cyan, lineWidth: 2)
-                    .frame(width: 24, height: 24)
-                    .overlay(Rectangle().fill(Ink.cyan.opacity(0.85)).frame(width: 10, height: 10))
+                Rectangle().stroke(Ink.cyan, lineWidth: 2 * u)
+                    .frame(width: 24 * u, height: 24 * u)
+                    .overlay(Rectangle().fill(Ink.cyan.opacity(0.85)).frame(width: 10 * u, height: 10 * u))
                     .bloom(Ink.cyan, radius: 6)
-                    .padding(.trailing, 22)
+                    .padding(.trailing, 22 * u)
             } else if style == .live {
                 Legend("LIVE", size: 16, colour: Ink.ground, tracking: 0.1)
-                    .padding(.horizontal, 8).padding(.vertical, 2)
+                    .padding(.horizontal, 8 * u).padding(.vertical, 2 * u)
                     .background(Ink.yellow)
-                    .padding(.trailing, 22)
+                    .padding(.trailing, 22 * u)
             }
         }
-        .frame(height: 72)
+        .frame(height: 72 * u)
         .background(alignment: .trailing) {
-            let shape = Bevelled(cut: 14)
+            let shape = Bevelled(cut: 14 * u)
             Group {
                 if open {
                     shape.fill(LinearGradient(colors: [Ink.red.opacity(0.42), Ink.redDeep.opacity(0.75)],
                                               startPoint: .leading, endPoint: .trailing))
-                        .overlay(shape.stroke(Ink.redHot, lineWidth: 1.6))
+                        .overlay(shape.stroke(Ink.redHot, lineWidth: 1.6 * u))
                         .bloom(Ink.red, radius: 8, opacity: 0.5)
                 } else {
                     shape.fill(Ink.well.opacity(0.75))
-                        .overlay(shape.stroke(Ink.red.opacity(style == .locked ? 0.25 : 0.45), lineWidth: 1.2))
+                        .overlay(shape.stroke(Ink.red.opacity(style == .locked ? 0.25 : 0.45), lineWidth: 1.2 * u))
                 }
             }
-            .padding(.leading, 70)
+            .padding(.leading, 70 * u)
         }
     }
 }
@@ -706,7 +735,7 @@ private struct ShardGlyph: Shape {
         p.closeSubpath()
         for k in 0..<3 {
             let y = r.minY + r.height * (0.3 + 0.2 * CGFloat(k))
-            p.addRect(CGRect(x: r.minX + r.width * 0.2, y: y, width: r.width * 0.6, height: 2))
+            p.addRect(CGRect(x: r.minX + r.width * 0.2, y: y, width: r.width * 0.6, height: r.height / 19))
         }
         return p
     }
@@ -768,34 +797,35 @@ private struct RightColumn: View {
     let now: Date
     let t: Double
     let previousPressure: Double?
+    @Environment(\.cyberpunkUnit) private var u
 
     var body: some View {
         let weather = snapshot.sources.weather?.data
-        VStack(spacing: Metrics.paneGap) {
+        VStack(spacing: Metrics.paneGap * u) {
             if let weather {
                 Conditions(snapshot: snapshot, weather: weather, now: now, t: t, previousPressure: previousPressure)
-                    .frame(height: 318)
+                    .frame(height: 318 * u)
                     .flicker(t, at: 0.4)
                 Trace(snapshot: snapshot, weather: weather, now: now, t: t)
-                    .frame(height: 176)
+                    .frame(height: 176 * u)
                     .flicker(t, at: 0.55)
                 Outlook(snapshot: snapshot, weather: weather, now: now)
-                    .frame(height: 124)
+                    .frame(height: 124 * u)
                     .flicker(t, at: 0.65)
             } else {
                 Pane(title: "SCAN // ATMOSPHERE", code: "NO SIGNAL") {
                     Legend("WEATHER FEED OFFLINE", size: 48, face: Face.bold, colour: Ink.redDim)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-                .frame(height: 318 + 176 + 124 + 2 * Metrics.paneGap)
+                .frame(height: (318 + 176 + 124 + 2 * Metrics.paneGap) * u)
                 .flicker(t, at: 0.4)
             }
-            HStack(spacing: Metrics.paneGap) {
+            HStack(spacing: Metrics.paneGap * u) {
                 Shard(snapshot: snapshot, t: t)
                     .flicker(t, at: 0.75)
                 if let moon = snapshot.moon {
                     Lunar(moon: moon, zone: snapshot.timeZone)
-                        .frame(width: 400)
+                        .frame(width: 400 * u)
                         .flicker(t, at: 0.85)
                 }
             }
@@ -812,56 +842,57 @@ private struct Conditions: View {
     let now: Date
     let t: Double
     let previousPressure: Double?
+    @Environment(\.cyberpunkUnit) private var u
 
     var body: some View {
         let zone = snapshot.timeZone
         let fetched = snapshot.sources.weather?.fetchedAt.map { "SCANNED " + clock($0, zone) } ?? "SCAN"
         Pane(title: "SCAN // ATMOSPHERE", code: fetched) {
-            HStack(alignment: .firstTextBaseline, spacing: 20) {
+            HStack(alignment: .firstTextBaseline, spacing: 20 * u) {
                 Text(decrypted(weather.currentDescription.uppercased(), t: t, at: 0.55))
-                    .font(.custom(Face.bold, size: 50))
+                    .font(.custom(Face.bold, size: 50 * u))
                     .foregroundStyle(Ink.red)
                     .bloom(Ink.red, radius: 12, opacity: 0.5)
                     .lineLimit(1)
                 Spacer(minLength: 0)
                 ForEach(weather.alerts.prefix(2), id: \.self) { alert in
-                    HStack(spacing: 8) {
-                        Image(systemName: "exclamationmark.triangle.fill").font(.system(size: 18, weight: .bold))
+                    HStack(spacing: 8 * u) {
+                        Image(systemName: "exclamationmark.triangle.fill").font(.system(size: 18 * u, weight: .bold))
                         Legend(alert.event, size: 20, face: Face.bold, colour: Ink.ground, tracking: 0.06)
                     }
                     .foregroundStyle(Ink.ground)
-                    .padding(.horizontal, 12).padding(.vertical, 4)
-                    .background(Bevelled(cut: 8).fill(Ink.yellow))
+                    .padding(.horizontal, 12 * u).padding(.vertical, 4 * u)
+                    .background(Bevelled(cut: 8 * u).fill(Ink.yellow))
                     .bloom(Ink.yellow, radius: 8, opacity: 0.45)
                 }
             }
             ZStack(alignment: .leading) {
-                Rectangle().fill(Ink.redDim.opacity(0.7)).frame(height: 1.2)
-                Rectangle().fill(Ink.red).frame(width: 80, height: 3)
+                Rectangle().fill(Ink.redDim.opacity(0.7)).frame(height: 1.2 * u)
+                Rectangle().fill(Ink.red).frame(width: 80 * u, height: 3 * u)
             }
-            HStack(alignment: .center, spacing: 40) {
+            HStack(alignment: .center, spacing: 40 * u) {
                 VStack(alignment: .leading, spacing: 0) {
-                    HStack(alignment: .center, spacing: 22) {
+                    HStack(alignment: .center, spacing: 22 * u) {
                         Image(systemName: WeatherSymbol.name(for: weather.currentIcon))
                             .symbolRenderingMode(.monochrome)
-                            .font(.system(size: 76, weight: .medium))
+                            .font(.system(size: 76 * u, weight: .medium))
                             .foregroundStyle(Ink.cyan)
                             .bloom(Ink.cyan, radius: 10, opacity: 0.5)
-                            .frame(width: 100)
+                            .frame(width: 100 * u)
                         // Rajdhani's degree sign stands well clear of its figures; set apart and pulled in.
-                        HStack(alignment: .top, spacing: 2) {
+                        HStack(alignment: .top, spacing: 2 * u) {
                             Text("\(Int(weather.currentTemp.rounded()))")
-                                .font(.custom(Face.bold, size: 132))
+                                .font(.custom(Face.bold, size: 132 * u))
                                 .monospacedDigit()
                             Text("°")
-                                .font(.custom(Face.bold, size: 80))
-                                .padding(.top, 30)
+                                .font(.custom(Face.bold, size: 80 * u))
+                                .padding(.top, 30 * u)
                         }
                         .foregroundStyle(Color.white.opacity(0.94))
                         .bloom(Ink.red, radius: 14, opacity: 0.6)
                     }
-                    .frame(height: 130)
-                    HStack(spacing: 18) {
+                    .frame(height: 130 * u)
+                    HStack(spacing: 18 * u) {
                         Legend("H \(degrees(weather.high))", size: 26, face: Face.bold, colour: Ink.red)
                         Legend("L \(degrees(weather.low))", size: 26, face: Face.bold, colour: Ink.red)
                         if let feels = weather.feelsLike {
@@ -869,8 +900,8 @@ private struct Conditions: View {
                         }
                     }
                 }
-                .frame(width: 400, alignment: .leading)
-                Grid(horizontalSpacing: 40, verticalSpacing: 16) {
+                .frame(width: 400 * u, alignment: .leading)
+                Grid(horizontalSpacing: 40 * u, verticalSpacing: 16 * u) {
                     let cells = readouts(zone: zone)
                     ForEach(0..<(cells.count + 1) / 2, id: \.self) { row in
                         GridRow {
@@ -881,7 +912,7 @@ private struct Conditions: View {
                     }
                 }
             }
-            .padding(.top, 6)
+            .padding(.top, 6 * u)
         }
     }
 
@@ -934,17 +965,18 @@ private struct Readout {
 
 private struct ReadoutCell: View {
     let readout: Readout
+    @Environment(\.cyberpunkUnit) private var u
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 4 * u) {
             HStack(alignment: .firstTextBaseline) {
                 Legend(readout.label, size: 16, colour: Ink.redDim, tracking: 0.14)
-                Spacer(minLength: 8)
+                Spacer(minLength: 8 * u)
                 Legend(readout.value, size: 25, face: Face.bold, colour: readout.colour, tracking: 0.02)
             }
             Bar(fraction: readout.fraction, colour: readout.colour, height: 3)
         }
-        .frame(width: 300)
+        .frame(width: 300 * u)
     }
 }
 
@@ -955,6 +987,7 @@ private struct Trace: View {
     let weather: Weather
     let now: Date
     let t: Double
+    @Environment(\.cyberpunkUnit) private var u
 
     var body: some View {
         let zone = snapshot.timeZone
@@ -971,8 +1004,8 @@ private struct Trace: View {
     }
 
     private func paint(_ points: [Skylight.Point], zone: TimeZone, draw: Double, in size: CGSize, _ gc: inout GraphicsContext) {
-        let labelTop: CGFloat = 28, labelBottom: CGFloat = 26
-        let plot = CGRect(x: 30, y: labelTop, width: size.width - 60, height: size.height - labelTop - labelBottom)
+        let labelTop = 28 * u, labelBottom = 26 * u
+        let plot = CGRect(x: 30 * u, y: labelTop, width: size.width - 60 * u, height: size.height - labelTop - labelBottom)
         let temps = points.map(\.temp)
         let lo = temps.min()!, hi = temps.max()!
         let span = max(hi - lo, 4)
@@ -982,13 +1015,13 @@ private struct Trace: View {
         // The grid: faint rows, and a tick at each slot.
         for k in 0...3 {
             let gy = plot.minY + plot.height * CGFloat(k) / 3
-            gc.fill(Path(CGRect(x: plot.minX, y: gy, width: plot.width, height: 1)), with: .color(Ink.redDim.opacity(0.18)))
+            gc.fill(Path(CGRect(x: plot.minX, y: gy, width: plot.width, height: u)), with: .color(Ink.redDim.opacity(0.18)))
         }
         // The chance of rain, as bars standing on the floor.
         for (i, p) in points.enumerated() where p.precipChance > 0.02 {
             let h = plot.height * CGFloat(p.precipChance)
-            gc.fill(Path(CGRect(x: x(i) - 9, y: plot.maxY - h, width: 18, height: h)), with: .color(Ink.cyan.opacity(0.28)))
-            gc.fill(Path(CGRect(x: x(i) - 9, y: plot.maxY - h, width: 18, height: 2)), with: .color(Ink.cyan))
+            gc.fill(Path(CGRect(x: x(i) - 9 * u, y: plot.maxY - h, width: 18 * u, height: h)), with: .color(Ink.cyan.opacity(0.28)))
+            gc.fill(Path(CGRect(x: x(i) - 9 * u, y: plot.maxY - h, width: 18 * u, height: 2 * u)), with: .color(Ink.cyan))
         }
         var line = Path()
         for i in points.indices {
@@ -997,21 +1030,21 @@ private struct Trace: View {
         }
         let shown = line.trimmedPath(from: 0, to: draw)
         gc.drawLayer { l in
-            l.addFilter(.blur(radius: 6))
-            l.stroke(shown, with: .color(Ink.red.opacity(0.8)), lineWidth: 5)
+            l.addFilter(.blur(radius: 6 * u))
+            l.stroke(shown, with: .color(Ink.red.opacity(0.8)), lineWidth: 5 * u)
         }
-        gc.stroke(shown, with: .color(Ink.red), lineWidth: 2.5)
+        gc.stroke(shown, with: .color(Ink.red), lineWidth: 2.5 * u)
         let reached = Int(Double(points.count - 1) * draw + 0.001)
-        let label = Font.custom(Face.bold, size: 22), small = Font.custom(Face.semibold, size: 17)
+        let label = Font.custom(Face.bold, size: 22 * u), small = Font.custom(Face.semibold, size: 17 * u)
         for (i, p) in points.enumerated() where i <= reached {
             let c = CGPoint(x: x(i), y: y(p.temp))
-            let mark = CGRect(x: c.x - 5, y: c.y - 5, width: 10, height: 10)
+            let mark = CGRect(x: c.x - 5 * u, y: c.y - 5 * u, width: 10 * u, height: 10 * u)
             gc.fill(Path(mark), with: .color(p.isNow ? Ink.cyan : Ink.ground))
-            gc.stroke(Path(mark), with: .color(p.isNow ? Ink.cyan : Ink.red), lineWidth: 2)
+            gc.stroke(Path(mark), with: .color(p.isNow ? Ink.cyan : Ink.red), lineWidth: 2 * u)
             gc.draw(Text("\(Int(p.temp.rounded()))°").font(label).foregroundColor(p.isNow ? Ink.cyan : .white.opacity(0.9)),
-                    at: CGPoint(x: c.x, y: c.y - 12), anchor: .bottom)
+                    at: CGPoint(x: c.x, y: c.y - 12 * u), anchor: .bottom)
             let when = p.isNow ? "NOW" : Self.hour(p.time, zone)
-            gc.draw(Text(when).font(small).tracking(1.5).foregroundColor(p.isNow ? Ink.cyan : Ink.redDim),
+            gc.draw(Text(when).font(small).tracking(1.5 * u).foregroundColor(p.isNow ? Ink.cyan : Ink.redDim),
                     at: CGPoint(x: c.x, y: size.height), anchor: .bottom)
         }
     }
@@ -1030,28 +1063,29 @@ private struct Outlook: View {
     let snapshot: Snapshot
     let weather: Weather
     let now: Date
+    @Environment(\.cyberpunkUnit) private var u
 
     var body: some View {
         let zone = snapshot.timeZone
         let today = CivilDate(now, in: zone)
         let days = Skylight.outlook(weather, now: now, zone: zone, count: 5)
-        HStack(spacing: 12) {
+        HStack(spacing: 12 * u) {
             ForEach(days, id: \.self) { day in
                 let isToday = day.date == today
-                HStack(spacing: 14) {
+                HStack(spacing: 14 * u) {
                     Image(systemName: WeatherSymbol.name(for: day.icon))
-                        .font(.system(size: 38, weight: .medium))
+                        .font(.system(size: 38 * u, weight: .medium))
                         .foregroundStyle(isToday ? Ink.cyan : Ink.red)
-                        .frame(width: 56)
-                    VStack(alignment: .leading, spacing: 2) {
+                        .frame(width: 56 * u)
+                    VStack(alignment: .leading, spacing: 2 * u) {
                         Legend(isToday ? "TODAY" : day.date.start(in: zone).formatted(Date.FormatStyle(timeZone: zone).weekday(.abbreviated)),
                                size: 19, colour: isToday ? Ink.cyan : Ink.redDim, tracking: 0.14)
-                        HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        HStack(alignment: .firstTextBaseline, spacing: 8 * u) {
                             Text("\(Int(day.high.rounded()))°")
-                                .font(.custom(Face.bold, size: 36))
+                                .font(.custom(Face.bold, size: 36 * u))
                                 .foregroundStyle(Color.white.opacity(0.92))
                             Text("\(Int(day.low.rounded()))°")
-                                .font(.custom(Face.semibold, size: 26))
+                                .font(.custom(Face.semibold, size: 26 * u))
                                 .foregroundStyle(Ink.redDim)
                         }
                         // Always a third line, so every card's figures sit at one height.
@@ -1063,10 +1097,10 @@ private struct Outlook: View {
                     }
                     Spacer(minLength: 0)
                 }
-                .padding(.horizontal, 16)
+                .padding(.horizontal, 16 * u)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Bevelled(cut: 14).fill(isToday ? Ink.redDeep.opacity(0.55) : Ink.well.opacity(0.78)))
-                .overlay(Bevelled(cut: 14).stroke(isToday ? Ink.redHot : Ink.red.opacity(0.32), lineWidth: isToday ? 1.6 : 1.2))
+                .background(Bevelled(cut: 14 * u).fill(isToday ? Ink.redDeep.opacity(0.55) : Ink.well.opacity(0.78)))
+                .overlay(Bevelled(cut: 14 * u).stroke(isToday ? Ink.redHot : Ink.red.opacity(0.32), lineWidth: (isToday ? 1.6 : 1.2) * u))
             }
         }
     }
@@ -1077,15 +1111,16 @@ private struct Outlook: View {
 private struct Shard: View {
     let snapshot: Snapshot
     let t: Double
+    @Environment(\.cyberpunkUnit) private var u
 
     var body: some View {
         let quote = snapshot.quote ?? snapshot.moon?.quote
         let digest = Cyberpunk.seed(quote?.text ?? "")
         Pane(title: "ENCRYPTED SHARD", code: String(format: "0x%08X // DECRYPTED", UInt32(truncatingIfNeeded: digest))) {
             if let quote {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 8 * u) {
                     Text("“\(quote.text)”")
-                        .font(.custom(Face.medium, size: 30))
+                        .font(.custom(Face.medium, size: 30 * u))
                         .foregroundStyle(Ink.red)
                         .lineSpacing(0)
                         .minimumScaleFactor(0.55)
@@ -1106,18 +1141,19 @@ private struct Shard: View {
 private struct Lunar: View {
     let moon: Moon
     let zone: TimeZone
+    @Environment(\.cyberpunkUnit) private var u
 
     var body: some View {
         Pane(title: "LUNAR", code: moon.supermoon ? "SUPERMOON" : nil) {
-            HStack(spacing: 22) {
+            HStack(spacing: 22 * u) {
                 ZStack {
-                    Circle().stroke(Ink.redDim.opacity(0.6), lineWidth: 1.5)
+                    Circle().stroke(Ink.redDim.opacity(0.6), lineWidth: 1.5 * u)
                     if let fraction = moon.today?.fraction {
                         LitShape(fraction: fraction).fill(Ink.red).bloom(Ink.red, radius: 10)
                     }
                 }
-                .frame(width: 92, height: 92)
-                VStack(alignment: .leading, spacing: 5) {
+                .frame(width: 92 * u, height: 92 * u)
+                VStack(alignment: .leading, spacing: 5 * u) {
                     Legend(moon.phaseName, size: 25, face: Face.bold, colour: Ink.red, tracking: 0.04)
                     if let lit = moon.today?.illumination {
                         Legend("\(Int(lit.rounded()))% LIT", size: 19, colour: Ink.cyan, tracking: 0.1)
@@ -1141,34 +1177,35 @@ private struct Lunar: View {
 private struct Footer: View {
     let snapshot: Snapshot
     let now: Date
+    @Environment(\.cyberpunkUnit) private var u
 
     var body: some View {
         let s = snapshot.sources
-        HStack(spacing: 22) {
-            HStack(spacing: 4) {
-                ForEach(0..<5, id: \.self) { _ in Rectangle().fill(Ink.redDim).frame(width: 5, height: 14) }
+        HStack(spacing: 22 * u) {
+            HStack(spacing: 4 * u) {
+                ForEach(0..<5, id: \.self) { _ in Rectangle().fill(Ink.redDim).frame(width: 5 * u, height: 14 * u) }
             }
             Legend("NC // 2077 · HOME DASHBOARD SUBNET", size: 15, colour: Ink.redDim, tracking: 0.14)
             ForEach([("CAL", s.events?.staleness), ("WX", s.weather?.staleness),
                      ("AIR", s.airQuality?.staleness), ("BDAY", s.birthdays?.staleness)], id: \.0) { source in
                 if let staleness = source.1 {
-                    HStack(spacing: 7) {
-                        Rectangle().fill(Ink.staleness(staleness)).frame(width: 9, height: 9)
+                    HStack(spacing: 7 * u) {
+                        Rectangle().fill(Ink.staleness(staleness)).frame(width: 9 * u, height: 9 * u)
                         Legend(source.0, size: 15, colour: Ink.redDim, tracking: 0.14)
                     }
                 }
             }
             Spacer(minLength: 0)
-            HStack(spacing: 12) {
-                Circle().fill(.white.opacity(0.85)).frame(width: 11, height: 11)
-                    .frame(width: 32, height: 27)
-                    .overlay(Rectangle().stroke(.white.opacity(0.7), lineWidth: 1.5))
+            HStack(spacing: 12 * u) {
+                Circle().fill(.white.opacity(0.85)).frame(width: 11 * u, height: 11 * u)
+                    .frame(width: 32 * u, height: 27 * u)
+                    .overlay(Rectangle().stroke(.white.opacity(0.7), lineWidth: 1.5 * u))
                 Text("Settings")
-                    .font(.custom(Face.semibold, size: 24))
+                    .font(.custom(Face.semibold, size: 24 * u))
                     .foregroundStyle(Ink.cyan)
             }
         }
-        .frame(height: 34)
+        .frame(height: 34 * u)
     }
 }
 

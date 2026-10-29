@@ -6,6 +6,8 @@
 [![needs HomeDashboard 6.2+](https://img.shields.io/badge/needs-HomeDashboard%206.2%2B-2f6fb2)](https://github.com/gkoch02/HomeDashboard)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
+![Home Dashboard for Apple TV: the wordmark on the app's night-to-day sky with its amber sun, beside the Dashboard layout on a TV](docs/banner.png)
+
 The tvOS companion to [HomeDashboard](https://github.com/gkoch02/HomeDashboard), the Raspberry Pi e-ink dashboard.
 The Pi keeps doing the fetching (Google Calendar / ICS / CalDAV, OpenWeatherMap, birthdays)
 on its own timer; this app reads the Pi's cached snapshot from `GET /api/dashboard` and
@@ -236,6 +238,7 @@ in `docs/app-icon.png` and `docs/top-shelf.png`.
 
 ```bash
 python3 scripts/generate_brand_assets.py
+python3 scripts/make_banner.py        # the README banner, from the same sky and sun
 ```
 
 ## Building

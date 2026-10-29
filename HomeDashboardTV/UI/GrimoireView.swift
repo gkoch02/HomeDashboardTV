@@ -11,7 +11,7 @@ import SwiftUI
 /// and the chronicler's date, with the realm (the weather's place) and the year at the right.
 /// Down the left, the calendar as the quest log (the quest under way crossed with swords, the
 /// next one marked with the gold exclamation, dailies with a scroll) and the month's birthdays
-/// as feast days under a crown. In the middle, the augury: the sky painted as an illuminated
+/// as feast days under a gold star. In the middle, the augury: the sky painted as an illuminated
 /// miniature beside the temperature, any alerts as omens under a skull, the readings as runes
 /// over their bars, the next day as the tide of the hours, and the days to come as five small
 /// miniatures. On the right, the moon in a gold ring with its phase and next turning, the day's
@@ -21,7 +21,8 @@ import SwiftUI
 /// The page inks in as it appears: each panel rises in turn. Settled, the next quest's mark
 /// breathes (not under Reduce Motion).
 ///
-/// Drawn at 1920 x 1080 and scaled to the screen.
+/// Laid out at 1920 x 1080 and scaled to the screen by multiplying its sizes by `u` (from the
+/// environment), not with `scaleEffect`, which enlarges text as a bitmap and blurs it.
 struct GrimoireView: Theme {
     let snapshot: Snapshot
     let now: Date
@@ -38,9 +39,9 @@ struct GrimoireView: Theme {
     var body: some View {
         GeometryReader { geometry in
             let scale = min(geometry.size.width / Self.size.width, geometry.size.height / Self.size.height)
-            screen
-                .frame(width: Self.size.width, height: Self.size.height, alignment: .topLeading)
-                .scaleEffect(scale)
+            screen(u: scale)
+                .environment(\.grimoireUnit, scale)
+                .frame(width: Self.size.width * scale, height: Self.size.height * scale, alignment: .topLeading)
                 .frame(width: geometry.size.width, height: geometry.size.height)
         }
         .onBuildIn(reset: { settled in ink = settled ? 1 : 0 }) {
@@ -67,22 +68,22 @@ struct GrimoireView: Theme {
 
     // MARK: The page
 
-    private var screen: some View {
+    private func screen(u: CGFloat) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             Header(snapshot: snapshot, now: now)
-                .frame(height: Metrics.headerHeight)
+                .frame(height: Metrics.headerHeight * u)
                 .opacity(ink)
-            HStack(alignment: .top, spacing: Metrics.gutter) {
+            HStack(alignment: .top, spacing: Metrics.gutter * u) {
                 QuestLog(snapshot: snapshot, now: now, breathe: breathe)
-                    .frame(width: Metrics.leftWidth, height: Metrics.bodyHeight)
+                    .frame(width: Metrics.leftWidth * u, height: Metrics.bodyHeight * u)
                     .rise(ink, index: 0)
                 Augury(snapshot: snapshot, now: now)
-                    .frame(width: Metrics.centreWidth, height: Metrics.bodyHeight)
+                    .frame(width: Metrics.centreWidth * u, height: Metrics.bodyHeight * u)
                     .rise(ink, index: 1)
-                VStack(spacing: Metrics.paneGap) {
+                VStack(spacing: Metrics.paneGap * u) {
                     if let moon = snapshot.moon {
                         Lunar(moon: moon, snapshot: snapshot, now: now)
-                            .frame(height: 236)
+                            .frame(height: 236 * u)
                             .rise(ink, index: 2)
                     }
                     Sage(quote: snapshot.quote ?? snapshot.moon?.quote)
@@ -90,23 +91,28 @@ struct GrimoireView: Theme {
                         .rise(ink, index: 3)
                     if let air = snapshot.sources.airQuality?.data {
                         Breath(air: air)
-                            .frame(height: 150)
+                            .frame(height: 150 * u)
                             .rise(ink, index: 4)
                     }
                 }
                 .frame(maxWidth: .infinity)
-                .frame(height: Metrics.bodyHeight)
+                .frame(height: Metrics.bodyHeight * u)
             }
-            .padding(.top, 14)
+            .padding(.top, 14 * u)
             Spacer(minLength: 0)
             Candles(sources: snapshot.sources)
-                .frame(height: 40)
+                .frame(height: 40 * u)
                 .rise(ink, index: 5)
         }
-        .padding(.horizontal, Metrics.margin)
-        .padding(.top, 36)
-        .padding(.bottom, 30)
+        .padding(.horizontal, Metrics.margin * u)
+        .padding(.top, 36 * u)
+        .padding(.bottom, 30 * u)
     }
+}
+
+extension EnvironmentValues {
+    /// Points on screen per point of Grimoire's 1920 x 1080 layout.
+    @Entry fileprivate var grimoireUnit: CGFloat = 1
 }
 
 // MARK: - Inks, faces, geometry
@@ -202,11 +208,13 @@ private struct Gilt: View {
         self.style = AnyShapeStyle(colour)
     }
 
+    @Environment(\.grimoireUnit) private var u
+
     var body: some View {
         Text(text)
-            .font(Face.title(size))
+            .font(Face.title(size * u))
             .foregroundStyle(style)
-            .shadow(color: .black.opacity(0.75), radius: 1, y: max(1, size / 40))
+            .shadow(color: .black.opacity(0.75), radius: u, y: max(1, size / 40) * u)
             .lineLimit(1)
     }
 }
@@ -224,11 +232,13 @@ private struct Glyph: View {
         self.colour = colour
     }
 
+    @Environment(\.grimoireUnit) private var u
+
     var body: some View {
         Text(glyph)
-            .font(Face.title(size))
+            .font(Face.title(size * u))
             .foregroundStyle(colour)
-            .shadow(color: .black.opacity(0.6), radius: 1, y: 1)
+            .shadow(color: .black.opacity(0.6), radius: u, y: u)
     }
 }
 
@@ -248,10 +258,12 @@ private struct Caps: View {
         self.tracking = tracking
     }
 
+    @Environment(\.grimoireUnit) private var u
+
     var body: some View {
         Text(text.uppercased())
-            .font(Face.caps(size, weight))
-            .tracking(size * tracking)
+            .font(Face.caps(size * u, weight))
+            .tracking(size * u * tracking)
             .foregroundStyle(colour)
             .lineLimit(1)
     }
@@ -262,11 +274,12 @@ private struct Rule: View {
     enum Diamond { case leading, trailing, middle, none }
     var diamond = Diamond.middle
     var colour = Ink.gold
+    @Environment(\.grimoireUnit) private var u
 
     var body: some View {
         Canvas { gc, size in
             let y = size.height / 2
-            let d: CGFloat = 5
+            let d = 5 * u
             let x: CGFloat? = switch diamond {
             case .leading: d
             case .trailing: size.width - d
@@ -275,8 +288,8 @@ private struct Rule: View {
             }
             var line = Path()
             if let x {
-                line.move(to: CGPoint(x: 0, y: y)); line.addLine(to: CGPoint(x: x - d - 3, y: y))
-                line.move(to: CGPoint(x: x + d + 3, y: y)); line.addLine(to: CGPoint(x: size.width, y: y))
+                line.move(to: CGPoint(x: 0, y: y)); line.addLine(to: CGPoint(x: x - d - 3 * u, y: y))
+                line.move(to: CGPoint(x: x + d + 3 * u, y: y)); line.addLine(to: CGPoint(x: size.width, y: y))
                 var gem = Path()
                 gem.move(to: CGPoint(x: x, y: y - d)); gem.addLine(to: CGPoint(x: x + d, y: y))
                 gem.addLine(to: CGPoint(x: x, y: y + d)); gem.addLine(to: CGPoint(x: x - d, y: y)); gem.closeSubpath()
@@ -286,9 +299,9 @@ private struct Rule: View {
             }
             gc.stroke(line, with: .linearGradient(
                 Gradient(colors: [colour.opacity(0.15), colour.opacity(0.8), colour.opacity(0.15)]),
-                startPoint: .zero, endPoint: CGPoint(x: size.width, y: 0)), lineWidth: 1.2)
+                startPoint: .zero, endPoint: CGPoint(x: size.width, y: 0)), lineWidth: 1.2 * u)
         }
-        .frame(height: 12)
+        .frame(height: 12 * u)
     }
 }
 
@@ -299,12 +312,13 @@ private struct Panel<Content: View>: View {
     let glyph: String
     var note: String?
     @ViewBuilder var content: Content
+    @Environment(\.grimoireUnit) private var u
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 14) {
+        VStack(alignment: .leading, spacing: 12 * u) {
+            HStack(spacing: 14 * u) {
                 Rule(diamond: .leading)
-                HStack(spacing: 12) {
+                HStack(spacing: 12 * u) {
                     Glyph(glyph, size: 28)
                     Gilt(title, size: 34)
                 }
@@ -314,41 +328,44 @@ private struct Panel<Content: View>: View {
             .overlay(alignment: .trailing) {
                 if let note {
                     Caps(note, size: 13, colour: Ink.goldDim.opacity(0.9))
-                        .padding(.horizontal, 8)
+                        .padding(.horizontal, 8 * u)
                         .background(Ink.parchment)
-                        .offset(y: 20)
+                        .offset(y: 20 * u)
                 }
             }
-            .frame(height: 44)
+            .frame(height: 44 * u)
             content
         }
-        .padding(.horizontal, 22)
-        .padding(.top, 14)
-        .padding(.bottom, 18)
+        .padding(.horizontal, 22 * u)
+        .padding(.top, 14 * u)
+        .padding(.bottom, 18 * u)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background {
-            let shape = RoundedRectangle(cornerRadius: 6, style: .continuous)
+            let shape = RoundedRectangle(cornerRadius: 6 * u, style: .continuous)
             shape.fill(LinearGradient(colors: [Ink.parchment, Ink.parchmentDeep], startPoint: .top, endPoint: .bottom))
-                .overlay(shape.stroke(Ink.gold.opacity(0.55), lineWidth: 1.6))
-                .overlay(shape.inset(by: 5).stroke(Ink.goldDeep.opacity(0.7), lineWidth: 1))
-                .overlay(CornerPieces().stroke(Ink.gold.opacity(0.85), lineWidth: 1.6))
-                .shadow(color: .black.opacity(0.5), radius: 14, y: 6)
+                .overlay(shape.stroke(Ink.gold.opacity(0.55), lineWidth: 1.6 * u))
+                .overlay(shape.inset(by: 5 * u).stroke(Ink.goldDeep.opacity(0.7), lineWidth: u))
+                .overlay(CornerPieces(unit: u).stroke(Ink.gold.opacity(0.85), lineWidth: 1.6 * u))
+                .shadow(color: .black.opacity(0.5), radius: 14 * u, y: 6 * u)
         }
     }
 }
 
 /// The corner-pieces of a frame: a short bracket inside each corner, with a bead.
 private struct CornerPieces: Shape {
+    /// Points on screen per layout point.
+    var unit: CGFloat = 1
+
     func path(in r: CGRect) -> Path {
         var p = Path()
-        let inset: CGFloat = 5, arm: CGFloat = 22, bead: CGFloat = 2.5
+        let inset = 5 * unit, arm = 22 * unit, bead = 2.5 * unit, step = 9 * unit, at = 14 * unit
         for (sx, sy) in [(1.0, 1.0), (-1.0, 1.0), (1.0, -1.0), (-1.0, -1.0)] {
             let cx = sx > 0 ? r.minX + inset : r.maxX - inset
             let cy = sy > 0 ? r.minY + inset : r.maxY - inset
-            p.move(to: CGPoint(x: cx + sx * arm, y: cy + sy * 9))
-            p.addLine(to: CGPoint(x: cx + sx * 9, y: cy + sy * 9))
-            p.addLine(to: CGPoint(x: cx + sx * 9, y: cy + sy * arm))
-            let b = CGPoint(x: cx + sx * 14, y: cy + sy * 14)
+            p.move(to: CGPoint(x: cx + sx * arm, y: cy + sy * step))
+            p.addLine(to: CGPoint(x: cx + sx * step, y: cy + sy * step))
+            p.addLine(to: CGPoint(x: cx + sx * step, y: cy + sy * arm))
+            let b = CGPoint(x: cx + sx * at, y: cy + sy * at)
             p.addEllipse(in: CGRect(x: b.x - bead, y: b.y - bead, width: bead * 2, height: bead * 2))
         }
         return p
@@ -359,19 +376,20 @@ private struct CornerPieces: Shape {
 private struct RuneBar: View {
     let fraction: Double
     var colour = Ink.gold
+    @Environment(\.grimoireUnit) private var u
 
     var body: some View {
         GeometryReader { g in
             let w = g.size.width * min(max(fraction, 0), 1)
             ZStack(alignment: .leading) {
                 Capsule().fill(Color.black.opacity(0.45))
-                    .overlay(Capsule().stroke(Ink.goldDeep.opacity(0.6), lineWidth: 1))
+                    .overlay(Capsule().stroke(Ink.goldDeep.opacity(0.6), lineWidth: u))
                 Capsule().fill(LinearGradient(colors: [colour.opacity(0.7), colour], startPoint: .leading, endPoint: .trailing))
-                    .frame(width: max(w, 6))
-                    .padding(1.5)
+                    .frame(width: max(w, 6 * u))
+                    .padding(1.5 * u)
             }
         }
-        .frame(height: 7)
+        .frame(height: 7 * u)
     }
 }
 
@@ -437,6 +455,7 @@ private struct Ground: View {
 private struct Header: View {
     let snapshot: Snapshot
     let now: Date
+    @Environment(\.grimoireUnit) private var u
 
     var body: some View {
         let zone = snapshot.timeZone
@@ -444,22 +463,22 @@ private struct Header: View {
         let year = Self.year(now, in: zone)
         HStack(alignment: .bottom, spacing: 0) {
             VStack(alignment: .leading, spacing: 0) {
-                HStack(alignment: .firstTextBaseline, spacing: 14) {
+                HStack(alignment: .firstTextBaseline, spacing: 14 * u) {
                     Gilt(clock.time, size: 118)
                     if let period = clock.period {
                         Caps(period, size: 30, weight: 600, colour: Ink.gold)
                     }
                     Text(Grimoire.watch(snapshot, now: now))
-                        .font(Face.italic(40))
+                        .font(Face.italic(40 * u))
                         .foregroundStyle(Ink.cream)
-                        .padding(.leading, 18)
+                        .padding(.leading, 18 * u)
                 }
-                .frame(height: 96, alignment: .bottom)
+                .frame(height: 96 * u, alignment: .bottom)
                 Caps(Grimoire.dateLine(now, zone: zone), size: 22, colour: Ink.gold, tracking: 0.14)
-                    .padding(.top, 4)
+                    .padding(.top, 4 * u)
             }
             Spacer(minLength: 0)
-            VStack(alignment: .trailing, spacing: 2) {
+            VStack(alignment: .trailing, spacing: 2 * u) {
                 Gilt(snapshot.sources.weather?.data?.locationName ?? "The Realm", size: 46)
                 Caps("Anno \(roman(year))", size: 20, colour: Ink.goldDim, tracking: 0.16)
             }
@@ -499,6 +518,7 @@ private struct QuestLog: View {
     private static let rowGap: CGFloat = 6
     private static let feastHeading: CGFloat = 18 + 36 + 6
     private static let feastRow: CGFloat = 56
+    @Environment(\.grimoireUnit) private var u
 
     var body: some View {
         let zone = snapshot.timeZone
@@ -508,27 +528,27 @@ private struct QuestLog: View {
         let limit = max(1, Int((room + Self.rowGap) / (Self.rowHeight + Self.rowGap)))
         let quests = Grimoire.quests(snapshot, now: now, limit: limit)
         Panel(title: "Quests", glyph: "⚔", note: quests.isEmpty ? nil : "\(quests.count) in the log") {
-            VStack(alignment: .leading, spacing: Self.rowGap) {
+            VStack(alignment: .leading, spacing: Self.rowGap * u) {
                 if quests.isEmpty {
                     Empty(line: "The log lies empty.", sub: "Rest, adventurer: nothing is asked of you today.")
-                        .frame(height: Self.rowHeight * 2)
+                        .frame(height: Self.rowHeight * 2 * u)
                 }
                 ForEach(quests, id: \.self) { quest in
                     QuestRow(quest: quest, now: now, zone: zone, breathe: breathe)
-                        .frame(height: Self.rowHeight)
+                        .frame(height: Self.rowHeight * u)
                 }
                 if !feasts.isEmpty {
-                    HStack(spacing: 12) {
-                        Glyph("👑", size: 24)
+                    HStack(spacing: 12 * u) {
+                        Glyph("✦", size: 24)
                         Gilt("Feast Days", size: 28)
                         Rule(diamond: .trailing)
                     }
-                    .frame(height: 36)
-                    .padding(.top, 18)
-                    .padding(.bottom, 6)
+                    .frame(height: 36 * u)
+                    .padding(.top, 18 * u)
+                    .padding(.bottom, 6 * u)
                     ForEach(feasts, id: \.self) { feast in
                         FeastRow(feast: feast, zone: zone)
-                            .frame(height: Self.feastRow)
+                            .frame(height: Self.feastRow * u)
                     }
                 }
                 Spacer(minLength: 0)
@@ -541,14 +561,15 @@ private struct QuestLog: View {
 private struct Empty: View {
     let line: String
     let sub: String
+    @Environment(\.grimoireUnit) private var u
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(line).font(Face.italic(32)).foregroundStyle(Ink.cream)
-            Text(sub).font(Face.hand(22)).foregroundStyle(Ink.creamDim)
+        VStack(alignment: .leading, spacing: 6 * u) {
+            Text(line).font(Face.italic(32 * u)).foregroundStyle(Ink.cream)
+            Text(sub).font(Face.hand(22 * u)).foregroundStyle(Ink.creamDim)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 10)
+        .padding(.horizontal, 10 * u)
     }
 }
 
@@ -559,6 +580,7 @@ private struct QuestRow: View {
     let now: Date
     let zone: TimeZone
     let breathe: Bool
+    @Environment(\.grimoireUnit) private var u
 
     var body: some View {
         let event = quest.event
@@ -566,24 +588,24 @@ private struct QuestRow: View {
         let place = event.shortLocation.map { " · " + $0 } ?? ""
         HStack(spacing: 0) {
             mark
-                .frame(width: 58)
-            VStack(alignment: .leading, spacing: 2) {
+                .frame(width: 58 * u)
+            VStack(alignment: .leading, spacing: 2 * u) {
                 Text(event.summary)
-                    .font(Face.hand(30, .semibold))
+                    .font(Face.hand(30 * u, .semibold))
                     .foregroundStyle(quest.state == .tomorrow ? Ink.creamDim : Ink.cream)
                     .lineLimit(1)
                 Caps(when + place, size: 15, colour: lit ? Ink.gold : Ink.goldDim, tracking: 0.08)
             }
-            .padding(.leading, 10)
-            Spacer(minLength: 8)
+            .padding(.leading, 10 * u)
+            Spacer(minLength: 8 * u)
         }
-        .padding(.horizontal, 8)
+        .padding(.horizontal, 8 * u)
         .background {
             if lit {
-                RoundedRectangle(cornerRadius: 4)
+                RoundedRectangle(cornerRadius: 4 * u)
                     .fill(LinearGradient(colors: [Ink.gold.opacity(quest.state == .underway ? 0.26 : 0.16), Ink.gold.opacity(0)],
                                          startPoint: .leading, endPoint: .trailing))
-                    .overlay(alignment: .leading) { Rectangle().fill(Ink.gold).frame(width: 3).padding(.vertical, 6) }
+                    .overlay(alignment: .leading) { Rectangle().fill(Ink.gold).frame(width: 3 * u).padding(.vertical, 6 * u) }
             }
         }
     }
@@ -592,10 +614,10 @@ private struct QuestRow: View {
         switch quest.state {
         case .underway:
             Glyph("⚔", size: 40, colour: Ink.goldBright)
-                .shadow(color: Ink.gold.opacity(0.8), radius: 8)
+                .shadow(color: Ink.gold.opacity(0.8), radius: 8 * u)
         case .next:
             Glyph("!", size: 54, colour: Ink.goldBright)
-                .shadow(color: Ink.gold.opacity(0.7), radius: 8)
+                .shadow(color: Ink.gold.opacity(0.7), radius: 8 * u)
                 .scaleEffect(breathe ? 1.1 : 1)
                 .animation(breathe ? .easeInOut(duration: 1.5).repeatForever(autoreverses: true) : .default, value: breathe)
         case .today:
@@ -628,25 +650,28 @@ private struct QuestRow: View {
 private struct FeastRow: View {
     let feast: Grimoire.Feast
     let zone: TimeZone
+    @Environment(\.grimoireUnit) private var u
 
     var body: some View {
         let today = feast.daysAway == 0
         HStack(spacing: 0) {
-            Glyph("👑", size: 30, colour: today ? Ink.goldBright : Ink.goldDim)
-                .shadow(color: Ink.gold.opacity(today ? 0.8 : 0), radius: 8)
-                .frame(width: 58)
-            VStack(alignment: .leading, spacing: 1) {
+            // Not Goodmountain's 👑: that is a tall, narrow helm, a smudge at this size. ✦ is
+            // the system face's, which Goodmountain falls back to.
+            Glyph("✦", size: 30, colour: today ? Ink.goldBright : Ink.goldDim)
+                .shadow(color: Ink.gold.opacity(today ? 0.8 : 0), radius: 8 * u)
+                .frame(width: 58 * u)
+            VStack(alignment: .leading, spacing: u) {
                 Text("\(feast.birthday.name)’s name day")
-                    .font(Face.hand(27, .semibold))
+                    .font(Face.hand(27 * u, .semibold))
                     .foregroundStyle(Ink.cream)
                     .lineLimit(1)
                 Caps(Grimoire.feastWhen(feast, zone: zone) + (feast.birthday.age.map { " · comes to \($0)" } ?? ""),
                      size: 14, colour: today ? Ink.gold : Ink.goldDim, tracking: 0.08)
             }
-            .padding(.leading, 10)
+            .padding(.leading, 10 * u)
             Spacer(minLength: 0)
         }
-        .padding(.horizontal, 8)
+        .padding(.horizontal, 8 * u)
     }
 }
 
@@ -657,6 +682,7 @@ private struct FeastRow: View {
 private struct Augury: View {
     let snapshot: Snapshot
     let now: Date
+    @Environment(\.grimoireUnit) private var u
 
     var body: some View {
         let zone = snapshot.timeZone
@@ -664,15 +690,15 @@ private struct Augury: View {
         let read = snapshot.sources.weather?.fetchedAt.map { "Read at \(clock($0, zone))" }
         Panel(title: "The Augury", glyph: "💎", note: weather == nil ? nil : read) {
             if let weather {
-                VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: 10 * u) {
                     Hero(snapshot: snapshot, weather: weather, now: now)
-                        .frame(height: 206)
+                        .frame(height: 206 * u)
                     Rule(diamond: .middle, colour: Ink.goldDim)
                     Runes(snapshot: snapshot, weather: weather, now: now)
-                        .frame(height: 136)
+                        .frame(height: 136 * u)
                     Subheading("The Tide of the Hours")
                     Tide(snapshot: snapshot, weather: weather, now: now)
-                        .frame(height: 128)
+                        .frame(height: 128 * u)
                     Subheading("Days to Come")
                     Outlook(snapshot: snapshot, weather: weather, now: now)
                         .frame(maxHeight: .infinity)
@@ -689,14 +715,15 @@ private struct Augury: View {
 private struct Subheading: View {
     let text: String
     init(_ text: String) { self.text = text }
+    @Environment(\.grimoireUnit) private var u
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 12 * u) {
             Rule(diamond: .none, colour: Ink.goldDim)
             Caps(text, size: 15, weight: 600, colour: Ink.gold, tracking: 0.18).fixedSize()
             Rule(diamond: .none, colour: Ink.goldDim)
         }
-        .frame(height: 22)
+        .frame(height: 22 * u)
     }
 }
 
@@ -706,44 +733,45 @@ private struct Hero: View {
     let snapshot: Snapshot
     let weather: Weather
     let now: Date
+    @Environment(\.grimoireUnit) private var u
 
     var body: some View {
-        HStack(alignment: .top, spacing: 22) {
+        HStack(alignment: .top, spacing: 22 * u) {
             Miniature(icon: weather.currentIcon, moonFraction: Skylight.moon(snapshot, now: now)?.fraction ?? snapshot.moon?.today?.fraction,
-                      size: CGSize(width: 290, height: 206))
+                      size: CGSize(width: 290 * u, height: 206 * u))
             VStack(alignment: .leading, spacing: 0) {
-                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                HStack(alignment: .firstTextBaseline, spacing: 4 * u) {
                     Gilt("\(Int(weather.currentTemp.rounded()))", size: 96)
                     Gilt("°", size: 60)
                     Spacer(minLength: 0)
                 }
-                .frame(height: 100, alignment: .bottom)
+                .frame(height: 100 * u, alignment: .bottom)
                 Text(weather.currentDescription.prefix(1).uppercased() + weather.currentDescription.dropFirst())
-                    .font(Face.italic(32))
+                    .font(Face.italic(32 * u))
                     .foregroundStyle(Ink.cream)
                     .lineLimit(1)
-                HStack(spacing: 16) {
+                HStack(spacing: 16 * u) {
                     Caps("High \(degrees(weather.high))", size: 17, weight: 600, colour: Ink.gold)
                     Caps("Low \(degrees(weather.low))", size: 17, weight: 600, colour: Ink.gold)
                     if let feels = weather.feelsLike {
                         Caps("Feels \(degrees(feels))", size: 17, colour: Ink.goldDim)
                     }
                 }
-                .padding(.top, 4)
+                .padding(.top, 4 * u)
                 if !weather.alerts.isEmpty {
-                    HStack(spacing: 10) {
+                    HStack(spacing: 10 * u) {
                         ForEach(weather.alerts.prefix(2), id: \.self) { alert in
-                            HStack(spacing: 8) {
+                            HStack(spacing: 8 * u) {
                                 Glyph("☠", size: 20, colour: Ink.goldBright)
                                 Caps(alert.event, size: 15, weight: 600, colour: Ink.cream, tracking: 0.06)
                             }
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 5)
-                            .background(RoundedRectangle(cornerRadius: 4).fill(Ink.wax))
-                            .overlay(RoundedRectangle(cornerRadius: 4).stroke(Ink.ember.opacity(0.7), lineWidth: 1.2))
+                            .padding(.horizontal, 12 * u)
+                            .padding(.vertical, 5 * u)
+                            .background(RoundedRectangle(cornerRadius: 4 * u).fill(Ink.wax))
+                            .overlay(RoundedRectangle(cornerRadius: 4 * u).stroke(Ink.ember.opacity(0.7), lineWidth: 1.2 * u))
                         }
                     }
-                    .padding(.top, 8)
+                    .padding(.top, 8 * u)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -757,15 +785,17 @@ private struct Hero: View {
 private struct Miniature: View {
     let icon: String
     let moonFraction: Double?
+    /// On screen, already scaled.
     let size: CGSize
+    @Environment(\.grimoireUnit) private var u
 
     var body: some View {
         WeatherArt(icon: icon, moonFraction: moonFraction, size: size, light: Ink.cream, accent: Ink.gold)
             .equatable()
-            .clipShape(RoundedRectangle(cornerRadius: 5))
-            .overlay(RoundedRectangle(cornerRadius: 5).stroke(Ink.gold.opacity(0.8), lineWidth: 2))
-            .overlay(RoundedRectangle(cornerRadius: 5).inset(by: 4).stroke(Ink.goldDeep.opacity(0.8), lineWidth: 1))
-            .shadow(color: .black.opacity(0.5), radius: 8, y: 4)
+            .clipShape(RoundedRectangle(cornerRadius: 5 * u))
+            .overlay(RoundedRectangle(cornerRadius: 5 * u).stroke(Ink.gold.opacity(0.8), lineWidth: 2 * u))
+            .overlay(RoundedRectangle(cornerRadius: 5 * u).inset(by: 4 * u).stroke(Ink.goldDeep.opacity(0.8), lineWidth: u))
+            .shadow(color: .black.opacity(0.5), radius: 8 * u, y: 4 * u)
     }
 }
 
@@ -783,21 +813,23 @@ private struct Runes: View {
         var id: String { label }
     }
 
+    @Environment(\.grimoireUnit) private var u
+
     var body: some View {
         let runes = Array(self.runes.prefix(6))
-        Grid(horizontalSpacing: 26, verticalSpacing: 10) {
+        Grid(horizontalSpacing: 26 * u, verticalSpacing: 10 * u) {
             ForEach(0..<(runes.count + 2) / 3, id: \.self) { row in
                 GridRow {
                     ForEach(runes[(row * 3)..<min(row * 3 + 3, runes.count)]) { rune in
-                        VStack(alignment: .leading, spacing: 2) {
+                        VStack(alignment: .leading, spacing: 2 * u) {
                             Caps(rune.label, size: 12, colour: Ink.goldDim, tracking: 0.14)
                             Text(rune.value)
-                                .font(Face.hand(24, .semibold))
+                                .font(Face.hand(24 * u, .semibold))
                                 .foregroundStyle(Ink.cream)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.8)
                             RuneBar(fraction: rune.fraction, colour: rune.colour)
-                                .padding(.top, 3)
+                                .padding(.top, 3 * u)
                         }
                         .frame(maxWidth: .infinity)
                     }
@@ -845,13 +877,14 @@ private struct Tide: View {
     let snapshot: Snapshot
     let weather: Weather
     let now: Date
+    @Environment(\.grimoireUnit) private var u
 
     var body: some View {
         let zone = snapshot.timeZone
         let points = Skylight.ribbon(weather, now: now)
         if points.count < 2 {
             Text("The hours ahead are unwritten.")
-                .font(Face.italic(26)).foregroundStyle(Ink.creamDim)
+                .font(Face.italic(26 * u)).foregroundStyle(Ink.creamDim)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             Canvas { gc, size in paint(points, zone: zone, in: size, &gc) }
@@ -859,8 +892,8 @@ private struct Tide: View {
     }
 
     private func paint(_ points: [Skylight.Point], zone: TimeZone, in size: CGSize, _ gc: inout GraphicsContext) {
-        let labelTop: CGFloat = 30, labelBottom: CGFloat = 24
-        let plot = CGRect(x: 26, y: labelTop, width: size.width - 52, height: size.height - labelTop - labelBottom)
+        let labelTop = 30 * u, labelBottom = 24 * u
+        let plot = CGRect(x: 26 * u, y: labelTop, width: size.width - 52 * u, height: size.height - labelTop - labelBottom)
         let temps = points.map(\.temp)
         let lo = temps.min()!, hi = temps.max()!
         let span = max(hi - lo, 4)
@@ -868,12 +901,12 @@ private struct Tide: View {
         func x(_ i: Int) -> CGFloat { plot.minX + plot.width * CGFloat(i) / CGFloat(points.count - 1) }
         func y(_ v: Double) -> CGFloat { plot.midY - CGFloat((v - mid) / span) * plot.height * 0.8 }
         // The floor, ruled faintly.
-        gc.fill(Path(CGRect(x: plot.minX, y: plot.maxY, width: plot.width, height: 1)), with: .color(Ink.goldDeep.opacity(0.8)))
+        gc.fill(Path(CGRect(x: plot.minX, y: plot.maxY, width: plot.width, height: u)), with: .color(Ink.goldDeep.opacity(0.8)))
         for (i, p) in points.enumerated() where p.precipChance > 0.02 {
             let h = plot.height * CGFloat(p.precipChance)
-            gc.fill(Path(roundedRect: CGRect(x: x(i) - 8, y: plot.maxY - h, width: 16, height: h), cornerRadius: 2),
+            gc.fill(Path(roundedRect: CGRect(x: x(i) - 8 * u, y: plot.maxY - h, width: 16 * u, height: h), cornerRadius: 2 * u),
                     with: .color(Ink.rain.opacity(0.3)))
-            gc.fill(Path(CGRect(x: x(i) - 8, y: plot.maxY - h, width: 16, height: 2)), with: .color(Ink.rain.opacity(0.9)))
+            gc.fill(Path(CGRect(x: x(i) - 8 * u, y: plot.maxY - h, width: 16 * u, height: 2 * u)), with: .color(Ink.rain.opacity(0.9)))
         }
         var line = Path()
         for i in points.indices {
@@ -881,23 +914,23 @@ private struct Tide: View {
             i == 0 ? line.move(to: pt) : line.addLine(to: pt)
         }
         gc.drawLayer { l in
-            l.addFilter(.blur(radius: 5))
-            l.stroke(line, with: .color(Ink.gold.opacity(0.6)), lineWidth: 5)
+            l.addFilter(.blur(radius: 5 * u))
+            l.stroke(line, with: .color(Ink.gold.opacity(0.6)), lineWidth: 5 * u)
         }
-        gc.stroke(line, with: .color(Ink.gold), lineWidth: 2.2)
-        let label = Font.custom("Goodmountain-Regular", size: 22), small = Face.caps(13, 500)
+        gc.stroke(line, with: .color(Ink.gold), lineWidth: 2.2 * u)
+        let label = Font.custom("Goodmountain-Regular", size: 22 * u), small = Face.caps(13 * u, 500)
         for (i, p) in points.enumerated() {
             let c = CGPoint(x: x(i), y: y(p.temp))
             var gem = Path()
-            let d: CGFloat = p.isNow ? 6 : 4.5
+            let d = (p.isNow ? 6 : 4.5) * u
             gem.move(to: CGPoint(x: c.x, y: c.y - d)); gem.addLine(to: CGPoint(x: c.x + d, y: c.y))
             gem.addLine(to: CGPoint(x: c.x, y: c.y + d)); gem.addLine(to: CGPoint(x: c.x - d, y: c.y)); gem.closeSubpath()
             gc.fill(gem, with: .color(p.isNow ? Ink.goldBright : Ink.parchmentDeep))
-            gc.stroke(gem, with: .color(Ink.gold), lineWidth: 1.5)
+            gc.stroke(gem, with: .color(Ink.gold), lineWidth: 1.5 * u)
             gc.draw(Text("\(Int(p.temp.rounded()))°").font(label).foregroundColor(p.isNow ? Ink.goldBright : Ink.cream),
-                    at: CGPoint(x: c.x, y: c.y - 11), anchor: .bottom)
+                    at: CGPoint(x: c.x, y: c.y - 11 * u), anchor: .bottom)
             let when = p.isNow ? "NOW" : Self.hour(p.time, zone).uppercased()
-            gc.draw(Text(when).font(small).tracking(1.2).foregroundColor(p.isNow ? Ink.gold : Ink.goldDim),
+            gc.draw(Text(when).font(small).tracking(1.2 * u).foregroundColor(p.isNow ? Ink.gold : Ink.goldDim),
                     at: CGPoint(x: c.x, y: size.height), anchor: .bottom)
         }
     }
@@ -916,22 +949,23 @@ private struct Outlook: View {
     let snapshot: Snapshot
     let weather: Weather
     let now: Date
+    @Environment(\.grimoireUnit) private var u
 
     var body: some View {
         let zone = snapshot.timeZone
         let today = CivilDate(now, in: zone)
         let days = Skylight.outlook(weather, now: now, zone: zone, count: 5)
-        HStack(spacing: 12) {
+        HStack(spacing: 12 * u) {
             ForEach(days, id: \.self) { day in
                 let isToday = day.date == today
-                VStack(spacing: 4) {
+                VStack(spacing: 4 * u) {
                     Caps(isToday ? "Today" : day.date.start(in: zone).formatted(Date.FormatStyle(timeZone: zone).weekday(.abbreviated)),
                          size: 13, weight: 600, colour: isToday ? Ink.gold : Ink.goldDim, tracking: 0.16)
-                    Miniature(icon: day.icon, moonFraction: nil, size: CGSize(width: 108, height: 62))
-                    HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Miniature(icon: day.icon, moonFraction: nil, size: CGSize(width: 108 * u, height: 62 * u))
+                    HStack(alignment: .firstTextBaseline, spacing: 6 * u) {
                         Gilt("\(Int(day.high.rounded()))°", size: 30)
                         Text("\(Int(day.low.rounded()))°")
-                            .font(Face.hand(22, .semibold))
+                            .font(Face.hand(22 * u, .semibold))
                             .foregroundStyle(Ink.creamDim)
                     }
                     if let chance = day.precipChance, chance >= 0.1 {
@@ -953,24 +987,25 @@ private struct Lunar: View {
     let moon: Moon
     let snapshot: Snapshot
     let now: Date
+    @Environment(\.grimoireUnit) private var u
 
     var body: some View {
         let zone = snapshot.timeZone
         let fraction = moon.days.first { $0.date == CivilDate(now, in: zone) }?.fraction ?? moon.today?.fraction ?? 0
         Panel(title: "The Moon", glyph: "🕯", note: moon.supermoon ? "A supermoon" : nil) {
-            HStack(spacing: 22) {
+            HStack(spacing: 22 * u) {
                 ZStack {
-                    Circle().stroke(Ink.gold.opacity(0.85), lineWidth: 2.5).padding(-8)
-                    Circle().stroke(Ink.goldDeep.opacity(0.8), lineWidth: 1).padding(-13)
-                    MoonDisc(fraction: fraction, radius: 62, halo: true)
+                    Circle().stroke(Ink.gold.opacity(0.85), lineWidth: 2.5 * u).padding(-8 * u)
+                    Circle().stroke(Ink.goldDeep.opacity(0.8), lineWidth: u).padding(-13 * u)
+                    MoonDisc(fraction: fraction, radius: 62 * u, halo: true)
                 }
-                .frame(width: 124, height: 124)
-                .padding(.leading, 14)
-                VStack(alignment: .leading, spacing: 4) {
+                .frame(width: 124 * u, height: 124 * u)
+                .padding(.leading, 14 * u)
+                VStack(alignment: .leading, spacing: 4 * u) {
                     Gilt(moon.phaseName, size: 32)
                         .minimumScaleFactor(0.7)
                     Text(Grimoire.moonLine(moon).split(separator: ",").last.map { $0.trimmingCharacters(in: .whitespaces) } ?? "")
-                        .font(Face.hand(24)).foregroundStyle(Ink.cream)
+                        .font(Face.hand(24 * u)).foregroundStyle(Ink.cream)
                     Caps(Grimoire.nextMoon(moon), size: 14, colour: Ink.gold, tracking: 0.08)
                     if let rise = moon.rise, let set = moon.set {
                         Caps("Rises \(clock(rise, zone)) · Sets \(clock(set, zone))", size: 13, colour: Ink.goldDim, tracking: 0.06)
@@ -986,21 +1021,22 @@ private struct Lunar: View {
 /// The day's quote as the words of the sage.
 private struct Sage: View {
     let quote: Quote?
+    @Environment(\.grimoireUnit) private var u
 
     var body: some View {
         Panel(title: "Words of the Sage", glyph: "📖") {
             if let quote {
-                VStack(alignment: .leading, spacing: 14) {
+                VStack(alignment: .leading, spacing: 14 * u) {
                     Text("“\(quote.text)”")
-                        .font(Face.italic(33))
+                        .font(Face.italic(33 * u))
                         .foregroundStyle(Ink.cream)
-                        .lineSpacing(3)
+                        .lineSpacing(3 * u)
                         .minimumScaleFactor(0.6)
                         .fixedSize(horizontal: false, vertical: true)
                     Caps("— " + quote.author, size: 17, weight: 600, colour: Ink.gold, tracking: 0.1)
                 }
-                .padding(.horizontal, 6)
-                .padding(.top, 6)
+                .padding(.horizontal, 6 * u)
+                .padding(.top, 6 * u)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             } else {
                 Empty(line: "The sage is silent.", sub: "No words were set down for today.")
@@ -1013,20 +1049,21 @@ private struct Sage: View {
 /// The air as the dragon's breath: sweet or foul, with the index and the fine dust.
 private struct Breath: View {
     let air: AirQuality
+    @Environment(\.grimoireUnit) private var u
 
     var body: some View {
         let colour = Ink.breath(air.band)
         Panel(title: "Dragon’s Breath", glyph: "🐉") {
-            HStack(alignment: .firstTextBaseline, spacing: 14) {
+            HStack(alignment: .firstTextBaseline, spacing: 14 * u) {
                 Gilt(Grimoire.breath(air.band), size: 40, colour: colour)
                 Text(air.shortLabel.lowercased())
-                    .font(Face.italic(24)).foregroundStyle(Ink.creamDim)
+                    .font(Face.italic(24 * u)).foregroundStyle(Ink.creamDim)
                 Spacer(minLength: 0)
                 Caps("AQI \(air.aqi) · fine dust \(String(format: "%.0f", air.pm25))", size: 13, colour: Ink.goldDim, tracking: 0.06)
             }
-            .padding(.horizontal, 6)
+            .padding(.horizontal, 6 * u)
             RuneBar(fraction: Double(air.aqi) / 300, colour: colour)
-                .padding(.horizontal, 6)
+                .padding(.horizontal, 6 * u)
         }
     }
 }
@@ -1037,15 +1074,16 @@ private struct Breath: View {
 /// out once it is stale.
 private struct Candles: View {
     let sources: Sources
+    @Environment(\.grimoireUnit) private var u
 
     var body: some View {
         let candles = Grimoire.candles(sources)
-        HStack(spacing: 44) {
+        HStack(spacing: 44 * u) {
             Spacer(minLength: 0)
             ForEach(candles, id: \.name) { name, candle in
-                HStack(spacing: 10) {
+                HStack(spacing: 10 * u) {
                     Glyph("🕯", size: 26, colour: colour(candle))
-                        .shadow(color: Ink.gold.opacity(candle == .lit ? 0.8 : 0), radius: 7)
+                        .shadow(color: Ink.gold.opacity(candle == .lit ? 0.8 : 0), radius: 7 * u)
                     Caps(name, size: 15, weight: 600, colour: candle == .out ? Ink.ash : Ink.gold, tracking: 0.14)
                     Caps(word(candle), size: 13, colour: candle == .out ? Ink.ash : Ink.goldDim, tracking: 0.1)
                 }

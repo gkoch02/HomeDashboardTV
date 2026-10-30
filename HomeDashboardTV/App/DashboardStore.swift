@@ -284,6 +284,12 @@ final class DashboardStore {
             case .server(let url):
                 fresh = try await DashboardClient(baseURL: url, username: username, password: password).fetch()
             case .local:
+                // A saver session starts from what is cached, if it has the weather, before
+                // waiting on fetches that may each run to their timeout on a bad network.
+                if snapshot == nil, let cached = try? await local.snapshot(fetching: false),
+                   cached.sources.weather?.data != nil {
+                    snapshot = cached
+                }
                 fresh = try await local.snapshot()
             }
             snapshot = fresh

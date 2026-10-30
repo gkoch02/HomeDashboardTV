@@ -132,6 +132,23 @@ final class ICSTests: XCTestCase {
         XCTAssertEqual(events.filter { $0.summary == "Runaway" }.count, 1, "a rule finer than daily leaves the first instance")
     }
 
+    func testADailyAllDayEventEndsAtMidnightAcrossTheChange() {
+        let text = """
+        BEGIN:VCALENDAR
+        BEGIN:VEVENT
+        UID:daily
+        SUMMARY:Holiday week
+        DTSTART;VALUE=DATE:20260307
+        DTEND;VALUE=DATE:20260308
+        RRULE:FREQ=DAILY;COUNT=3
+        END:VEVENT
+        END:VCALENDAR
+        """
+        let start = CivilDate(year: 2026, month: 3, day: 7)
+        let events = ICS.parse(text, zone: newYork, window: start.start(in: newYork)..<start.adding(days: 7).start(in: newYork)).events
+        XCTAssertEqual(events.map(\.end), (1...3).map { start.adding(days: $0).start(in: newYork) })
+    }
+
     func testDurationsAndZones() {
         XCTAssertEqual(ICS.duration("PT45M"), 2700)
         XCTAssertEqual(ICS.duration("P1DT2H"), 93_600)

@@ -37,15 +37,16 @@ public enum ICS {
         for raw in raws where raw.status?.uppercased() != "CANCELLED" {
             guard let start = raw.start.flatMap({ stamp($0, zone: zone) }) else { continue }
             let length = raw.length(from: start, zone: zone)
-            var starts: [Date] = [start.instant]
+            var starts: [Stamp] = [start]
             if raw.recurrenceID == nil, let rule = raw.rule.flatMap(Rule.init) {
                 let skipped = Set(raw.exdates.flatMap { values($0) }.compactMap { stamp($0, zone: zone)?.instant })
                     .union(raw.uid.flatMap { replaced[$0] } ?? [])
-                starts = rule.instances(from: start, in: window).map(\.instant).filter { !skipped.contains($0) }
+                starts = rule.instances(from: start, in: window).filter { !skipped.contains($0.instant) }
             }
             var kept = 0
-            for begin in starts {
-                let end = begin.addingTimeInterval(length)
+            for stamp in starts {
+                let begin = stamp.instant
+                let end = length.end(after: stamp)
                 guard begin < window.upperBound, end > window.lowerBound else { continue }
                 kept += 1
                 if kept > maxPerSeries { break }
@@ -87,12 +88,31 @@ public enum ICS {
 
         /// How long each instance lasts, from DTEND or DURATION, else the Pi's defaults: a day
         /// for an all-day event, an hour for a timed one.
-        func length(from start: Stamp, zone: TimeZone) -> TimeInterval {
+        func length(from start: Stamp, zone: TimeZone) -> Length {
+            let seconds: TimeInterval
             if let end = end.flatMap({ ICS.stamp($0, zone: zone) }) {
-                return max(0, end.instant.timeIntervalSince(start.instant))
+                if start.isAllDay { return .days(max(0, start.day.days(until: end.day))) }
+                seconds = max(0, end.instant.timeIntervalSince(start.instant))
+            } else if let duration = duration.flatMap({ ICS.duration($0.value) }) {
+                seconds = duration
+            } else {
+                return start.isAllDay ? .days(1) : .seconds(3600)
             }
-            if let duration = duration.flatMap({ ICS.duration($0.value) }) { return duration }
-            return start.isAllDay ? 86_400 : 3600
+            return start.isAllDay ? .days(Int((seconds / 86_400).rounded())) : .seconds(seconds)
+        }
+    }
+
+    /// An instance's length: whole days for an all-day event, so an instance across a DST
+    /// change still ends at midnight, and real time for a timed one.
+    enum Length {
+        case days(Int)
+        case seconds(TimeInterval)
+
+        func end(after start: Stamp) -> Date {
+            switch self {
+            case .days(let n): return start.day.adding(days: n).start(in: start.zone)
+            case .seconds(let s): return start.instant.addingTimeInterval(s)
+            }
         }
     }
 

@@ -75,14 +75,16 @@ final class LocalSource {
         self.state = state
     }
 
-    func snapshot(now: Date = .now) async throws -> Snapshot {
+    /// The snapshot, after fetching what is due. With *fetching* false, only from what is
+    /// cached, so the store can show that at once rather than wait out a slow network.
+    func snapshot(now: Date = .now, fetching: Bool = true) async throws -> Snapshot {
         let config = Configuration(defaults: defaults)
         guard let place = config.place, let key = config.cacheKey else { throw Failure.noPlace }
 
-        let (forecast, failure) = await cached("forecast", for: key, every: Self.weatherInterval, now: now) {
+        let (forecast, failure) = await cached("forecast", for: key, every: Self.weatherInterval, now: now, fetching: fetching) {
             try await OpenMeteo.get(OpenMeteo.forecastURL(latitude: place.latitude, longitude: place.longitude, metric: config.metric))
         }
-        let (air, _) = await cached("air", for: key, every: Self.airInterval, now: now) {
+        let (air, _) = await cached("air", for: key, every: Self.airInterval, now: now, fetching: fetching) {
             try await OpenMeteo.get(OpenMeteo.airQualityURL(latitude: place.latitude, longitude: place.longitude))
         }
         let weather = forecast.flatMap { answer in
@@ -98,14 +100,14 @@ final class LocalSource {
             quotes: quotes,
             weather: weather.map { .read($0.0, at: $0.1) } ?? .pending,
             airQuality: air.flatMap { answer in (try? OpenMeteo.airQuality(from: answer.data)).map { .read($0, at: answer.at) } } ?? .pending,
-            events: await events(config.feeds, zone: place.timeZone, now: now),
+            events: await events(config.feeds, zone: place.timeZone, now: now, fetching: fetching),
             birthdays: .off
         )
     }
 
     /// Every feed's events in the window, as old as the oldest feed's answer, so a feed that
     /// keeps failing ages the calendar on screen as the Pi's does. Off without feeds.
-    private func events(_ feeds: [URL], zone: TimeZone, now: Date) async -> LocalSnapshot.Feed<[CalendarEvent]> {
+    private func events(_ feeds: [URL], zone: TimeZone, now: Date, fetching: Bool) async -> LocalSnapshot.Feed<[CalendarEvent]> {
         guard !feeds.isEmpty else { return .off }
         let bounds = LocalSnapshot.eventWindow(now: now, in: zone)
         let window = bounds.start..<bounds.end
@@ -113,7 +115,7 @@ final class LocalSource {
         var oldest: Date?
         for url in feeds {
             let (answer, _) = await cached("feed-" + Self.digest(url.absoluteString), for: url.absoluteString,
-                                           every: Self.feedInterval, now: now) {
+                                           every: Self.feedInterval, now: now, fetching: fetching) {
                 try await Self.fetchFeed(url)
             }
             guard let answer else { continue }
@@ -134,14 +136,14 @@ final class LocalSource {
     /// The last answer for *name* kept for *key*, fetched again first when it is older than
     /// *interval*, and the fetch's error if it failed. A failed fetch keeps the old answer,
     /// which ages on screen as the Pi's does.
-    private func cached(_ name: String, for key: String, every interval: TimeInterval, now: Date,
+    private func cached(_ name: String, for key: String, every interval: TimeInterval, now: Date, fetching: Bool,
                         fetch: () async throws -> Data) async -> ((data: Data, at: Date)?, Error?) {
         let file = Self.cacheFolder.appending(path: name)
         let atKey = "local.\(name).at", forKey = "local.\(name).for"
         var data = state.string(forKey: forKey) == key ? try? Data(contentsOf: file) : nil
         var at = data == nil ? nil : state.object(forKey: atKey) as? Date
         var failure: Error?
-        if at.map({ now.timeIntervalSince($0) >= interval }) ?? true {
+        if fetching, at.map({ now.timeIntervalSince($0) >= interval }) ?? true {
             do {
                 let fresh = try await fetch()
                 try FileManager.default.createDirectory(at: Self.cacheFolder, withIntermediateDirectories: true)

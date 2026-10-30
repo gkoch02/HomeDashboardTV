@@ -1,12 +1,12 @@
 import Foundation
 
-/// The Steward pair's model: two layouts meant for two displays side by side, in Seneschal's
+/// The Ephemeris pair's model: two layouts meant for two displays side by side, in Seneschal's
 /// HUD language. The wing holds now (the clock, the next thing, the sky); the main display holds
 /// what is ahead, its centrepiece the next day as a strip running away from the wing, with the
 /// events laid along it in lanes. These are the strip's window, its events and lanes, its
-/// daylight, its hour labels, and the check line's word on the Pi's sources. Steward has no
+/// daylight, its hour labels, and the check line's word on the Pi's sources. Ephemeris has no
 /// Pi theme behind it.
-public enum Steward {
+public enum Ephemeris {
     // MARK: The strip
 
     /// The strip's stretch of time: from an hour before now, for a day.

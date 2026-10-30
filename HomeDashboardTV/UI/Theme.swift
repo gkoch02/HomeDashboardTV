@@ -89,8 +89,8 @@ struct LayoutSwitch: View {
         case .window: frame(WindowView.self)
         case .cyberpunk: frame(CyberpunkView.self)
         case .uplink: frame(UplinkView.self)
-        case .steward: frame(StewardView.self)
-        case .wing: frame(StewardWingView.self)
+        case .ephemeris: frame(EphemerisView.self)
+        case .wing: frame(EphemerisWingView.self)
         case .grimoire: frame(GrimoireView.self)
         }
     }
@@ -102,7 +102,7 @@ struct LayoutSwitch: View {
 
 extension EnvironmentValues {
     /// The side of this screen another display sits on, for the layouts made as a pair
-    /// (Steward and its wing); nil with none beside it, as on the TV. The Mac saver sets it from
+    /// (Ephemeris and its wing); nil with none beside it, as on the TV. The Mac saver sets it from
     /// the displays' arrangement.
     @Entry var partnerEdge: HorizontalEdge? = nil
 }

@@ -42,6 +42,11 @@ public struct Snapshot: Decodable, Sendable, Equatable {
 public struct Quote: Decodable, Sendable, Equatable {
     public var text: String
     public var author: String
+
+    public init(text: String, author: String) {
+        self.text = text
+        self.author = author
+    }
 }
 
 /// The sun's altitude every `stepMinutes` from `start` (local midnight today) for four days,
@@ -127,6 +132,15 @@ public struct CalendarEvent: Decodable, Sendable, Equatable, Hashable {
     public var isAllDay: Bool
     public var location: String?
     public var calendarName: String?
+
+    public init(summary: String, start: Date, end: Date, isAllDay: Bool, location: String? = nil, calendarName: String? = nil) {
+        self.summary = summary
+        self.start = start
+        self.end = end
+        self.isAllDay = isAllDay
+        self.location = location
+        self.calendarName = calendarName
+    }
 }
 
 public struct Weather: Decodable, Sendable, Equatable {
@@ -149,6 +163,31 @@ public struct Weather: Decodable, Sendable, Equatable {
     public var alerts: [WeatherAlert]
     /// Absent from caches written before the Pi kept the 3-hour grid.
     public var hourly: [HourlyForecast]
+
+    init(
+        currentTemp: Double, currentIcon: String, currentDescription: String, high: Double, low: Double,
+        humidity: Int, pressure: Double?, feelsLike: Double?, windSpeed: Double?, windDeg: Double?,
+        uvIndex: Double?, sunrise: Date?, sunset: Date?, locationName: String?,
+        forecast: [DayForecast], alerts: [WeatherAlert], hourly: [HourlyForecast]
+    ) {
+        self.currentTemp = currentTemp
+        self.currentIcon = currentIcon
+        self.currentDescription = currentDescription
+        self.high = high
+        self.low = low
+        self.humidity = humidity
+        self.pressure = pressure
+        self.feelsLike = feelsLike
+        self.windSpeed = windSpeed
+        self.windDeg = windDeg
+        self.uvIndex = uvIndex
+        self.sunrise = sunrise
+        self.sunset = sunset
+        self.locationName = locationName
+        self.forecast = forecast
+        self.alerts = alerts
+        self.hourly = hourly
+    }
 
     enum CodingKeys: String, CodingKey {
         case currentTemp, currentIcon, currentDescription, high, low, humidity, pressure, feelsLike
@@ -204,6 +243,12 @@ public struct Birthday: Decodable, Sendable, Equatable, Hashable {
     /// The upcoming occurrence, as the Pi's birthday fetcher stores it.
     public var date: CivilDate
     public var age: Int?
+
+    public init(name: String, date: CivilDate, age: Int? = nil) {
+        self.name = name
+        self.date = date
+        self.age = age
+    }
 }
 
 public struct AirQuality: Decodable, Sendable, Equatable {

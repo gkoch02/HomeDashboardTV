@@ -71,6 +71,8 @@ final class DashboardStore {
     enum Connection: Equatable {
         case demo
         case server(URL)
+        /// No Pi: the weather for a place from Open-Meteo, the rest computed here (`LocalSource`).
+        case local
     }
 
     private(set) var connection: Connection?
@@ -138,6 +140,9 @@ final class DashboardStore {
     private let defaults: UserDefaults
     /// Where the store keeps what it records rather than what was chosen: the pressure history.
     private let state: UserDefaults
+    @ObservationIgnored private let local: LocalSource
+    /// The place and units the local snapshot was made for, to notice Options changing them.
+    @ObservationIgnored private var localConfiguration: LocalSource.Configuration
     private var loop: Task<Void, Never>?
     private var idleCheck: Task<Void, Never>?
     private var lastInteraction = Date.now
@@ -161,6 +166,8 @@ final class DashboardStore {
     init(defaults: UserDefaults = .standard, state: UserDefaults? = nil) {
         self.defaults = defaults
         self.state = state ?? defaults
+        local = LocalSource(defaults: defaults, state: self.state)
+        localConfiguration = LocalSource.Configuration(defaults: defaults)
         username = defaults.string(forKey: Keys.username) ?? "admin"
         // `-layout moon` sets it for a run too, since launch arguments land in UserDefaults.
         layout = defaults.string(forKey: Keys.layout).flatMap(Layout.init(saved:)) ?? .dashboard
@@ -185,7 +192,7 @@ final class DashboardStore {
         #endif
         // Readings from another source (a `-demo` run, another Pi) would make a trend out of
         // two places, so the history is kept only for the source it came from.
-        if let connection, self.state.string(forKey: Keys.pressureSource) == Self.encode(connection) {
+        if let connection, self.state.string(forKey: Keys.pressureSource) == pressureSource(connection) {
             pressureHistory = self.state.data(forKey: Keys.pressureHistory)
                 .flatMap { try? JSONDecoder().decode(PressureHistory.self, from: $0) } ?? PressureHistory()
         }
@@ -241,6 +248,8 @@ final class DashboardStore {
         highlights = defaults.string(forKey: Keys.highlights).flatMap(Highlights.init(rawValue:)) ?? highlights
         if let saved = Self.decode(defaults.string(forKey: Keys.connection)), saved != connection {
             connect(saved)
+        } else if connection == .local, LocalSource.Configuration(defaults: defaults) != localConfiguration {
+            connect(.local)
         }
     }
 
@@ -253,6 +262,7 @@ final class DashboardStore {
 
     func connect(_ connection: Connection) {
         self.connection = connection
+        localConfiguration = LocalSource.Configuration(defaults: defaults)
         save(Self.encode(connection), Keys.connection)
         // Another source's snapshot must not stay up as if it were this one's.
         snapshot = nil
@@ -273,6 +283,14 @@ final class DashboardStore {
                 fresh = try Self.demoSnapshot().shiftedToToday(now: .now).fetched(at: .now)
             case .server(let url):
                 fresh = try await DashboardClient(baseURL: url, username: username, password: password).fetch()
+            case .local:
+                // A saver session starts from what is cached, if it has the weather, before
+                // waiting on fetches that may each run to their timeout on a bad network.
+                if snapshot == nil, let cached = try? await local.snapshot(fetching: false),
+                   cached.sources.weather?.data != nil {
+                    snapshot = cached
+                }
+                fresh = try await local.snapshot()
             }
             snapshot = fresh
             recordPressure(fresh)
@@ -291,7 +309,8 @@ final class DashboardStore {
     /// gone stale. Nothing when everything is current.
     var notice: String? {
         if let since = failingSince {
-            return "Can't reach the dashboard since \(since.formatted(date: .omitted, time: .shortened))"
+            let what = connection == .local ? "the weather" : "the dashboard"
+            return "Can't reach \(what) since \(since.formatted(date: .omitted, time: .shortened))"
         }
         guard let sources = snapshot?.sources else { return nil }
         let stale = [
@@ -310,7 +329,14 @@ final class DashboardStore {
         pressureHistory.record(hPa, at: weather.fetchedAt ?? .now)
         guard pressureHistory != before, let data = try? JSONEncoder().encode(pressureHistory) else { return }
         state.set(data, forKey: Keys.pressureHistory)
-        state.set(Self.encode(connection), forKey: Keys.pressureSource)
+        state.set(pressureSource(connection), forKey: Keys.pressureSource)
+    }
+
+    /// Whose readings a pressure history is: the connection's, and for this Mac its place.
+    private func pressureSource(_ connection: Connection) -> String {
+        let encoded = Self.encode(connection)
+        guard connection == .local else { return encoded }
+        return encoded + "@" + (LocalSource.Configuration(defaults: defaults).cacheKey ?? "")
     }
 
     private static func demoSnapshot() throws -> Snapshot {
@@ -324,12 +350,14 @@ final class DashboardStore {
         switch connection {
         case .demo: return "demo"
         case .server(let url): return url.absoluteString
+        case .local: return "local"
         }
     }
 
     private static func decode(_ raw: String?) -> Connection? {
         guard let raw else { return nil }
         if raw == "demo" { return .demo }
+        if raw == "local" { return .local }
         return URL(string: raw).map(Connection.server)
     }
 }

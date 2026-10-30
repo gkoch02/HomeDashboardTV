@@ -277,6 +277,7 @@ struct SettingsView: View {
         case nil: return "None"
         case .demo: return "Demo data"
         case .server(let url): return url.host() ?? url.absoluteString
+        case .local: return "Open-Meteo"
         }
     }
 
@@ -300,6 +301,9 @@ struct SettingsView: View {
                 return "\(url.host() ?? url.absoluteString) · updated \(last.formatted(date: .omitted, time: .shortened))"
             }
             return "Connecting to \(url.host() ?? url.absoluteString)…"
+        case .local:
+            // The Mac saver's own source; the TV offers no way to choose it.
+            return store.problem ?? "The weather from Open-Meteo, without a Pi."
         }
     }
 

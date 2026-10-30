@@ -203,6 +203,14 @@ around them, since scaling up blurs the text. The skies' highlights go brighter 
 an XDR or HDR display. There is no web UI login on the Mac yet, so the Pi's web UI must be
 open.
 
+Without a Pi, choose **This Mac** under Options and find a place: the weather and the air
+come from [Open-Meteo](https://open-meteo.com) (no key needed), the moon, the sun and the
+quote are worked out on the Mac as the Pi works them out, and the days are counted in the
+place's time zone. The screensaver runs in macOS's sandboxed screensaver host, which cannot
+read the Mac's calendars, so the calendar comes from feed addresses given under **Calendars**:
+a Google calendar's *Secret address in iCal format*, or a Mac calendar shared as a *Public
+Calendar*. Birthdays still need a Pi.
+
 ## Layout
 
 - `Packages/DashboardCore`: the payload model, decoding of the Pi's Python timestamps, the

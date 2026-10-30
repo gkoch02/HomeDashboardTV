@@ -64,6 +64,8 @@ struct SaverScreen: View {
                     .background { Color.black.ignoresSafeArea() }
             } else if store.connection == nil {
                 Waiting(problem: "No dashboard chosen yet.", hint: "Choose one under Options in the Screen Saver settings.")
+            } else if store.connection == .local {
+                Waiting(problem: store.problem, hint: "Choose a place under Options in the Screen Saver settings.")
             } else {
                 Waiting(problem: store.problem, hint: "Check the address under Options in the Screen Saver settings.")
             }

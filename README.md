@@ -206,8 +206,10 @@ open.
 Without a Pi, choose **This Mac** under Options and find a place: the weather and the air
 come from [Open-Meteo](https://open-meteo.com) (no key needed), the moon, the sun and the
 quote are worked out on the Mac as the Pi works them out, and the days are counted in the
-place's time zone. The calendar and birthdays still need a Pi: the screensaver runs in
-macOS's sandboxed screensaver host, which cannot read the Mac's calendars.
+place's time zone. The screensaver runs in macOS's sandboxed screensaver host, which cannot
+read the Mac's calendars, so the calendar comes from feed addresses given under **Calendars**:
+a Google calendar's *Secret address in iCal format*, or a Mac calendar shared as a *Public
+Calendar*. Birthdays still need a Pi.
 
 ## Layout
 

@@ -31,6 +31,7 @@ struct SaverSettingsView: View {
     @State private var placesFound: [OpenMeteo.Found] = []
     @State private var searching = false
     @State private var placeError: String?
+    @State private var feedsText: String
     @State private var layout: DashboardStore.Layout
     /// The connected displays, by key and name, when there is more than one, or when the one
     /// left still has a layout of its own, so it can be put back.
@@ -52,6 +53,7 @@ struct SaverSettingsView: View {
         let local = LocalSource.Configuration(defaults: defaults)
         _place = State(initialValue: local.place)
         _metric = State(initialValue: local.metric)
+        _feedsText = State(initialValue: (defaults.stringArray(forKey: LocalSource.Keys.feeds) ?? []).joined(separator: "\n"))
         let url = saved.flatMap(URL.init(string:)).flatMap { $0.host() == nil ? nil : $0 }
         _address = State(initialValue: url.map(Self.typed) ?? "")
         _layout = State(initialValue: defaults.string(forKey: "layout").flatMap(DashboardStore.Layout.init(saved:)) ?? .dashboard)
@@ -134,6 +136,7 @@ struct SaverSettingsView: View {
                     Spacer()
                     Button("Done") {
                         saveAddress()
+                        saveFeeds()
                         done()
                     }
                     .keyboardShortcut(.defaultAction)
@@ -228,8 +231,19 @@ struct SaverSettingsView: View {
             Text("°F, mph").tag(false)
             Text("°C, m/s").tag(true)
         }
-        Text("The weather and the air come from Open-Meteo, the moon, the sun and the quote are worked out here, and the days are counted in the place's time zone. The calendar and birthdays need a Pi: a screensaver can't read the Mac's calendars.")
+        TextField("Calendars", text: $feedsText, prompt: Text("webcal:// or https:// feed addresses"), axis: .vertical)
+            .lineLimit(1...4)
+            .onSubmit(saveFeeds)
+        Text("The weather and the air come from Open-Meteo, and the moon, the sun and the quote are worked out here, in the place's time zone. A screensaver can't read the Mac's calendars, so give each calendar's feed address: in Google Calendar, its settings' Secret address in iCal format; in Calendar on the Mac, share it as a Public Calendar and copy the link. Birthdays need a Pi.")
             .foregroundStyle(.secondary)
+    }
+
+    /// The feed addresses typed, one a line (or apart by spaces or commas), saved as typed;
+    /// `LocalSource` reads `webcal://` as HTTPS.
+    private func saveFeeds() {
+        let feeds = feedsText.split(whereSeparator: { $0.isWhitespace || $0 == "," }).map(String.init)
+        guard feeds != (defaults.stringArray(forKey: LocalSource.Keys.feeds) ?? []) else { return }
+        save(feeds, LocalSource.Keys.feeds)
     }
 
     private func searchPlaces() async {

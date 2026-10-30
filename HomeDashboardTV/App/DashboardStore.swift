@@ -28,7 +28,7 @@ final class DashboardStore {
     /// down to the calmest, with Night, the after-dark plate, last. Saved by raw value, so
     /// reordering keeps a saved choice.
     enum Layout: String, CaseIterable {
-        case dashboard, cyberpunk, uplink, steward, wing, grimoire, agenda, horizon, skylight, window, light, weatherglass, orrery, fuzzy, quote, moon, aurora, night
+        case dashboard, cyberpunk, uplink, ephemeris, wing, grimoire, agenda, horizon, skylight, window, light, weatherglass, orrery, fuzzy, quote, moon, aurora, night
 
         var title: String {
             switch self {
@@ -47,8 +47,8 @@ final class DashboardStore {
             case .window: return "Window"
             case .cyberpunk: return "Cyberpunk"
             case .uplink: return "Uplink"
-            case .steward: return "Steward"
-            case .wing: return "Steward Wing"
+            case .ephemeris: return "Ephemeris"
+            case .wing: return "Ephemeris Wing"
             case .grimoire: return "Grimoire"
             }
         }
@@ -62,9 +62,9 @@ final class DashboardStore {
             return all[((index + steps) % count + count) % count]
         }
 
-        /// A saved layout, including the agenda's earlier name.
+        /// A saved layout, including the earlier names of the agenda and the ephemeris.
         init?(saved: String) {
-            self.init(rawValue: saved == "halftone" ? "agenda" : saved)
+            self.init(rawValue: ["halftone": "agenda", "steward": "ephemeris"][saved] ?? saved)
         }
     }
 

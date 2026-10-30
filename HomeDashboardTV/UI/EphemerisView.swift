@@ -8,7 +8,7 @@ import SwiftUI
 ///
 /// The two split the day rather than repeat it. The wing, on the display beside, is now: the
 /// clock, the date, the next thing on the calendar, and the sky as three quiet marks, set
-/// against its inner edge. The main display, `StewardView`, is what is ahead: the next day as
+/// against its inner edge. The main display, `EphemerisView`, is what is ahead: the next day as
 /// a strip running away from the wing across the whole width (the main display is often the
 /// wider), the agenda, the conditions and as many days of outlook as the width holds.
 /// A gold rule runs off each one's inner edge at its header, so the pair reads across the gap.
@@ -17,7 +17,7 @@ import SwiftUI
 ///
 /// Both lay out 1080 points tall and as wide as the screen's shape makes that, scaled by `u`
 /// from the environment rather than `scaleEffect`, which blurs text.
-struct StewardView: Theme {
+struct EphemerisView: Theme {
     let snapshot: Snapshot
     let now: Date
 
@@ -30,7 +30,7 @@ struct StewardView: Theme {
             let u = min(g.size.width / 1920, g.size.height / 1080)
             let width = g.size.width / max(u, 0.01)
             screen(width: width, u: u)
-                .environment(\.stewardUnit, u)
+                .environment(\.ephemerisUnit, u)
                 .frame(width: g.size.width, height: 1080 * u, alignment: .topLeading)
                 .frame(width: g.size.width, height: g.size.height)
         }
@@ -38,7 +38,7 @@ struct StewardView: Theme {
 
     var backdrop: some View { Ground(dim: false) }
 
-    func notice(_ text: String) -> some View { StewardNotice(text: text) }
+    func notice(_ text: String) -> some View { EphemerisNotice(text: text) }
 
     private static let margin: CGFloat = 64
 
@@ -68,8 +68,8 @@ struct StewardView: Theme {
     }
 }
 
-/// The wing of the Steward pair: now, for the display beside the main one. See `StewardView`.
-struct StewardWingView: Theme {
+/// The wing of the Ephemeris pair: now, for the display beside the main one. See `EphemerisView`.
+struct EphemerisWingView: Theme {
     let snapshot: Snapshot
     let now: Date
 
@@ -81,14 +81,14 @@ struct StewardWingView: Theme {
         GeometryReader { g in
             let u = min(g.size.width / 1920, g.size.height / 1080)
             screen(height: g.size.height / max(u, 0.01), u: u)
-                .environment(\.stewardUnit, u)
+                .environment(\.ephemerisUnit, u)
                 .frame(width: g.size.width, height: g.size.height)
         }
     }
 
     var backdrop: some View { Ground(dim: true) }
 
-    func notice(_ text: String) -> some View { StewardNotice(text: text) }
+    func notice(_ text: String) -> some View { EphemerisNotice(text: text) }
 
     private func screen(height: CGFloat, u: CGFloat) -> some View {
         let inner = partnerEdge ?? .trailing
@@ -128,8 +128,8 @@ struct StewardWingView: Theme {
 }
 
 extension EnvironmentValues {
-    /// Points on screen per point of Steward's 1080-point-tall layout.
-    @Entry fileprivate var stewardUnit: CGFloat = 1
+    /// Points on screen per point of Ephemeris's 1080-point-tall layout.
+    @Entry fileprivate var ephemerisUnit: CGFloat = 1
 }
 
 // MARK: - Inks, faces, shapes
@@ -195,7 +195,7 @@ private struct Caps: View {
     var weight: CGFloat = 600
     var colour = Ink.muted
     var tracking: CGFloat = 0.2
-    @Environment(\.stewardUnit) private var u
+    @Environment(\.ephemerisUnit) private var u
 
     var body: some View {
         Text(text.uppercased())
@@ -226,7 +226,7 @@ private struct Bevelled: Shape {
 private struct SectionLabel: View {
     let title: String
     var detail: String?
-    @Environment(\.stewardUnit) private var u
+    @Environment(\.ephemerisUnit) private var u
 
     var body: some View {
         HStack(spacing: 14 * u) {
@@ -247,7 +247,7 @@ private struct Panel: View {
 
     var tone = Tone.quiet
     var cut: CGFloat = 14
-    @Environment(\.stewardUnit) private var u
+    @Environment(\.ephemerisUnit) private var u
 
     var body: some View {
         let shape = Bevelled(cut: cut * u)
@@ -279,7 +279,7 @@ private struct BridgeRule: View {
     var run: CGFloat = 300
     /// How far past the plate's margin the rule runs.
     var bleed: CGFloat
-    @Environment(\.stewardUnit) private var u
+    @Environment(\.ephemerisUnit) private var u
 
     var body: some View {
         ZStack(alignment: toward == .leading ? .leading : .trailing) {
@@ -344,7 +344,7 @@ private struct Ground: View {
 }
 
 /// The corner line, as Seneschal says something needs attention: a red marker and caps.
-private struct StewardNotice: View {
+private struct EphemerisNotice: View {
     let text: String
 
     var body: some View {
@@ -370,15 +370,15 @@ private struct MainHeader: View {
     let snapshot: Snapshot
     let now: Date
     let wing: HorizontalEdge
-    @Environment(\.stewardUnit) private var u
+    @Environment(\.ephemerisUnit) private var u
 
     var body: some View {
         let zone = snapshot.timeZone
-        let stale = Steward.stale(snapshot.sources)
+        let stale = Ephemeris.stale(snapshot.sources)
         VStack(spacing: 0) {
             Spacer(minLength: 0)
             HStack(alignment: .center, spacing: 0) {
-                Text("STEWARD")
+                Text("EPHEMERIS")
                     .font(Face.wide(40 * u))
                     .foregroundStyle(Ink.gold)
                     .shadow(color: Ink.gold.opacity(0.45), radius: 10 * u)
@@ -414,7 +414,7 @@ private struct Strip: View {
     let now: Date
     /// In layout points.
     let width: CGFloat
-    @Environment(\.stewardUnit) private var u
+    @Environment(\.ephemerisUnit) private var u
 
     private static let lanes = 2
     private static let laneHeight: CGFloat = 70
@@ -425,7 +425,7 @@ private struct Strip: View {
     private static let minLabel: CGFloat = 210
 
     var body: some View {
-        let window = Steward.Window(now: now)
+        let window = Ephemeris.Window(now: now)
         let zone = snapshot.timeZone
         let sunTimes = Skylight.sunTimes(snapshot, now: now)
         let rise = sunTimes.first { $0.rise && $0.time > now }?.time
@@ -456,9 +456,9 @@ private struct Strip: View {
 
     /// The temperature through the day, as a line with its readings, and the chance of rain as
     /// bars under it.
-    @ViewBuilder private func trace(_ window: Steward.Window) -> some View {
+    @ViewBuilder private func trace(_ window: Ephemeris.Window) -> some View {
         if let weather = snapshot.sources.weather?.data {
-            let points = Steward.trace(weather, now: now, window: window)
+            let points = Ephemeris.trace(weather, now: now, window: window)
             let lo = points.map(\.temp).min() ?? 0, hi = points.map(\.temp).max() ?? 1
             let top = 38 * u, bottom = (Self.traceHeight - 16) * u
             let y = { (t: Double) in bottom - CGFloat(Cyberpunk.fraction(t, low: lo, high: hi)) * (bottom - top) }
@@ -496,9 +496,9 @@ private struct Strip: View {
     }
 
     /// The daylight as a lit band along a hairline, and a tick each hour.
-    private func band(_ window: Steward.Window, sunTimes: [(time: Date, rise: Bool)], zone: TimeZone) -> some View {
-        let stretches = Steward.daylight(sunTimes, window: window)
-        let ticks = Steward.hours(in: window, zone: zone)
+    private func band(_ window: Ephemeris.Window, sunTimes: [(time: Date, rise: Bool)], zone: TimeZone) -> some View {
+        let stretches = Ephemeris.daylight(sunTimes, window: window)
+        let ticks = Ephemeris.hours(in: window, zone: zone)
         return Canvas { gc, size in
             let mid = size.height / 2
             gc.fill(Path(CGRect(x: 0, y: mid - 0.6 * u, width: size.width, height: 1.2 * u)), with: .color(.white.opacity(0.14)))
@@ -515,13 +515,13 @@ private struct Strip: View {
     }
 
     /// The hours under the band, as many as fit.
-    private func hours(_ window: Steward.Window, zone: TimeZone) -> some View {
+    private func hours(_ window: Ephemeris.Window, zone: TimeZone) -> some View {
         let hourWidth = Double(width) / window.hours
-        let step = Steward.labelStep(hourWidth: hourWidth, minSpacing: 92)
+        let step = Ephemeris.labelStep(hourWidth: hourWidth, minSpacing: 92)
         var cal = Calendar(identifier: .gregorian)
         cal.timeZone = zone
         // Clear of now's label, and of the ends.
-        let labels = Steward.hours(in: window, zone: zone).filter { tick in
+        let labels = Ephemeris.hours(in: window, zone: zone).filter { tick in
             let f = window.fraction(tick)
             return cal.component(.hour, from: tick) % step == 0 && abs(f - window.fraction(now)) > 0.025 && f > 0.015 && f < 0.985
         }
@@ -535,9 +535,9 @@ private struct Strip: View {
     }
 
     /// The timed events in their lanes.
-    private func events(_ window: Steward.Window, zone: TimeZone) -> some View {
-        let spans = Steward.spans(snapshot, now: now, window: window)
-        let lanes = Steward.lanes(spans.map { ($0.start, $0.end) }, minLength: Double(Self.minLabel / width), count: Self.lanes)
+    private func events(_ window: Ephemeris.Window, zone: TimeZone) -> some View {
+        let spans = Ephemeris.spans(snapshot, now: now, window: window)
+        let lanes = Ephemeris.lanes(spans.map { ($0.start, $0.end) }, minLength: Double(Self.minLabel / width), count: Self.lanes)
         let placed = zip(spans, lanes).compactMap { span, lane in lane.map { (span, $0) } }
         return ZStack(alignment: .topLeading) {
             Color.clear
@@ -552,7 +552,7 @@ private struct Strip: View {
     }
 
     /// A gold line at now, from the trace to the last lane, with its label.
-    private func nowLine(_ window: Steward.Window) -> some View {
+    private func nowLine(_ window: Ephemeris.Window) -> some View {
         let at = x(window.fraction(now))
         return ZStack(alignment: .topLeading) {
             Rectangle().fill(Ink.gold)
@@ -575,9 +575,9 @@ private struct Strip: View {
 
 /// An event on the strip: its name and when, in a panel lit while it is under way.
 private struct EventPanel: View {
-    let span: Steward.Span
+    let span: Ephemeris.Span
     let zone: TimeZone
-    @Environment(\.stewardUnit) private var u
+    @Environment(\.ephemerisUnit) private var u
 
     var body: some View {
         let tone: Panel.Tone = switch span.state {
@@ -610,7 +610,7 @@ private struct EventPanel: View {
 private struct AgendaColumn: View {
     let snapshot: Snapshot
     let now: Date
-    @Environment(\.stewardUnit) private var u
+    @Environment(\.ephemerisUnit) private var u
 
     private static let rows = 6
 
@@ -677,7 +677,7 @@ private struct AgendaColumn: View {
 private struct Conditions: View {
     let snapshot: Snapshot
     let now: Date
-    @Environment(\.stewardUnit) private var u
+    @Environment(\.ephemerisUnit) private var u
 
     var body: some View {
         let zone = snapshot.timeZone
@@ -774,7 +774,7 @@ private struct Outlook: View {
     let now: Date
     /// In layout points.
     let width: CGFloat
-    @Environment(\.stewardUnit) private var u
+    @Environment(\.ephemerisUnit) private var u
 
     private static let gap: CGFloat = 10
     private static let minCell: CGFloat = 150
@@ -823,7 +823,7 @@ private struct Outlook: View {
 /// The day's quote along the foot, as Seneschal sets its notes: reading text, quietly.
 private struct Dispatch: View {
     let quote: Quote?
-    @Environment(\.stewardUnit) private var u
+    @Environment(\.ephemerisUnit) private var u
 
     var body: some View {
         if let quote {
@@ -849,15 +849,15 @@ private struct Dispatch: View {
 private struct WingHeader: View {
     let snapshot: Snapshot
     let inner: HorizontalEdge
-    @Environment(\.stewardUnit) private var u
+    @Environment(\.ephemerisUnit) private var u
 
     var body: some View {
-        let stale = Steward.stale(snapshot.sources)
+        let stale = Ephemeris.stale(snapshot.sources)
         VStack(spacing: 0) {
             Spacer(minLength: 0)
             HStack(spacing: 14 * u) {
                 Rectangle().fill(Ink.muted.opacity(0.7)).frame(width: 18 * u, height: 2.5 * u)
-                Caps(text: "Steward · Now", size: 18, colour: Ink.white.opacity(0.6), tracking: 0.3)
+                Caps(text: "Ephemeris · Now", size: 18, colour: Ink.white.opacity(0.6), tracking: 0.3)
                 if !stale.isEmpty {
                     Caps(text: stale.joined(separator: ", ") + " stale", size: 16, colour: Ink.red, tracking: 0.18)
                 }
@@ -875,7 +875,7 @@ private struct NextUp: View {
     let snapshot: Snapshot
     let now: Date
     let align: HorizontalAlignment
-    @Environment(\.stewardUnit) private var u
+    @Environment(\.ephemerisUnit) private var u
 
     var body: some View {
         let zone = snapshot.timeZone
@@ -930,7 +930,7 @@ private struct NextUp: View {
 private struct Marks: View {
     let snapshot: Snapshot
     let inner: HorizontalEdge
-    @Environment(\.stewardUnit) private var u
+    @Environment(\.ephemerisUnit) private var u
 
     var body: some View {
         let weather = snapshot.sources.weather?.data

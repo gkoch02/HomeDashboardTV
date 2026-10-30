@@ -28,18 +28,18 @@ a codex entry.
 
 ![The Uplink layout, from HomeDashboard's dummy data](docs/uplink.png)
 
-**Steward** and **Steward Wing**, a pair for two displays side by side, in the look of the
+**Ephemeris** and **Ephemeris Wing**, a pair for two displays side by side, in the look of the
 Seneschal app: the wing is now (the clock, the next event, the moon, the temperature and the
-air, set against the edge nearest the main display), and Steward is what is ahead (the next
+air, set against the edge nearest the main display), and Ephemeris is what is ahead (the next
 24 hours as a strip with the temperature, the daylight and the events in lanes, then the
-agenda, the conditions and as many days of outlook as the width holds). Steward widens to fit
+agenda, the conditions and as many days of outlook as the width holds). Ephemeris widens to fit
 an ultrawide display, and a gold rule runs off each one's inner edge so the pair reads across
 the gap. In the Mac screensaver, give each display its layout under Options › Displays; the
 wing turns to face whichever side the other display is on.
 
-![The Steward layout, from HomeDashboard's dummy data](docs/steward.png)
+![The Ephemeris layout, from HomeDashboard's dummy data](docs/ephemeris.png)
 
-![The Steward Wing layout, from HomeDashboard's dummy data](docs/steward-wing.png)
+![The Ephemeris Wing layout, from HomeDashboard's dummy data](docs/ephemeris-wing.png)
 
 **Grimoire**, an adventurer's quest log: the
 calendar as quests (the one under way crossed with swords, the next marked with the gold
@@ -270,7 +270,7 @@ cd Packages/DashboardCore && swift test
 ```
 
 In the simulator, `-server <address>` or `-demo YES` sets the source for one run, and
-`-layout <name>` the layout, by its raw name (`dashboard`, `cyberpunk`, `uplink`, `steward`, `wing`, `grimoire`,
+`-layout <name>` the layout, by its raw name (`dashboard`, `cyberpunk`, `uplink`, `ephemeris`, `wing`, `grimoire`,
 `agenda`, `horizon`, `skylight`, `window`, `light`, `weatherglass`, `orrery`, `fuzzy`, `quote`,
 `moon`, `aurora`, `night`; the cases of `DashboardStore.Layout`):
 
@@ -282,7 +282,7 @@ xcrun simctl launch booted dev.plumpbug.homedashboard -server 127.0.0.1:8080
 
 The **HomeDashboardSaverHost** scheme shows the saver's screen in a window and takes the same
 `-server`, `-demo` and `-layout` arguments; arrow keys step through the layouts, `-window WxH`
-sizes it, `-partner leading|trailing` puts another display on that side for the Steward pair, `-showOptions YES` opens the Options sheet, and `-snapshot <path> [-settle <s>]`
+sizes it, `-partner leading|trailing` puts another display on that side for the Ephemeris pair, `-showOptions YES` opens the Options sheet, and `-snapshot <path> [-settle <s>]`
 writes the window as a PNG and quits.
 
 A device build needs a registered Apple TV for its development profile; signing is set up

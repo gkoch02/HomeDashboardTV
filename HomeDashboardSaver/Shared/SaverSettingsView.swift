@@ -2,7 +2,8 @@ import DashboardCore
 import SwiftUI
 
 /// The saver's choices, the TV drawer's as one form: where the dashboard comes from (a Pi
-/// found on the network, a typed address, or the demo week), the layout and any display's own
+/// found on the network, a typed address, this Mac with a place for the weather, or the demo
+/// week), the layout and any display's own
 /// (`SaverDisplay`), whether the layouts take turns, and the skies' highlights. It writes the
 /// keys `DashboardStore` reads, so the
 /// saver's next `startAnimation`, which builds a fresh store, picks them up; the host app's
@@ -16,9 +17,20 @@ struct SaverSettingsView: View {
     /// The configure sheet's Done button; the host's Settings window has none.
     var done: (() -> Void)?
 
+    /// Where the dashboard comes from, as the Source picker shows it.
+    enum SourceKind {
+        case pi, mac, demo
+    }
+
     @State private var browser = PiBrowser()
-    @State private var demo: Bool
+    @State private var source: SourceKind
     @State private var address: String
+    @State private var place: LocalSnapshot.Place?
+    @State private var metric: Bool
+    @State private var placeQuery = ""
+    @State private var placesFound: [OpenMeteo.Found] = []
+    @State private var searching = false
+    @State private var placeError: String?
     @State private var layout: DashboardStore.Layout
     /// The connected displays, by key and name, when there is more than one, or when the one
     /// left still has a layout of its own, so it can be put back.
@@ -36,7 +48,10 @@ struct SaverSettingsView: View {
         self.onChange = onChange
         self.done = done
         let saved = defaults.string(forKey: "connection")
-        _demo = State(initialValue: saved == "demo")
+        _source = State(initialValue: saved == "demo" ? .demo : saved == "local" ? .mac : .pi)
+        let local = LocalSource.Configuration(defaults: defaults)
+        _place = State(initialValue: local.place)
+        _metric = State(initialValue: local.metric)
         let url = saved.flatMap(URL.init(string:)).flatMap { $0.host() == nil ? nil : $0 }
         _address = State(initialValue: url.map(Self.typed) ?? "")
         _layout = State(initialValue: defaults.string(forKey: "layout").flatMap(DashboardStore.Layout.init(saved:)) ?? .dashboard)
@@ -51,13 +66,17 @@ struct SaverSettingsView: View {
     var body: some View {
         Form {
             Section("Source") {
-                Picker("Source", selection: $demo) {
-                    Text("A dashboard Pi").tag(false)
-                    Text("Demo data").tag(true)
+                Picker("Source", selection: $source) {
+                    Text("A dashboard Pi").tag(SourceKind.pi)
+                    Text("This Mac").tag(SourceKind.mac)
+                    Text("Demo data").tag(SourceKind.demo)
                 }
                 .pickerStyle(.segmented)
                 .labelsHidden()
-                if !demo {
+                if source == .mac {
+                    thisMac
+                }
+                if source == .pi {
                     TextField("Address", text: $address, prompt: Text("dashboard.local:8080"))
                         .onSubmit(saveAddress)
                     if let addressError {
@@ -129,9 +148,14 @@ struct SaverSettingsView: View {
         .frame(width: 480)
         .onAppear { browser.start() }
         .onDisappear { browser.stop() }
-        .onChange(of: demo) { _, demo in
-            if demo { save("demo", "connection") } else { saveAddress() }
+        .onChange(of: source) { _, source in
+            switch source {
+            case .demo: save("demo", "connection")
+            case .mac: save("local", "connection")
+            case .pi: saveAddress()
+            }
         }
+        .onChange(of: metric) { _, metric in save(metric, LocalSource.Keys.metric) }
         .onChange(of: layout) { _, layout in save(layout.rawValue, "layout") }
         .onChange(of: rotateMinutes) { _, minutes in save(minutes, "rotateMinutes") }
         .onChange(of: highlights) { _, highlights in save(highlights.rawValue, "highlights") }
@@ -173,13 +197,61 @@ struct SaverSettingsView: View {
     /// The typed address as the connection, if it reads as one; an empty field leaves the
     /// saved one alone.
     private func saveAddress() {
-        guard !demo, !address.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+        guard source == .pi, !address.trimmingCharacters(in: .whitespaces).isEmpty else { return }
         guard let url = DashboardClient.baseURL(forTyped: address) else {
             addressError = "That doesn't look like an address."
             return
         }
         addressError = nil
         if defaults.string(forKey: "connection") != url.absoluteString { save(url.absoluteString, "connection") }
+    }
+
+    /// This Mac's rows: the place the weather is for, found by name, and the units.
+    @ViewBuilder private var thisMac: some View {
+        LabeledContent("Place", value: place?.name ?? "None yet")
+        HStack {
+            TextField("Find", text: $placeQuery, prompt: Text("A city or town"))
+                .onSubmit { Task { await searchPlaces() } }
+            if searching { ProgressView().controlSize(.small) }
+        }
+        if let placeError {
+            Text(placeError).foregroundStyle(.red)
+        }
+        ForEach(placesFound) { found in
+            HStack {
+                Text(found.detail)
+                Spacer()
+                Button("Use") { choosePlace(found.place) }
+            }
+        }
+        Picker("Units", selection: $metric) {
+            Text("°F, mph").tag(false)
+            Text("°C, m/s").tag(true)
+        }
+        Text("The weather and the air come from Open-Meteo, the moon, the sun and the quote are worked out here, and the days are counted in the place's time zone. The calendar and birthdays need a Pi: a screensaver can't read the Mac's calendars.")
+            .foregroundStyle(.secondary)
+    }
+
+    private func searchPlaces() async {
+        let query = placeQuery.trimmingCharacters(in: .whitespaces)
+        guard !query.isEmpty else { return }
+        searching = true
+        defer { searching = false }
+        do {
+            placesFound = try OpenMeteo.places(from: await OpenMeteo.get(OpenMeteo.searchURL(query)))
+            placeError = placesFound.isEmpty ? "No place by that name." : nil
+        } catch {
+            placesFound = []
+            placeError = "Couldn't search: \((error as? LocalizedError)?.errorDescription ?? error.localizedDescription)"
+        }
+    }
+
+    private func choosePlace(_ chosen: LocalSnapshot.Place) {
+        guard let data = try? JSONEncoder().encode(chosen) else { return }
+        place = chosen
+        placesFound = []
+        placeQuery = ""
+        save(data, LocalSource.Keys.place)
     }
 
     private func choose(_ found: PiBrowser.Found) async {

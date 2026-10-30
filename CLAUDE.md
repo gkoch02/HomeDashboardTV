@@ -41,7 +41,8 @@ Tools/install_saver.sh                           # Mac screensaver, Release, int
   through `UI/Parts/Platform.swift`, resources through `PlatformBundle.resources` (not
   `Bundle.main`, which is the screensaver host there). Layout inks and faces stay `private`
   to their file; new fonts are listed under `UIAppFonts` in `project.yml`.
-- Days and times use the Pi's configured zone, never the device's.
+- Days and times use the snapshot's zone (the Pi's, or the place chosen for "This Mac"),
+  never the device's.
 - Target: tvOS 17 / macOS 14, Swift 5 mode. Signing comes from `Config/Signing.xcconfig`,
   overridden by the git-ignored `Config/Signing.local.xcconfig`.
 

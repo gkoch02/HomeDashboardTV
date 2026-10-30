@@ -225,10 +225,10 @@ final class LocalSnapshotTests: XCTestCase {
         let event = CalendarEvent(summary: "Standup", start: recorded, end: recorded.addingTimeInterval(1800), isAllDay: false)
         let snapshot = LocalSnapshot.make(
             now: recorded, place: nyc, metric: false, quotes: [Quote(text: "t", author: "a")],
-            weather: .init(weather, fetchedAt: recorded.addingTimeInterval(-5 * 3600)),
-            airQuality: nil,
-            events: .init([event], fetchedAt: recorded),
-            birthdays: .init([], fetchedAt: recorded)
+            weather: .read(weather, at: recorded.addingTimeInterval(-5 * 3600)),
+            airQuality: .pending,
+            events: .read([event], at: recorded),
+            birthdays: .off
         )
         XCTAssertEqual(snapshot.timeZone, newYork)
         XCTAssertEqual(snapshot.utcOffsetSeconds, -4 * 3600)
@@ -237,6 +237,8 @@ final class LocalSnapshotTests: XCTestCase {
         XCTAssertNil(snapshot.sources.weather?.data)
         XCTAssertEqual(snapshot.sources.events?.data, [event])
         XCTAssertEqual(snapshot.sources.airQuality?.staleness, .unknown)
+        XCTAssertNil(snapshot.sources.airQuality?.data)
+        XCTAssertNil(snapshot.sources.birthdays, "a source that is off is absent, as a Pi's disabled one")
         XCTAssertEqual(snapshot.moon?.days.count, 7)
         XCTAssertEqual(snapshot.quote?.text, "t")
     }

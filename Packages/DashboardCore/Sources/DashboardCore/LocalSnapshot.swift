@@ -24,15 +24,12 @@ public enum LocalSnapshot {
         public var timeZone: TimeZone { TimeZone(identifier: timezone) ?? .current }
     }
 
-    /// A reading and when it was taken.
-    public struct Reading<Value: Sendable>: Sendable {
-        public var value: Value
-        public var fetchedAt: Date
-
-        public init(_ value: Value, fetchedAt: Date) {
-            self.value = value
-            self.fetchedAt = fetchedAt
-        }
+    /// One source's state: off (absent from the snapshot, as a source the Pi has disabled),
+    /// not read yet, or read at a time.
+    public enum Feed<Value: Sendable>: Sendable {
+        case off
+        case pending
+        case read(Value, at: Date)
     }
 
     /// How long each source counts as fresh, the Pi's default TTLs: aging past one, stale past
@@ -49,10 +46,10 @@ public enum LocalSnapshot {
         place: Place,
         metric: Bool,
         quotes: [Quote],
-        weather: Reading<Weather>?,
-        airQuality: Reading<AirQuality>?,
-        events: Reading<[CalendarEvent]>?,
-        birthdays: Reading<[Birthday]>?
+        weather: Feed<Weather>,
+        airQuality: Feed<AirQuality>,
+        events: Feed<[CalendarEvent]>,
+        birthdays: Feed<[Birthday]>
     ) -> Snapshot {
         let zone = place.timeZone
         let today = CivilDate(now, in: zone)
@@ -74,12 +71,18 @@ public enum LocalSnapshot {
         )
     }
 
-    /// A source's entry, with the data withheld once it has expired, as the Pi sends it.
-    /// A source never read yet is present with no data, which the corner line reports.
-    static func source<Value>(_ reading: Reading<Value>?, ttl: TimeInterval, now: Date) -> Source<Value> {
-        guard let reading else { return Source(fetchedAt: nil, staleness: .unknown, data: nil) }
-        let staleness = Staleness(age: now.timeIntervalSince(reading.fetchedAt), ttl: ttl)
-        return Source(fetchedAt: reading.fetchedAt, staleness: staleness, data: staleness == .expired ? nil : reading.value)
+    /// A source's entry as the Pi sends it: absent when off, with no data until read, and with
+    /// the data withheld once it has expired.
+    static func source<Value>(_ feed: Feed<Value>, ttl: TimeInterval, now: Date) -> Source<Value>? {
+        switch feed {
+        case .off:
+            return nil
+        case .pending:
+            return Source(fetchedAt: nil, staleness: .unknown, data: nil)
+        case .read(let value, let at):
+            let staleness = Staleness(age: now.timeIntervalSince(at), ttl: ttl)
+            return Source(fetchedAt: at, staleness: staleness, data: staleness == .expired ? nil : value)
+        }
     }
 
     // MARK: Quote

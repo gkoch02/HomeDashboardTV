@@ -3,8 +3,8 @@ import SwiftUI
 
 /// The saver's choices, the TV drawer's as one form: where the dashboard comes from (a Pi
 /// found on the network, a typed address, this Mac with a place for the weather, or the demo
-/// week), the layout and any display's own
-/// (`SaverDisplay`), whether the layouts take turns, and the skies' highlights. It writes the
+/// week), each display's layout (`SaverDisplay`), whether the layouts take turns, and the
+/// skies' highlights. It writes the
 /// keys `DashboardStore` reads, so the
 /// saver's next `startAnimation`, which builds a fresh store, picks them up; the host app's
 /// Settings window reloads its store through `onChange`.
@@ -32,9 +32,10 @@ struct SaverSettingsView: View {
     @State private var searching = false
     @State private var placeError: String?
     @State private var feedsText: String
+    /// The shared layout, which a display without a choice of its own shows (one connected
+    /// since, and the host app's window); it follows the main display's.
     @State private var layout: DashboardStore.Layout
-    /// The connected displays, by key and name, when there is more than one, or when the one
-    /// left still has a layout of its own, so it can be put back.
+    /// The connected displays by key and name, the main one first.
     private let displays: [(key: String, name: String)]
     @State private var displayLayouts: [String: String]
     @State private var rotateMinutes: Int
@@ -58,9 +59,8 @@ struct SaverSettingsView: View {
         _address = State(initialValue: url.map(Self.typed) ?? "")
         _layout = State(initialValue: defaults.string(forKey: "layout").flatMap(DashboardStore.Layout.init(saved:)) ?? .dashboard)
         let screens = NSScreen.screens.compactMap { s in SaverDisplay.key(for: s).map { (key: $0, name: s.localizedName) } }
-        let displayLayouts = SaverDisplay.layouts(in: defaults)
-        displays = screens.count > 1 || screens.contains { displayLayouts[$0.key] != nil } ? screens : []
-        _displayLayouts = State(initialValue: displayLayouts)
+        displays = screens
+        _displayLayouts = State(initialValue: SaverDisplay.layouts(in: defaults))
         _rotateMinutes = State(initialValue: defaults.integer(forKey: "rotateMinutes"))
         _highlights = State(initialValue: defaults.string(forKey: "highlights").flatMap(DashboardStore.Highlights.init(rawValue:)) ?? .automatic)
     }
@@ -101,10 +101,15 @@ struct SaverSettingsView: View {
                     }
                 }
             }
-            Section {
-                Picker("Layout", selection: $layout) {
-                    ForEach(DashboardStore.Layout.allCases, id: \.self) { Text($0.title).tag($0) }
+            Section(displays.count > 1 ? "Displays" : "Layout") {
+                if displays.isEmpty {
+                    layoutPicker("Layout", selection: $layout)
                 }
+                ForEach(displays, id: \.key) { display in
+                    layoutPicker(displays.count > 1 ? display.name : "Layout", selection: displayLayout(display.key))
+                }
+            }
+            Section {
                 Picker("Change layout", selection: $rotateMinutes) {
                     ForEach(Self.rotateChoices, id: \.self) { Text(rotateLabel($0)).tag($0) }
                 }
@@ -114,22 +119,6 @@ struct SaverSettingsView: View {
             } footer: {
                 Text("Highlights: Skylight, Aurora and Window can draw the sun, lightning and the lights beyond the glass brighter than white on an XDR or HDR display. Automatic does so where the display can.")
                     .foregroundStyle(.secondary)
-            }
-            if !displays.isEmpty {
-                Section {
-                    ForEach(displays, id: \.key) { display in
-                        Picker(display.name, selection: displayLayout(display.key)) {
-                            Text("Same as Layout").tag(DashboardStore.Layout?.none)
-                            Divider()
-                            ForEach(DashboardStore.Layout.allCases, id: \.self) { Text($0.title).tag(Optional($0)) }
-                        }
-                    }
-                } header: {
-                    Text("Displays")
-                } footer: {
-                    Text("A display can show a layout of its own; one left on Same as Layout shows the one above.")
-                        .foregroundStyle(.secondary)
-                }
             }
             if let done {
                 HStack {
@@ -173,13 +162,25 @@ struct SaverSettingsView: View {
         return "\(host):\(url.port ?? 8080)"
     }
 
-    /// A display's own layout, nil to follow the shared one; set, it saves the lot.
-    private func displayLayout(_ key: String) -> Binding<DashboardStore.Layout?> {
+    private func layoutPicker(_ title: String, selection: Binding<DashboardStore.Layout>) -> some View {
+        Picker(title, selection: selection) {
+            ForEach(DashboardStore.Layout.allCases, id: \.self) { Text($0.title).tag($0) }
+        }
+    }
+
+    /// A display's layout: its own, else the shared one it has been showing. Set, it saves the
+    /// lot, and the main display's also becomes the shared one. Every connected display's is
+    /// saved first, so moving the shared one doesn't move a display still showing it.
+    private func displayLayout(_ key: String) -> Binding<DashboardStore.Layout> {
         Binding {
-            displayLayouts[key].flatMap(DashboardStore.Layout.init(saved:))
-        } set: { layout in
-            displayLayouts[key] = layout?.rawValue
+            displayLayouts[key].flatMap(DashboardStore.Layout.init(saved:)) ?? layout
+        } set: { chosen in
+            for display in displays where displayLayouts[display.key] == nil {
+                displayLayouts[display.key] = layout.rawValue
+            }
+            displayLayouts[key] = chosen.rawValue
             save(displayLayouts, SaverDisplay.layoutsKey)
+            if key == displays.first?.key { layout = chosen }
         }
     }
 

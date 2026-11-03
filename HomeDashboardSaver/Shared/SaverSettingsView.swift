@@ -169,11 +169,15 @@ struct SaverSettingsView: View {
     }
 
     /// A display's layout: its own, else the shared one it has been showing. Set, it saves the
-    /// lot, and the main display's also becomes the shared one.
+    /// lot, and the main display's also becomes the shared one. Every connected display's is
+    /// saved first, so moving the shared one doesn't move a display still showing it.
     private func displayLayout(_ key: String) -> Binding<DashboardStore.Layout> {
         Binding {
             displayLayouts[key].flatMap(DashboardStore.Layout.init(saved:)) ?? layout
         } set: { chosen in
+            for display in displays where displayLayouts[display.key] == nil {
+                displayLayouts[display.key] = layout.rawValue
+            }
             displayLayouts[key] = chosen.rawValue
             save(displayLayouts, SaverDisplay.layoutsKey)
             if key == displays.first?.key { layout = chosen }

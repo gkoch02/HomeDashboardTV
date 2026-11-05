@@ -333,6 +333,8 @@ private struct Palette {
 
     /// The top of the sky for the sun's altitude: deeper than the horizon, black at night.
     static func zenith(_ alt: Double) -> RGB {
+        // Colours at sun altitudes in degrees, highest first, blended linearly between: deepest
+        // blue at midday, dusk's indigo just below the horizon, near black past -14°.
         let stops: [(Double, RGB)] = [
             (30, RGB(0.05, 0.22, 0.52)),
             (10, RGB(0.11, 0.31, 0.64)),

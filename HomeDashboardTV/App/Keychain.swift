@@ -9,6 +9,7 @@ enum Keychain {
         kSecAttrAccount as String: "web-ui",
     ]
 
+    /// nil when none is saved. Setting replaces any saved one; setting nil removes it.
     static var password: String? {
         get {
             var q = query

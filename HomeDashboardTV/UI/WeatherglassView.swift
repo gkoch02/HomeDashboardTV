@@ -493,10 +493,13 @@ private struct Hygrometer: View {
         VStack(spacing: 6) {
             GeometryReader { geometry in
                 let w = geometry.size.width
+                // A half dial pivoting near the bottom, with room outside the arc for its numerals.
                 let r = min(w / 2 - 20, geometry.size.height - 30)
                 let c = CGPoint(x: w / 2, y: geometry.size.height - 10)
                 ZStack {
                     Canvas { context, _ in
+                        // 0 % at nine o'clock to 100 % at three, over the top; the needle below
+                        // uses the same mapping.
                         func angle(_ h: Double) -> Double { 180 - 180 * h / 100 }
                         var band = Path()
                         band.addArc(center: c, radius: r - 12, startAngle: .degrees(-angle(Weatherglass.comfortableHumidity.lowerBound)),

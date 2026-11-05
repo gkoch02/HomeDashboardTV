@@ -3,8 +3,10 @@ import SwiftUI
 
 /// One disc: the photograph where the sun lights it, a faint (earthshine) copy elsewhere.
 struct MoonDisc: View {
+    /// Through the lunation: 0 new, 0.25 first quarter, 0.5 full, 0.75 last quarter.
     let fraction: Double
     let radius: CGFloat
+    /// A soft glow round the disc, brighter the fuller the moon.
     var halo = false
 
     /// How bright the unlit side's texture stays, as on the panel (`_EARTHSHINE_FACTOR`).

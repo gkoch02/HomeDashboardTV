@@ -222,6 +222,7 @@ public struct DayForecast: Decodable, Sendable, Equatable, Hashable {
     public var low: Double
     public var icon: String
     public var description: String
+    /// The chance of rain or snow, 0 to 1.
     public var precipChance: Double?
 }
 
@@ -229,8 +230,9 @@ public struct HourlyForecast: Decodable, Sendable, Equatable, Hashable {
     public var time: Date
     public var temp: Double
     public var icon: String
+    /// The chance of rain or snow, 0 to 1.
     public var precipChance: Double?
-    /// Expected rain or snow over the slot, when the forecast gives one.
+    /// Expected rain or snow over the slot in millimetres, when the forecast gives one.
     public var precipMm: Double?
 }
 

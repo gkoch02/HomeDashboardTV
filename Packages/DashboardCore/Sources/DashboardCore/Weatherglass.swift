@@ -9,7 +9,9 @@ public enum Weatherglass {
     /// 950 to 1050 hPa over a 270° sweep: 950 at the lower left, 1000 at the top, 1050 at the
     /// lower right. The gap at the bottom carries the reading.
     public static let pressureRange = 950.0...1050.0
+    /// Where 950 sits, in degrees anticlockwise from three o'clock: the lower left.
     public static let startDegrees = 225.0
+    /// The dial's arc, run clockwise from *startDegrees*.
     public static let sweepDegrees = 270.0
 
     /// The banjo barometer's words at their inch-of-mercury places (28.5 to 30.5 inHg).
@@ -37,10 +39,14 @@ public enum Weatherglass {
 
     // MARK: The thermometer
 
+    /// The thermometer's tube, in the snapshot's units.
     public struct Scale: Sendable, Equatable {
+        /// The bottom and top of the tube.
         public var low: Double
         public var high: Double
+        /// "°C" or "°F", for the nameplate.
         public var symbol: String
+        /// The temperatures that carry a numeral.
         public var majors: [Double]
         /// The comfortable band, and where cold and hot begin.
         public var comfort: ClosedRange<Double>
@@ -48,6 +54,7 @@ public enum Weatherglass {
         public var hot: Double
     }
 
+    /// The Pi's scales: -20 to 45 °C, or 0 to 110 °F.
     public static func thermometer(isMetric: Bool) -> Scale {
         isMetric
             ? Scale(low: -20, high: 45, symbol: "°C", majors: [-20, -10, 0, 10, 20, 30, 40],
@@ -77,6 +84,7 @@ public enum Weatherglass {
 /// (`weatherglass_pressure_history.json`): at most one sample every 30 minutes, the last 48.
 /// The trend compares now with the oldest sample between 1 and 36 hours old.
 public struct PressureHistory: Codable, Sendable, Equatable {
+    /// One reading, as stored on the device between launches.
     public struct Sample: Codable, Sendable, Equatable {
         public var time: Date
         public var hPa: Double

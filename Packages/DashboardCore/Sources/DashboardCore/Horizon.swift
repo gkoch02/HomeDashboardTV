@@ -6,7 +6,9 @@ import Foundation
 /// Times are instants; the axis runs on real time, with each hour's width set by its local
 /// clock hour, so a DST day simply has 23 or 25 hour columns.
 public enum Horizon {
+    /// The span the layout shows, from the start of the current slot.
     public static let windowHours = 72
+    /// The forecast's grid (OWM's 3-hour steps), which the window's start also snaps to.
     public static let slotHours = 3
     static let wakeHour = 6
     static let sleepHour = 23
@@ -40,15 +42,22 @@ extension Calendar {
 
 /// Piecewise-linear map between time and x over the window, a breakpoint on every hour.
 public struct TimeAxis: Sendable, Equatable {
+    /// The window's first instant, at *x0*.
     public let start: Date
+    /// The window's length in elapsed hours, each a column of the axis.
     public let hours: Int
+    /// The window's left and right edges, in the view's points.
     public let x0: Double
     public let x1: Double
+    /// The zone whose clock hours set each column's width and where days begin.
     public let zone: TimeZone
+    /// x at each hour boundary: `hours + 1` breakpoints from *x0* to *x1*.
     let xs: [Double]
 
+    /// The window's last instant, at *x1*.
     public var end: Date { start.addingTimeInterval(Double(hours) * 3600) }
 
+    /// Spreads *hours* from *start* across *x0*...*x1*, a night hour narrower than a waking one.
     public init(start: Date, hours: Int = Horizon.windowHours, x0: Double, x1: Double, zone: TimeZone) {
         self.start = start
         self.hours = hours
@@ -135,10 +144,12 @@ public struct SunModel: Sendable, Equatable {
     public let rise: Double
     public let set: Double
     public let zone: TimeZone
+    /// The Pi's samples, kept only when there are enough to interpolate; nil means the arc.
     public let sun: Sun?
     /// The fallback arc's height at noon, in degrees.
     static let peak = 50.0
 
+    /// Takes the arc's rise and set from *weather*'s sun times, read as clock hours in *zone*.
     public init(weather: Weather?, sun: Sun? = nil, zone: TimeZone) {
         self.zone = zone
         self.sun = sun.flatMap { $0.altitudes.count >= 2 && $0.stepMinutes > 0 ? $0 : nil }
@@ -223,12 +234,14 @@ public struct SunModel: Sendable, Equatable {
 
 /// What an OWM icon puts in the sky.
 public struct SkyKind: Sendable, Equatable {
+    /// What falls, or hangs, under the clouds.
     public enum Precip: Sendable, Equatable { case none, rain, storm, snow, fog }
 
     /// 0 clear, 1 a few clouds, 2 scattered, 3 overcast.
     public var level: Int
     public var precip: Precip
 
+    /// Reads the code's number and ignores its day or night suffix (`10d`, `10n`).
     public init(icon: String) {
         switch icon.prefix(2) {
         case "02": (level, precip) = (1, .none)
@@ -251,9 +264,13 @@ public struct SkyKind: Sendable, Equatable {
 public struct HorizonSlot: Sendable, Equatable {
     public var start: Date
     public var end: Date
+    /// In the snapshot's units, °C or °F.
     public var temp: Double
+    /// An OWM icon code, such as `10d`.
     public var icon: String
+    /// The chance of precipitation, 0 to 1; 0 when the forecast gives none.
     public var precipChance: Double
+    /// Expected precipitation over the slot, in millimetres, when the forecast gives it.
     public var precipMm: Double?
     /// Filled in from the reading now, before the forecast's first slot (`lead_in`).
     public var isStandIn: Bool
@@ -261,9 +278,12 @@ public struct HorizonSlot: Sendable, Equatable {
     public var sky: SkyKind { SkyKind(icon: icon) }
 }
 
+/// A day's high or low, marked only where the curve turns there: a day still warming into the
+/// next has no high.
 public struct Extreme: Sendable, Equatable {
     public enum Kind: Sendable { case high, low }
     public var kind: Kind
+    /// The start of the slot it falls in.
     public var time: Date
     public var temp: Double
 }

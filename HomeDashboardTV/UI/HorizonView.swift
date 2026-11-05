@@ -291,13 +291,18 @@ private struct SkyArt: View, Equatable {
             let xa = axis.x(axis.start.addingTimeInterval(Double(k) * 3600)) - axis.x0
             let xb = axis.x(axis.start.addingTimeInterval(Double(k + 1) * 3600)) - axis.x0
             var random = SplitMix(seed: UInt64(first + k) &* 7919 &+ 17)
+            // About 12 stars to every 100 points of the hour's width, so the narrow night hours
+            // are no denser than the waking ones.
             let n = max(1, Int(((xb - xa) * 12 / 100).rounded()))
             for _ in 0..<n {
                 let x = xa + random.unit() * (xb - xa)
                 let y = 8 + random.unit() * (size.height * 0.62 - 8)
+                // Cubed, so most stars are pinpricks and a few are bright.
                 let r = 0.7 + pow(random.unit(), 3) * 2.2
                 let alpha = 0.35 + random.unit() * 0.6
                 let depth = model.altitude(atLocalX: x) + horizonGlow * y / size.height
+                // Out only once the sun is 15° down (further down near the horizon's glow), fading in
+                // over the next 5°.
                 guard depth < -15 else { continue }
                 let fade = min(1, (-15 - depth) / 5)
                 let dot = Path(ellipseIn: CGRect(x: x - r, y: y - r, width: 2 * r, height: 2 * r))
@@ -343,7 +348,10 @@ private struct SkyArt: View, Equatable {
     /// clock hour so a cloud belongs to a moment and travels with it as the window moves.
     private func weather(_ context: inout GraphicsContext) {
         let axis = model.axis
+        // The step to the next cloud, in cloud widths, by cover: wide gaps for a few clouds,
+        // overlapping ones for overcast.
         let advance: [Int: Double] = [1: 2.8, 2: 1.5, 3: 0.7]
+        // Clouds keep to the sky's top 30 %, above the temperature curve.
         let rowH = size.height * 0.30
         for slot in model.slots where slot.end > axis.start && slot.start < axis.end {
             let sky = slot.sky
@@ -361,11 +369,14 @@ private struct SkyArt: View, Equatable {
                 let w = (110 + random.unit() * 60) * (sky.level == 3 ? 1.2 : 1)
                 let ch = w * (0.42 + random.unit() * 0.10)
                 let y = 16 + random.unit() * max(1, rowH - ch)
+                // A light sky skips a cloud that would cover the sun or moon; overcast or wet
+                // hides them anyway.
                 let clear = sky.level == 3 || sky.precip != .none
                     || bodies.allSatisfy { abs(x - $0.midX) > 30 + w / 2 }
                 if clear {
                     let dark = isDark(x)
                     cloud(CGRect(x: x - w / 2, y: y, width: w, height: ch), dark: dark, random: &random, &context)
+                    // Heavy from 2 mm over the 3-hour slot, or any storm.
                     precipitation(sky.precip, under: CGRect(x: x - w / 2, y: y, width: w, height: ch),
                                   heavy: (slot.precipMm ?? 0) >= 2 || sky.precip == .storm, random: &random, &context)
                     if firstCloud == nil { firstCloud = CGPoint(x: x, y: y + ch) }
@@ -406,6 +417,7 @@ private struct SkyArt: View, Equatable {
         let ink = Color(red: 0.80, green: 0.87, blue: 0.97)
         switch precip {
         case .rain, .storm:
+            // Streaks slanting left, 18 to 34 points long, closer and thicker when heavy.
             var streaks = Path()
             var sx = rect.minX + 14
             while sx < rect.maxX - 10 {
@@ -418,6 +430,7 @@ private struct SkyArt: View, Equatable {
             context.stroke(streaks, with: .color(ink.opacity(0.75)),
                            style: StrokeStyle(lineWidth: heavy ? 3 : 2, lineCap: .round))
         case .snow:
+            // A flake to every 7 points of the cloud's width, scattered in the 54 points below it.
             for _ in 0..<Int(rect.width / 7) {
                 let x = rect.minX + 10 + random.unit() * (rect.width - 20)
                 let y = rect.maxY + 8 + random.unit() * 54
@@ -430,7 +443,10 @@ private struct SkyArt: View, Equatable {
         }
     }
 
+    /// A lightning bolt hanging from *base*, the first cloud of a storm slot.
     private func bolt(at base: CGPoint, _ context: inout GraphicsContext) {
+        // The zigzag's outline in a 21 × 42 grid, down the left edge to the tip and back up,
+        // doubled to about 42 × 84 points.
         let s = 2.0
         let pts = [(3, -2), (-7, 18), (1, 18), (-9, 40), (12, 12), (4, 12), (12, -2)]
             .map { CGPoint(x: base.x + Double($0.0) * s, y: base.y + Double($0.1) * s) }

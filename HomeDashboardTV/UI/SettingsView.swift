@@ -54,8 +54,8 @@ struct SettingsView: View {
         .ignoresSafeArea()
         .onAppear {
             browser.start()
-            if case let .server(url) = store.connection { typedAddress = Self.typed(url) }
-            if let backup = store.backup { typedBackup = Self.typed(backup) }
+            if case let .server(url) = store.connection { typedAddress = DashboardClient.typedAddress(for: url) }
+            if let backup = store.backup { typedBackup = DashboardClient.typedAddress(for: backup) }
             // A first launch has nothing to show yet: straight to choosing a source.
             if store.connection == nil { page = .source }
             enter()
@@ -332,11 +332,6 @@ struct SettingsView: View {
 
     private static func host(_ url: URL) -> String { url.host() ?? url.absoluteString }
 
-    /// An address as its field shows it: `host:port`.
-    private static func typed(_ url: URL) -> String {
-        url.host().map { "\($0):\(url.port ?? 8080)" } ?? url.absoluteString
-    }
-
     private func awakeLabel(_ hours: Int) -> String {
         switch hours {
         case 0: return "Always"
@@ -390,7 +385,7 @@ struct SettingsView: View {
             return
         }
         addressError = nil
-        typedBackup = Self.typed(url)
+        typedBackup = DashboardClient.typedAddress(for: url)
         store.setBackup(url)
         page = .root
     }

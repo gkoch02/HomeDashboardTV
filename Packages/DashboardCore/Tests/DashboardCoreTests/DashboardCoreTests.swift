@@ -175,6 +175,14 @@ final class DashboardCoreTests: XCTestCase {
         XCTAssertNil(DashboardClient.baseURL(forTyped: "   "))
     }
 
+    func testTypedAddressRoundTripsEverySavedURL() throws {
+        for saved in ["http://dashboard.local:8080/", "https://pi.example:443/", "http://pi.local:8080/dash/"] {
+            let url = try XCTUnwrap(URL(string: saved))
+            XCTAssertEqual(DashboardClient.baseURL(forTyped: DashboardClient.typedAddress(for: url)), url, saved)
+        }
+        XCTAssertEqual(DashboardClient.typedAddress(for: URL(string: "http://dashboard.local:8080/")!), "dashboard.local:8080")
+    }
+
     func testRequestCarriesBasicAuthOnlyWithCredentials() {
         let base = URL(string: "http://pi.local:8080/")!
         XCTAssertNil(DashboardClient(baseURL: base).request.value(forHTTPHeaderField: "Authorization"))

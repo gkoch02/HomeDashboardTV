@@ -77,6 +77,15 @@ public struct DashboardClient: Sendable {
         return snapshot
     }
 
+    /// A saved URL as an address field shows it: `host:port` for a plain HTTP root, which
+    /// `baseURL(forTyped:)` turns back into the same URL, else the whole URL, so opening a
+    /// settings page and confirming it never rewrites an HTTPS or sub-path address.
+    public static func typedAddress(for url: URL) -> String {
+        guard url.scheme == "http", url.path == "/" || url.path.isEmpty, url.query == nil,
+              let host = url.host() else { return url.absoluteString }
+        return "\(host):\(url.port ?? 8080)"
+    }
+
     /// The base URL for a typed address: `dashboard.local`, `192.168.1.20:8080` or a full URL.
     /// A bare host gets the web UI's default port.
     public static func baseURL(forTyped address: String) -> URL? {

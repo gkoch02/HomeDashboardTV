@@ -89,6 +89,9 @@ final class DashboardStore {
     var settingsVisible = false
     /// The weather's pressure readings, for the Weatherglass barometer's trend needle.
     private(set) var pressureHistory: PressureHistory
+    /// Whose readings `pressureHistory` holds (`pressureSource`): with a backup Pi, the one that
+    /// answered, since the two may fetch the weather for different places.
+    @ObservationIgnored private var historySource: String?
 
     var layout: Layout {
         didSet { save(layout.rawValue, Keys.layout) }
@@ -202,6 +205,7 @@ final class DashboardStore {
         // Readings from another source (a `-demo` run, another Pi) would make a trend out of
         // two places, so the history is kept only for the source it came from.
         if let connection, self.state.string(forKey: Keys.pressureSource) == pressureSource(connection) {
+            historySource = pressureSource(connection)
             pressureHistory = self.state.data(forKey: Keys.pressureHistory)
                 .flatMap { try? JSONDecoder().decode(PressureHistory.self, from: $0) } ?? PressureHistory()
         }
@@ -282,6 +286,7 @@ final class DashboardStore {
         // Another source's snapshot must not stay up as if it were this one's.
         snapshot = nil
         pressureHistory = PressureHistory()
+        historySource = nil
         restart()
     }
 
@@ -308,6 +313,7 @@ final class DashboardStore {
         guard let connection else { return }
         do {
             let fresh: Snapshot
+            var source = pressureSource(connection)
             switch connection {
             case .demo:
                 fresh = try Self.demoSnapshot().shiftedToToday(now: .now).fetched(at: .now)
@@ -316,6 +322,7 @@ final class DashboardStore {
                 let urls = [url] + [backup].compactMap { $0 }.filter { $0 != url }
                 let answer = try await DashboardClient.fetchFirst(of: urls, username: username, password: password)
                 fresh = answer.snapshot
+                source = urls[answer.index].absoluteString
                 if answer.index == 0 {
                     onBackupSince = nil
                 } else if onBackupSince == nil {
@@ -331,7 +338,7 @@ final class DashboardStore {
                 fresh = try await local.snapshot()
             }
             snapshot = fresh
-            recordPressure(fresh)
+            recordPressure(fresh, from: source)
             lastSuccess = .now
             problem = nil
             failingSince = nil
@@ -372,13 +379,19 @@ final class DashboardStore {
 
     /// Keeps the weather's pressure, stamped with when the Pi fetched it: polling the same cache
     /// again adds nothing, and a new fetch is a new reading.
-    private func recordPressure(_ snapshot: Snapshot) {
-        guard let connection, let weather = snapshot.sources.weather, let hPa = weather.data?.pressure else { return }
+    /// Readings from another source than the history's (the backup Pi answering, or the main
+    /// one again) start a new history: a trend between two places would mean nothing.
+    private func recordPressure(_ snapshot: Snapshot, from source: String) {
+        guard let weather = snapshot.sources.weather, let hPa = weather.data?.pressure else { return }
+        if historySource != source {
+            pressureHistory = PressureHistory()
+            historySource = source
+        }
         let before = pressureHistory
         pressureHistory.record(hPa, at: weather.fetchedAt ?? .now)
         guard pressureHistory != before, let data = try? JSONEncoder().encode(pressureHistory) else { return }
         state.set(data, forKey: Keys.pressureHistory)
-        state.set(pressureSource(connection), forKey: Keys.pressureSource)
+        state.set(source, forKey: Keys.pressureSource)
     }
 
     /// Whose readings a pressure history is: the connection's, and for this Mac its place.

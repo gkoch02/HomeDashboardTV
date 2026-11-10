@@ -58,8 +58,8 @@ struct SaverSettingsView: View {
         _metric = State(initialValue: local.metric)
         _feedsText = State(initialValue: (defaults.stringArray(forKey: LocalSource.Keys.feeds) ?? []).joined(separator: "\n"))
         let url = saved.flatMap(URL.init(string:)).flatMap { $0.host() == nil ? nil : $0 }
-        _address = State(initialValue: url.map(Self.typed) ?? "")
-        _backupAddress = State(initialValue: defaults.string(forKey: "backup").flatMap(URL.init(string:)).map(Self.typed) ?? "")
+        _address = State(initialValue: url.map(DashboardClient.typedAddress(for:)) ?? "")
+        _backupAddress = State(initialValue: defaults.string(forKey: "backup").flatMap(URL.init(string:)).map(DashboardClient.typedAddress(for:)) ?? "")
         _layout = State(initialValue: defaults.string(forKey: "layout").flatMap(DashboardStore.Layout.init(saved:)) ?? .dashboard)
         let screens = NSScreen.screens.compactMap { s in SaverDisplay.key(for: s).map { (key: $0, name: s.localizedName) } }
         displays = screens
@@ -160,15 +160,6 @@ struct SaverSettingsView: View {
         .onChange(of: layout) { _, layout in save(layout.rawValue, "layout") }
         .onChange(of: rotateMinutes) { _, minutes in save(minutes, "rotateMinutes") }
         .onChange(of: highlights) { _, highlights in save(highlights.rawValue, "highlights") }
-    }
-
-    /// A saved URL as the field shows it: `host:port` for a plain HTTP root, which
-    /// `DashboardClient.baseURL(forTyped:)` turns back into the same URL, else the whole URL, so
-    /// opening Options and pressing Done never rewrites an HTTPS or sub-path address.
-    static func typed(_ url: URL) -> String {
-        guard url.scheme == "http", url.path == "/" || url.path.isEmpty, url.query == nil,
-              let host = url.host() else { return url.absoluteString }
-        return "\(host):\(url.port ?? 8080)"
     }
 
     private func layoutPicker(_ title: String, selection: Binding<DashboardStore.Layout>) -> some View {
@@ -305,10 +296,10 @@ struct SaverSettingsView: View {
             return
         }
         if asBackup {
-            backupAddress = Self.typed(url)
+            backupAddress = DashboardClient.typedAddress(for: url)
             saveBackup()
         } else {
-            address = Self.typed(url)
+            address = DashboardClient.typedAddress(for: url)
             saveAddress()
         }
     }

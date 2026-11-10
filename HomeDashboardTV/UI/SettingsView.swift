@@ -17,6 +17,7 @@ struct SettingsView: View {
     @Environment(DashboardStore.self) private var store
     @State private var browser = PiBrowser()
     @State private var typedAddress = ""
+    @State private var typedBackup = ""
     @State private var resolving: String?
     @State private var addressError: String?
     @State private var page: Page = .root
@@ -24,7 +25,7 @@ struct SettingsView: View {
     @State private var lastFocused: [Page: String] = [:]
     @FocusState private var focused: String?
 
-    enum Page { case root, layout, keepAwake, highlights, source }
+    enum Page { case root, layout, keepAwake, highlights, source, backup }
 
     static let width: CGFloat = 780
 
@@ -36,6 +37,7 @@ struct SettingsView: View {
             case .keepAwake: keepAwakePage
             case .highlights: highlightsPage
             case .source: sourcePage
+            case .backup: backupPage
             }
         }
         // Inside tvOS's safe margins on the outer edge (90 across, 60 down), and 48 on the
@@ -52,7 +54,8 @@ struct SettingsView: View {
         .ignoresSafeArea()
         .onAppear {
             browser.start()
-            if case let .server(url) = store.connection { typedAddress = url.host().map { "\($0):\(url.port ?? 8080)" } ?? "" }
+            if case let .server(url) = store.connection { typedAddress = Self.typed(url) }
+            if let backup = store.backup { typedBackup = Self.typed(backup) }
             // A first launch has nothing to show yet: straight to choosing a source.
             if store.connection == nil { page = .source }
             enter()
@@ -61,6 +64,7 @@ struct SettingsView: View {
         // opened, a keystroke.
         .onChange(of: page) { _, _ in
             store.noteInteraction()
+            addressError = nil
             enter()
         }
         .onChange(of: focused) { _, id in
@@ -68,6 +72,7 @@ struct SettingsView: View {
             if let id { lastFocused[page] = id }
         }
         .onChange(of: typedAddress) { _, _ in store.noteInteraction() }
+        .onChange(of: typedBackup) { _, _ in store.noteInteraction() }
         .onChange(of: store.username) { _, _ in store.noteInteraction() }
         .onChange(of: store.password) { _, _ in store.noteInteraction() }
         .onChange(of: browser.found) { _, found in
@@ -101,6 +106,10 @@ struct SettingsView: View {
             row(id: "highlights", title: "Highlights", detail: "Skies brighter than white on an HDR output",
                 value: store.highlights.title, chevron: true) { page = .highlights }
             row(id: "source", title: "Source", value: sourceName, chevron: true) { page = .source }
+            if case .server = store.connection {
+                row(id: "backup", title: "Backup", detail: "A second Pi, for while this one is down",
+                    value: store.backup.map(Self.host) ?? "None", chevron: true) { page = .backup }
+            }
             sectionHeader("Web UI login, if the Pi has a password")
             TextField("Username", text: $store.username)
                 .focused($focused, equals: "username")
@@ -203,6 +212,45 @@ struct SettingsView: View {
         }
     }
 
+    private var backupPage: some View {
+        Group {
+            title("Backup")
+            sectionHeader("On this network")
+            if browser.found.isEmpty {
+                HStack(spacing: 18) {
+                    ProgressView()
+                    footnote("Looking for dashboards…")
+                }
+                .padding(.horizontal, 12)
+            }
+            ForEach(browser.found) { found in
+                row(id: "backup-\(found.name)", title: found.name,
+                    value: resolving == found.name ? "Connecting…" : nil) {
+                    Task { await chooseBackup(found) }
+                }
+            }
+            sectionHeader("By address")
+            TextField("dashboard-2.local:8080", text: $typedBackup)
+                .textContentType(.URL)
+                .onSubmit(useTypedBackup)
+                .focused($focused, equals: "backup-address")
+            row(id: "backup-use", title: "Use as Backup", action: useTypedBackup)
+            if let addressError {
+                Text(addressError)
+                    .font(.callout)
+                    .foregroundStyle(.red)
+                    .padding(.horizontal, 12)
+            }
+            row(id: "backup-none", title: "No Backup", value: tick(store.backup == nil)) {
+                store.setBackup(nil)
+                typedBackup = ""
+                page = .root
+            }
+            Spacer(minLength: 0)
+            footnote("When the main Pi doesn't answer, the dashboard comes from this one, with the same login, and the corner says so. Every update tries the main Pi first, so it takes over again once it is back. Menu goes back.")
+        }
+    }
+
     /// Focus as a page opens: where it was last left, else the current choice, else the
     /// page's first row.
     private func enter() {
@@ -216,6 +264,7 @@ struct SettingsView: View {
             case .keepAwake: target = "awake-\(store.keepAwakeHours)"
             case .highlights: target = "highlights-\(store.highlights.rawValue)"
             case .source: target = browser.found.first.map { "pi-\($0.name)" } ?? "address"
+            case .backup: target = store.backup == nil ? "backup-none" : "backup-address"
             }
         }
         // A turn later, once the page's rows exist to take it.
@@ -276,9 +325,16 @@ struct SettingsView: View {
         switch store.connection {
         case nil: return "None"
         case .demo: return "Demo data"
-        case .server(let url): return url.host() ?? url.absoluteString
+        case .server(let url): return Self.host(url)
         case .local: return "Open-Meteo"
         }
+    }
+
+    private static func host(_ url: URL) -> String { url.host() ?? url.absoluteString }
+
+    /// An address as its field shows it: `host:port`.
+    private static func typed(_ url: URL) -> String {
+        url.host().map { "\($0):\(url.port ?? 8080)" } ?? url.absoluteString
     }
 
     private func awakeLabel(_ hours: Int) -> String {
@@ -297,6 +353,9 @@ struct SettingsView: View {
             return "Showing the built-in demo week."
         case .server(let url):
             if let problem = store.problem { return "\(url.host() ?? url.absoluteString): \(problem)" }
+            if store.onBackupSince != nil, let backup = store.backup, let last = store.lastSuccess {
+                return "\(Self.host(url)) isn't answering · showing \(Self.host(backup)), updated \(last.formatted(date: .omitted, time: .shortened))"
+            }
             if let last = store.lastSuccess {
                 return "\(url.host() ?? url.absoluteString) · updated \(last.formatted(date: .omitted, time: .shortened))"
             }
@@ -320,6 +379,31 @@ struct SettingsView: View {
         addressError = nil
         store.connect(.server(url))
         store.settingsVisible = false
+    }
+
+    private func chooseBackup(_ found: PiBrowser.Found) async {
+        store.noteInteraction()
+        resolving = found.name
+        defer { resolving = nil }
+        guard let url = await PiBrowser.resolve(found.endpoint) else {
+            addressError = "Couldn't reach \(found.name)."
+            return
+        }
+        addressError = nil
+        typedBackup = Self.typed(url)
+        store.setBackup(url)
+        page = .root
+    }
+
+    private func useTypedBackup() {
+        store.noteInteraction()
+        guard let url = DashboardClient.baseURL(forTyped: typedBackup) else {
+            addressError = "That doesn't look like an address."
+            return
+        }
+        addressError = nil
+        store.setBackup(url)
+        page = .root
     }
 
     private func connectTyped() {

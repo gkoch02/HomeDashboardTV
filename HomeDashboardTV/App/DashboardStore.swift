@@ -80,6 +80,12 @@ final class DashboardStore {
     private(set) var lastSuccess: Date?
     private(set) var problem: String?
     private(set) var failingSince: Date?
+    /// A second Pi to read while the main one (`connection`'s) doesn't answer. Every poll tries
+    /// the main one first, so it takes over again once it is back.
+    private(set) var backup: URL?
+    /// Since when the main Pi has not answered and the backup has been on screen; nil while the
+    /// main one answers, and while neither does (`failingSince` then).
+    private(set) var onBackupSince: Date?
     var settingsVisible = false
     /// The weather's pressure readings, for the Weatherglass barometer's trend needle.
     private(set) var pressureHistory: PressureHistory
@@ -152,6 +158,7 @@ final class DashboardStore {
 
     private enum Keys {
         static let connection = "connection"
+        static let backup = "backup"
         static let username = "username"
         static let layout = "layout"
         static let keepAwakeHours = "keepAwakeHours"
@@ -187,6 +194,8 @@ final class DashboardStore {
         } else {
             connection = Self.decode(defaults.string(forKey: Keys.connection))
         }
+        // `-backup <url>` sets it for a run too.
+        backup = defaults.string(forKey: Keys.backup).flatMap(DashboardClient.baseURL(forTyped:))
         #if canImport(UIKit)
         settingsVisible = connection == nil
         #endif
@@ -215,7 +224,9 @@ final class DashboardStore {
             while !Task.isCancelled {
                 guard let self else { return }
                 await self.refresh()
-                try? await Task.sleep(for: self.problem == nil ? Self.pollInterval : Self.retryInterval)
+                // On the backup, back to the main Pi as soon as it answers.
+                let healthy = self.problem == nil && self.onBackupSince == nil
+                try? await Task.sleep(for: healthy ? Self.pollInterval : Self.retryInterval)
             }
         }
     }
@@ -246,8 +257,12 @@ final class DashboardStore {
     func reloadChoices() {
         layout = defaults.string(forKey: Keys.layout).flatMap(Layout.init(saved:)) ?? layout
         highlights = defaults.string(forKey: Keys.highlights).flatMap(Highlights.init(rawValue:)) ?? highlights
+        let savedBackup = defaults.string(forKey: Keys.backup).flatMap(DashboardClient.baseURL(forTyped:))
         if let saved = Self.decode(defaults.string(forKey: Keys.connection)), saved != connection {
+            backup = savedBackup
             connect(saved)
+        } else if savedBackup != backup {
+            setBackup(savedBackup)
         } else if connection == .local, LocalSource.Configuration(defaults: defaults) != localConfiguration {
             connect(.local)
         }
@@ -267,8 +282,23 @@ final class DashboardStore {
         // Another source's snapshot must not stay up as if it were this one's.
         snapshot = nil
         pressureHistory = PressureHistory()
+        restart()
+    }
+
+    /// The Pi to read while the main one is down, or none. The main Pi's snapshot stays up.
+    func setBackup(_ url: URL?) {
+        backup = url
+        if let url { save(url.absoluteString, Keys.backup) } else if defaults.object(forKey: Keys.backup) != nil {
+            defaults.removeObject(forKey: Keys.backup)
+        }
+        guard case .server = connection else { return }
+        restart()
+    }
+
+    private func restart() {
         problem = nil
         failingSince = nil
+        onBackupSince = nil
         loop?.cancel()
         loop = nil
         start()
@@ -282,7 +312,15 @@ final class DashboardStore {
             case .demo:
                 fresh = try Self.demoSnapshot().shiftedToToday(now: .now).fetched(at: .now)
             case .server(let url):
-                fresh = try await DashboardClient(baseURL: url, username: username, password: password).fetch()
+                // The same login for both: the web UI's, which each Pi is set up with alike.
+                let urls = [url] + [backup].compactMap { $0 }.filter { $0 != url }
+                let answer = try await DashboardClient.fetchFirst(of: urls, username: username, password: password)
+                fresh = answer.snapshot
+                if answer.index == 0 {
+                    onBackupSince = nil
+                } else if onBackupSince == nil {
+                    onBackupSince = failingSince ?? .now
+                }
             case .local:
                 // A saver session starts from what is cached, if it has the weather, before
                 // waiting on fetches that may each run to their timeout on a bad network.
@@ -301,7 +339,8 @@ final class DashboardStore {
             return
         } catch {
             problem = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
-            if failingSince == nil { failingSince = .now }
+            if failingSince == nil { failingSince = onBackupSince ?? .now }
+            onBackupSince = nil
         }
     }
 
@@ -310,7 +349,10 @@ final class DashboardStore {
     var notice: String? {
         if let since = failingSince {
             let what = connection == .local ? "the weather" : "the dashboard"
-            return "Can't reach \(what) since \(since.formatted(date: .omitted, time: .shortened))"
+            return "Can't reach \(what) since \(clock(since))"
+        }
+        if let since = onBackupSince, case .server(let url) = connection {
+            return "\(url.host() ?? "The main Pi") down since \(clock(since)); showing the backup"
         }
         guard let sources = snapshot?.sources else { return nil }
         let stale = [
@@ -319,6 +361,13 @@ final class DashboardStore {
             ("Birthdays", sources.birthdays?.staleness),
         ].filter { $0.1?.isWorthFlagging == true }.map(\.0)
         return stale.isEmpty ? nil : "\(ListFormatter.localizedString(byJoining: stale)) not updated lately"
+    }
+
+    /// A time for the corner, on the dashboard's clock: the snapshot's zone, not the device's.
+    private func clock(_ date: Date) -> String {
+        var style = Date.FormatStyle(date: .omitted, time: .shortened)
+        style.timeZone = snapshot?.timeZone ?? .current
+        return date.formatted(style)
     }
 
     /// Keeps the weather's pressure, stamped with when the Pi fetched it: polling the same cache

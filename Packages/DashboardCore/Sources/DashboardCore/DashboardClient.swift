@@ -48,6 +48,26 @@ public struct DashboardClient: Sendable {
         return try Self.validated(data)
     }
 
+    /// The first of *urls* to answer, tried in order, and its index there: a main Pi and its
+    /// backup. Every poll starts again from the first, so the main one takes over again as soon
+    /// as it is back. When none answers, the first one's error is the one thrown: that is the
+    /// Pi expected to be there.
+    public static func fetchFirst(of urls: [URL], username: String? = nil, password: String? = nil,
+                                  session: URLSession = .shared) async throws -> (snapshot: Snapshot, index: Int) {
+        var firstError: Error?
+        for (index, url) in urls.enumerated() {
+            do {
+                let snapshot = try await DashboardClient(baseURL: url, username: username, password: password,
+                                                         session: session).fetch()
+                return (snapshot, index)
+            } catch {
+                if error is CancellationError || (error as? URLError)?.code == .cancelled || Task.isCancelled { throw error }
+                if firstError == nil { firstError = error }
+            }
+        }
+        throw firstError ?? URLError(.badURL)
+    }
+
     /// Decodes *data* and refuses a payload shape newer than this build understands.
     public static func validated(_ data: Data) throws -> Snapshot {
         let snapshot = try Snapshot.decode(data)

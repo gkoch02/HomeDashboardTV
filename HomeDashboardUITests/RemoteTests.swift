@@ -61,6 +61,31 @@ final class RemoteTests: XCTestCase {
         XCTAssertTrue(layout.waitForExistence(timeout: 5), "the dashboard has focus again, so a click reopens settings")
     }
 
+    /// With a Pi as the source, the drawer offers a backup Pi on a page of its own, which
+    /// opens on No Backup while none is set, and Menu comes back from it.
+    func testBackupPageOpensFromTheRoot() {
+        let app = XCUIApplication()
+        // An address that never answers: the drawer doesn't need the Pi to be there.
+        app.launchArguments = ["-server", "192.0.2.1:8080", "-backup", "", "-layout", "dashboard"]
+        app.launch()
+
+        remote.press(.select)
+        let backup = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Backup'")).firstMatch
+        XCTAssertTrue(backup.waitForExistence(timeout: 10), "a Pi source offers a backup")
+        for _ in 0..<10 where !backup.hasFocus {
+            remote.press(.down)
+        }
+        XCTAssertTrue(backup.hasFocus, "the remote reaches Backup")
+
+        remote.press(.select)
+        let none = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'No Backup'")).firstMatch
+        XCTAssertTrue(none.waitForHasFocus(timeout: 5), "the page opens on No Backup while none is set")
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Use as Backup'")).firstMatch.exists)
+
+        remote.press(.menu)
+        XCTAssertTrue(backup.waitForHasFocus(timeout: 5), "Menu goes back to the root")
+    }
+
     /// The layout list is longer than the panel is tall: the remote must reach its last row,
     /// and the list must scroll to bring it on screen.
     func testLayoutListScrollsToItsLastRow() {

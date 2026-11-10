@@ -3,7 +3,8 @@ import SwiftUI
 
 /// A window around the saver's screen, for working on the Mac port without locking the
 /// screen. It reads the app's standard defaults, so the TV app's launch arguments work
-/// (`-layout <id>`, `-demo YES`, `-server <address>`, `-highlights`). Left and right arrows step
+/// (`-layout <id>`, `-demo YES`, `-server <address>`, `-backup <address>`,
+/// `-highlights`). Left and right arrows step
 /// through the layouts. `-snapshot <path> [-settle <s>]` captures the window after the
 /// build-ins have played and quits, for screenshots and visual checks; `-window WxH` sizes the
 /// window (default 1280×720), for a look at a 16:10 display or the System Settings preview's

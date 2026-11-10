@@ -203,9 +203,12 @@ final class DashboardStore {
         settingsVisible = connection == nil
         #endif
         // Readings from another source (a `-demo` run, another Pi) would make a trend out of
-        // two places, so the history is kept only for the source it came from.
-        if let connection, self.state.string(forKey: Keys.pressureSource) == pressureSource(connection) {
-            historySource = pressureSource(connection)
+        // two places, so the history is kept only for the source it came from: this connection,
+        // or its backup Pi when that was the one answering (the main Pi still down).
+        var owners = connection.map { [pressureSource($0)] } ?? []
+        if case .server = connection, let backup { owners.append(backup.absoluteString) }
+        if let saved = self.state.string(forKey: Keys.pressureSource), owners.contains(saved) {
+            historySource = saved
             pressureHistory = self.state.data(forKey: Keys.pressureHistory)
                 .flatMap { try? JSONDecoder().decode(PressureHistory.self, from: $0) } ?? PressureHistory()
         }

@@ -175,12 +175,45 @@ final class DashboardCoreTests: XCTestCase {
         XCTAssertNil(DashboardClient.baseURL(forTyped: "   "))
     }
 
+    func testTypedAddressRoundTripsEverySavedURL() throws {
+        for saved in ["http://dashboard.local:8080/", "https://pi.example:443/", "http://pi.local:8080/dash/"] {
+            let url = try XCTUnwrap(URL(string: saved))
+            XCTAssertEqual(DashboardClient.baseURL(forTyped: DashboardClient.typedAddress(for: url)), url, saved)
+        }
+        XCTAssertEqual(DashboardClient.typedAddress(for: URL(string: "http://dashboard.local:8080/")!), "dashboard.local:8080")
+    }
+
     func testRequestCarriesBasicAuthOnlyWithCredentials() {
         let base = URL(string: "http://pi.local:8080/")!
         XCTAssertNil(DashboardClient(baseURL: base).request.value(forHTTPHeaderField: "Authorization"))
         let authed = DashboardClient(baseURL: base, username: "admin", password: "pw").request
         XCTAssertEqual(authed.value(forHTTPHeaderField: "Authorization"), "Basic YWRtaW46cHc=")
         XCTAssertEqual(authed.url?.absoluteString, "http://pi.local:8080/api/dashboard")
+    }
+
+    func testFetchFirstFallsBackAndReturnsToTheMainPi() async throws {
+        let main = URL(string: "http://main.local:8080/")!
+        let backup = URL(string: "http://backup.local:8080/")!
+        let body = try fixture()
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [StubProtocol.self]
+        let session = URLSession(configuration: config)
+
+        StubProtocol.answers = ["main.local": .failure(URLError(.cannotConnectToHost)), "backup.local": .success(body)]
+        let fallen = try await DashboardClient.fetchFirst(of: [main, backup], session: session)
+        XCTAssertEqual(fallen.index, 1, "the backup answers while the main Pi is down")
+
+        StubProtocol.answers["main.local"] = .success(body)
+        let back = try await DashboardClient.fetchFirst(of: [main, backup], session: session)
+        XCTAssertEqual(back.index, 0, "the main Pi takes over again once it answers")
+
+        StubProtocol.answers = ["main.local": .failure(URLError(.timedOut)), "backup.local": .failure(URLError(.cannotConnectToHost))]
+        do {
+            _ = try await DashboardClient.fetchFirst(of: [main, backup], session: session)
+            XCTFail("neither answers")
+        } catch {
+            XCTAssertEqual((error as? URLError)?.code, .timedOut, "the main Pi's error is the one reported")
+        }
     }
 
     func testAQIBandsFollowTheEPABreakpoints() throws {
@@ -324,5 +357,26 @@ final class DashboardCoreTests: XCTestCase {
         XCTAssertEqual(WeatherSymbol.name(for: "01d"), "sun.max.fill")
         XCTAssertEqual(WeatherSymbol.name(for: "01n"), "moon.stars.fill")
         XCTAssertEqual(WeatherSymbol.name(for: "zz"), "thermometer.medium")
+    }
+}
+
+/// Answers each host with a canned body or error, for the failover test.
+private final class StubProtocol: URLProtocol {
+    nonisolated(unsafe) static var answers: [String: Result<Data, URLError>] = [:]
+
+    override class func canInit(with request: URLRequest) -> Bool { true }
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+    override func stopLoading() {}
+
+    override func startLoading() {
+        switch Self.answers[request.url?.host() ?? ""] ?? .failure(URLError(.cannotFindHost)) {
+        case .success(let data):
+            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+            client?.urlProtocol(self, didLoad: data)
+            client?.urlProtocolDidFinishLoading(self)
+        case .failure(let error):
+            client?.urlProtocol(self, didFailWithError: error)
+        }
     }
 }

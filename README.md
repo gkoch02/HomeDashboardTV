@@ -122,7 +122,9 @@ Pick a layout in settings → Layout.
 
 On first launch the app opens its settings drawer at **Source**: pick the Pi under **On This
 Network**, or type its address (`dashboard.local`, `192.168.1.20:8080`). **Demo data** shows a
-bundled week with no Pi at all. Click anywhere on the dashboard to open the drawer again;
+bundled week with no Pi at all. With two Pis, set the second under **Backup**: while the main
+one doesn't answer, the dashboard comes from the backup (with the same login) and the corner
+says so; every update tries the main Pi first, so it takes over again once it is back. Click anywhere on the dashboard to open the drawer again;
 Menu goes back a page, then closes it.
 Left and right on the remote step through the layouts (Dashboard, Cyberpunk, Uplink, Grimoire,
 Agenda, Horizon, Skylight, Window, Light Cycle, Weatherglass, Orrery, Fuzzy Clock, Quote, Moon, Aurora,
@@ -195,7 +197,7 @@ Tools/install_saver.sh
 ```
 
 Then pick **Home Dashboard** under System Settings → Screen Saver, and set the Pi's address
-(or Demo data), each display's layout, and whether the layouts take turns under its
+and an optional backup Pi (or Demo data), each display's layout, and whether the layouts take turns under its
 **Options**. The
 layouts are drawn at the TV's 1920×1080 points and scaled down to a smaller display; on a
 16:10 screen they get the extra height, and on a bigger one they stay at 1:1 with more room
@@ -277,7 +279,8 @@ xcodegen
 cd Packages/DashboardCore && swift test
 ```
 
-In the simulator, `-server <address>` or `-demo YES` sets the source for one run, and
+In the simulator, `-server <address>` or `-demo YES` sets the source for one run
+(`-backup <address>` the backup Pi), and
 `-layout <name>` the layout, by its raw name (`dashboard`, `cyberpunk`, `uplink`, `ephemeris`, `wing`, `grimoire`,
 `agenda`, `horizon`, `skylight`, `window`, `light`, `weatherglass`, `orrery`, `fuzzy`, `quote`,
 `moon`, `aurora`, `night`; the cases of `DashboardStore.Layout`):
@@ -289,7 +292,7 @@ xcrun simctl launch booted dev.plumpbug.homedashboard -server 127.0.0.1:8080
 (With your own `BUNDLE_ID_PREFIX`, the bundle identifier is `<prefix>.homedashboard`.)
 
 The **HomeDashboardSaverHost** scheme shows the saver's screen in a window and takes the same
-`-server`, `-demo` and `-layout` arguments; arrow keys step through the layouts, `-window WxH`
+`-server`, `-backup`, `-demo` and `-layout` arguments; arrow keys step through the layouts, `-window WxH`
 sizes it, `-partner leading|trailing` puts another display on that side for the Ephemeris pair, `-showOptions YES` opens the Options sheet, and `-snapshot <path> [-settle <s>]`
 writes the window as a PNG and quits.
 

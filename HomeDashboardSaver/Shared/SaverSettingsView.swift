@@ -25,6 +25,8 @@ struct SaverSettingsView: View {
     @State private var browser = PiBrowser()
     @State private var source: SourceKind
     @State private var address: String
+    /// The second Pi's address, read while the main one doesn't answer; empty for none.
+    @State private var backupAddress: String
     @State private var place: LocalSnapshot.Place?
     @State private var metric: Bool
     @State private var placeQuery = ""
@@ -56,7 +58,8 @@ struct SaverSettingsView: View {
         _metric = State(initialValue: local.metric)
         _feedsText = State(initialValue: (defaults.stringArray(forKey: LocalSource.Keys.feeds) ?? []).joined(separator: "\n"))
         let url = saved.flatMap(URL.init(string:)).flatMap { $0.host() == nil ? nil : $0 }
-        _address = State(initialValue: url.map(Self.typed) ?? "")
+        _address = State(initialValue: url.map(DashboardClient.typedAddress(for:)) ?? "")
+        _backupAddress = State(initialValue: defaults.string(forKey: "backup").flatMap(URL.init(string:)).map(DashboardClient.typedAddress(for:)) ?? "")
         _layout = State(initialValue: defaults.string(forKey: "layout").flatMap(DashboardStore.Layout.init(saved:)) ?? .dashboard)
         let screens = NSScreen.screens.compactMap { s in SaverDisplay.key(for: s).map { (key: $0, name: s.localizedName) } }
         displays = screens
@@ -81,6 +84,8 @@ struct SaverSettingsView: View {
                 if source == .pi {
                     TextField("Address", text: $address, prompt: Text("dashboard.local:8080"))
                         .onSubmit(saveAddress)
+                    TextField("Backup", text: $backupAddress, prompt: Text("Optional: a second Pi"))
+                        .onSubmit(saveBackup)
                     if let addressError {
                         Text(addressError).foregroundStyle(.red)
                     }
@@ -88,6 +93,8 @@ struct SaverSettingsView: View {
                         Text("Looking for dashboards on this network… A Pi appears here once `make web-enable` has run on it.")
                             .foregroundStyle(.secondary)
                     }
+                    Text("While the main Pi doesn't answer, the backup's dashboard is shown, and the main one takes over again once it is back.")
+                        .foregroundStyle(.secondary)
                     ForEach(browser.found) { found in
                         HStack {
                             Text(found.name)
@@ -96,6 +103,7 @@ struct SaverSettingsView: View {
                                 ProgressView().controlSize(.small)
                             } else {
                                 Button("Use") { Task { await choose(found) } }
+                                Button("Backup") { Task { await choose(found, asBackup: true) } }
                             }
                         }
                     }
@@ -125,6 +133,7 @@ struct SaverSettingsView: View {
                     Spacer()
                     Button("Done") {
                         saveAddress()
+                        saveBackup()
                         saveFeeds()
                         done()
                     }
@@ -151,15 +160,6 @@ struct SaverSettingsView: View {
         .onChange(of: layout) { _, layout in save(layout.rawValue, "layout") }
         .onChange(of: rotateMinutes) { _, minutes in save(minutes, "rotateMinutes") }
         .onChange(of: highlights) { _, highlights in save(highlights.rawValue, "highlights") }
-    }
-
-    /// A saved URL as the field shows it: `host:port` for a plain HTTP root, which
-    /// `DashboardClient.baseURL(forTyped:)` turns back into the same URL, else the whole URL, so
-    /// opening Options and pressing Done never rewrites an HTTPS or sub-path address.
-    static func typed(_ url: URL) -> String {
-        guard url.scheme == "http", url.path == "/" || url.path.isEmpty, url.query == nil,
-              let host = url.host() else { return url.absoluteString }
-        return "\(host):\(url.port ?? 8080)"
     }
 
     private func layoutPicker(_ title: String, selection: Binding<DashboardStore.Layout>) -> some View {
@@ -208,6 +208,25 @@ struct SaverSettingsView: View {
         }
         addressError = nil
         if defaults.string(forKey: "connection") != url.absoluteString { save(url.absoluteString, "connection") }
+    }
+
+    /// The typed backup as the second Pi; an empty field removes it.
+    private func saveBackup() {
+        let trimmed = backupAddress.trimmingCharacters(in: .whitespaces)
+        if trimmed.isEmpty {
+            addressError = nil
+            guard defaults.object(forKey: "backup") != nil else { return }
+            defaults.removeObject(forKey: "backup")
+            defaults.synchronize()
+            onChange()
+            return
+        }
+        guard let url = DashboardClient.baseURL(forTyped: trimmed) else {
+            addressError = "The backup doesn't look like an address."
+            return
+        }
+        addressError = nil
+        if defaults.string(forKey: "backup") != url.absoluteString { save(url.absoluteString, "backup") }
     }
 
     /// This Mac's rows: the place the weather is for, found by name, and the units.
@@ -269,14 +288,19 @@ struct SaverSettingsView: View {
         save(data, LocalSource.Keys.place)
     }
 
-    private func choose(_ found: PiBrowser.Found) async {
+    private func choose(_ found: PiBrowser.Found, asBackup: Bool = false) async {
         resolving = found.name
         defer { resolving = nil }
         guard let url = await PiBrowser.resolve(found.endpoint) else {
             addressError = "Couldn't reach \(found.name)."
             return
         }
-        address = Self.typed(url)
-        saveAddress()
+        if asBackup {
+            backupAddress = DashboardClient.typedAddress(for: url)
+            saveBackup()
+        } else {
+            address = DashboardClient.typedAddress(for: url)
+            saveAddress()
+        }
     }
 }

@@ -20,7 +20,7 @@ it when you rename or move one.
 ```bash
 (cd Packages/DashboardCore && swift test)        # the only tests CI runs; no UI
 xcodebuild -scheme HomeDashboard -configuration Debug \
-  -destination 'platform=tvOS Simulator,name=Apple TV 4K (3rd generation)' -derivedDataPath build/sim build
+  -destination 'generic/platform=tvOS Simulator' -derivedDataPath build/sim build
 xcrun simctl launch booted dev.plumpbug.homedashboard -demo YES -layout <name>
 Tools/install_saver.sh                           # Mac screensaver, Release, into ~/Library/Screen Savers
 ```

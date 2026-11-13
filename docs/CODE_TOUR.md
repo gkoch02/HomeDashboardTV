@@ -168,7 +168,7 @@ Read it **from the top down** (the opposite of Python): the first line is the re
    - **In the Apple TV Simulator.** Xcode's Device Hub must have an Apple TV simulator (add one there if it lists none). Build and run from Xcode (`open HomeDashboardTV.xcodeproj`, the `HomeDashboard` scheme, an Apple TV simulator, Cmd-R), or from the terminal:
 
      ```bash
-     xcodebuild -scheme HomeDashboard -destination 'platform=tvOS Simulator,name=<your Apple TV simulator>' -derivedDataPath build/sim -quiet build
+     xcodebuild -scheme HomeDashboard -destination 'generic/platform=tvOS Simulator' -derivedDataPath build/sim -quiet build
      xcrun simctl install booted "build/sim/Build/Products/Debug-appletvsimulator/Home Dashboard.app"
      xcrun simctl launch booted dev.plumpbug.homedashboard -demo YES -layout uplink
      ```

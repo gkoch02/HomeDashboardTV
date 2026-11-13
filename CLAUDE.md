@@ -3,6 +3,8 @@
 tvOS companion to the HomeDashboard Pi, plus the same layouts as a Mac screensaver. The
 README is the full reference (architecture under **Layout**, how to add one under **Adding a
 layout**); this file holds only what every session needs.
+`docs/CODE_TOUR.md` is a newcomer's walk through the code that names files and functions: update
+it when you rename or move one.
 
 ## Project generation
 

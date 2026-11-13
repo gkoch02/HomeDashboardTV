@@ -215,6 +215,8 @@ Calendar*. Birthdays still need a Pi.
 
 ## Layout
 
+A newcomer's walk through the code, from a poll of the Pi to a layout on screen, is [`docs/CODE_TOUR.md`](docs/CODE_TOUR.md).
+
 - `Packages/DashboardCore`: the payload model, decoding of the Pi's Python timestamps, the
   agenda (events per day in the Pi's zone), the HTTP client and the demo-data shift. No UI;
   `swift test` runs it on the Mac.

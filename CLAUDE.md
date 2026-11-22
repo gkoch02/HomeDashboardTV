@@ -18,7 +18,7 @@ it when you rename or move one.
 ## Build and test
 
 ```bash
-(cd Packages/DashboardCore && swift test)        # the only tests CI runs; CI also builds the app and saver
+(cd Packages/DashboardCore && swift test)        # the only tests CI runs
 xcodebuild -scheme HomeDashboard -configuration Debug \
   -destination 'generic/platform=tvOS Simulator' -derivedDataPath build/sim build
 xcrun simctl launch booted dev.plumpbug.homedashboard -demo YES -layout <name>
@@ -28,8 +28,8 @@ Tools/install_saver.sh                           # Mac screensaver, Release, int
 - Run `xcodebuild` outside the sandbox (a hook enforces it): sandboxed, it cannot read the
   Xcode account and signs Xcode out.
 - Keep derived data under `build/<name>` (ignored); don't scatter it elsewhere.
-- CI doesn't build the app, so a change to `HomeDashboardTV/` or `HomeDashboardSaver/` is
-  unverified until built locally for both the tvOS simulator and a macOS scheme
+- CI builds the app and the saver but runs neither, so a change to `HomeDashboardTV/` or
+  `HomeDashboardSaver/` is unverified until run, on the tvOS simulator and on the Mac
   (`HomeDashboardSaverHost`), since every layout compiles into both.
 - Check a layout visually before a PR: simulator screenshot (`xcrun simctl io <udid>
   screenshot`), or the host app's `-snapshot <path>` on the Mac. `simctl install` kills the

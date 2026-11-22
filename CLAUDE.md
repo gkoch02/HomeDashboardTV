@@ -18,7 +18,7 @@ it when you rename or move one.
 ## Build and test
 
 ```bash
-(cd Packages/DashboardCore && swift test)        # the only tests CI runs; no UI
+(cd Packages/DashboardCore && swift test)        # the only tests CI runs; CI also builds the app and saver
 xcodebuild -scheme HomeDashboard -configuration Debug \
   -destination 'generic/platform=tvOS Simulator' -derivedDataPath build/sim build
 xcrun simctl launch booted dev.plumpbug.homedashboard -demo YES -layout <name>

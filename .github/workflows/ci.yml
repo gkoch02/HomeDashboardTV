@@ -14,8 +14,9 @@ concurrency:
 
 jobs:
   core:
-    # The app itself is not built here: hosted runners trail new Xcode releases,
-    # and an archive brings in signing. This covers what can break without a TV.
+    # The app itself is not built in this job (see `apps`): hosted runners trail
+    # new Xcode releases, and an archive brings in signing. This covers what can
+    # break without a TV.
     # No paths filter: `core` is a required check, and a filtered-out run never
     # reports, which would leave a docs-only PR unmergeable.
     runs-on: macos-latest
@@ -44,3 +45,29 @@ jobs:
       - name: DashboardCore tests
         working-directory: Packages/DashboardCore
         run: swift test
+
+  apps:
+    # What ships: the tvOS app and the Mac screensaver, which compiles the app's
+    # layouts for macOS too, so a view change can break it without touching
+    # DashboardCore. Plain unsigned builds, not archives, so signing never comes
+    # into it. Not a required check: if the runner's Xcode trails a feature the
+    # project uses, this fails in plain sight without blocking a merge.
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain
+        run: xcodebuild -version
+      - name: Build the tvOS app and the screensaver
+        run: |
+          set +e
+          status=0
+          for target in "HomeDashboard|generic/platform=tvOS Simulator" "HomeDashboardSaver|generic/platform=macOS"; do
+            scheme="${target%%|*}"
+            xcodebuild build -project HomeDashboardTV.xcodeproj -scheme "$scheme" \
+              -destination "${target#*|}" -derivedDataPath build/ci CODE_SIGNING_ALLOWED=NO \
+              > "$scheme.log" 2>&1 || status=1
+            echo "$scheme: $(grep -E 'BUILD (SUCCEEDED|FAILED)' "$scheme.log")"
+            grep -E 'error:' "$scheme.log" | head -20
+          done
+          exit $status
